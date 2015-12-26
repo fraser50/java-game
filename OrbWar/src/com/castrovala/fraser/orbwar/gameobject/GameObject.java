@@ -47,6 +47,8 @@ public abstract class GameObject {
 		}
 	}
 	
+	public void clientUpdate() {}
+	
 	public void zoneUnload(WorldZone zone) {
 		
 	}

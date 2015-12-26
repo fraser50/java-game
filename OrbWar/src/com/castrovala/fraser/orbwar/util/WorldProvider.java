@@ -12,6 +12,7 @@ public interface WorldProvider {
 	public void addObject(GameObject o);
 	public HashMap<GameObject, Float> getScanners();
 	public GameObject[] allObjects();
-	public void setShip(Controllable ship);
+	public boolean isServer();
+	public void updateGame();
 
 }

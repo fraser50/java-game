@@ -297,88 +297,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				return;
 			}
 			
-			long start = System.currentTimeMillis();
-			
-			ArrayList<CollisionHandler> colliders = new ArrayList<>();
-			for (GameObject s : controller.getScanners().keySet().toArray(new GameObject[controller.getScanners().keySet().size()])) {
-				s.getNearby().clear();
-				if (s.isCleaned() || s.isDeleted()) {
-					controller.getScanners().remove(s);
-					continue;
-				}
-				
-			}
-			
-			for (WorldZone zone : controller.getZones().toArray(new WorldZone[controller.getZones().size()])) {
-				for (GameObject obj : (zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()]))) {
-					
-					for (GameObject scan : controller.getScanners().keySet()) {
-						if (scan == obj) {
-							continue;
-						}
-						
-						if (scan.distance(obj) <= controller.getScanners().get(scan)) {
-							scan.getNearby().add(obj);
-						}
-					}
-					
-					if (obj.isDeleted()) {
-						zone.getGameobjects().remove(obj);
-						continue;
-					}
-					
-					WorldZone objzone = controller.getZone(Util.toZoneCoords(obj.getPosition()));
-					if (zone != objzone) {
-						zone.getGameobjects().remove(obj);
-						objzone.getGameobjects().add(obj);
-					}
-					
-					if (!controller.getScanners().containsKey(obj)) {
-						obj.update();
-					}
-					
-					if (obj instanceof CollisionHandler) {
-						colliders.add( (CollisionHandler)obj);
-					}
-				}
-			}
-			
-			for (GameObject obj : controller.getScanners().keySet()) {
-				obj.update();
-			}
-			
-			for (CollisionHandler h : colliders) {
-				ArrayList<CollisionHandler> collided = new ArrayList<>();
-				GameObject obj = (GameObject) h;
-				
-				if (obj.isDeleted() || obj.isCleaned()) {
-					continue;
-				}
-				
-				for (CollisionHandler check : colliders) {
-					
-					if (check == h) {
-						continue;
-					}
-					GameObject checkobj = (GameObject) check;
-					Rectangle rect1 = obj.getBoundingBox();
-					Rectangle rect2 = checkobj.getBoundingBox();
-					if (rect1.intersects(rect2)) {
-						collided.add(check);
-					}
-					
-					
-					
-				}
-				
-				if (collided.size() >= 1) {
-						h.onCollision(collided.toArray(new GameObject[collided.size()]));
-					}
-			}
-			long end = System.currentTimeMillis();
-			updatetime = (int) (end - start);
-			
 		}
+		
+		controller.updateGame();
 	}
 	
 	public void gameRender() {
@@ -645,7 +566,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public void prepareGame() {
-		controller = new WorldController(this);
+		controller = new WorldController();
 		for (int i = 1;i <= 1000; i++) {
 			float x = Util.randomRange(0, PWIDTH);
 			float y = Util.randomRange(0, PHEIGHT);

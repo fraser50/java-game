@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.server.ControlUser;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.Position;
@@ -288,6 +289,17 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 
 	public void setShield(Weapon shield) {
 		this.shield = shield;
+	}
+	
+	@Override
+	public ControlUser getControl() {
+		return null;
+	};
+
+	@Override
+	public void setControl(ControlUser user) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

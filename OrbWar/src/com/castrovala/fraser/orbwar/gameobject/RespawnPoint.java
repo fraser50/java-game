@@ -50,7 +50,7 @@ public class RespawnPoint extends GameObject {
 			pos.subtract(new Position(32, 32));
 			PlayerShip ship = new PlayerShip(pos, getController());
 			getController().addObject(ship);
-			getController().setShip(ship);
+			//getController().setShip(ship);
 		}
 		
 		if (timealive == 600) {

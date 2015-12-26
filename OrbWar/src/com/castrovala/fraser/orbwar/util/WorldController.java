@@ -1,21 +1,16 @@
 package com.castrovala.fraser.orbwar.util;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.castrovala.fraser.orbwar.OrbWarPanel;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
 	private List<Position> starpoints = new ArrayList<>();
 	private HashMap<GameObject, Float> scanners = new HashMap<>();
-	private OrbWarPanel panel;
-	
-	public WorldController(OrbWarPanel panel) {
-		this.panel = panel;
-	}
 	
 	@Override
 	public WorldZone getZone(Position pos) {
@@ -67,8 +62,80 @@ public class WorldController implements WorldProvider {
 	}
 
 	@Override
-	public void setShip(Controllable ship) {
-		panel.myship = ship;
+	public boolean isServer() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+	public void updateGame() {
+		List<CollisionHandler> colliders = new ArrayList<>();
+		for (WorldZone zone : getZones().toArray(new WorldZone[getZones().size()])) {
+			for (GameObject obj : (zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()]))) {
+				
+				for (GameObject scan : getScanners().keySet()) {
+					if (scan == obj) {
+						continue;
+					}
+					
+					if (scan.distance(obj) <= getScanners().get(scan)) {
+						scan.getNearby().add(obj);
+					}
+				}
+				
+				if (obj.isDeleted()) {
+					zone.getGameobjects().remove(obj);
+					continue;
+				}
+				
+				WorldZone objzone = getZone(Util.toZoneCoords(obj.getPosition()));
+				if (zone != objzone) {
+					zone.getGameobjects().remove(obj);
+					objzone.getGameobjects().add(obj);
+				}
+				
+				if (!getScanners().containsKey(obj)) {
+					obj.update();
+				}
+				
+				if (obj instanceof CollisionHandler) {
+					colliders.add( (CollisionHandler)obj);
+				}
+			}
+		}
+		
+		for (GameObject obj : getScanners().keySet()) {
+			obj.update();
+		}
+		
+		for (CollisionHandler h : colliders) {
+			ArrayList<CollisionHandler> collided = new ArrayList<>();
+			GameObject obj = (GameObject) h;
+			
+			if (obj.isDeleted() || obj.isCleaned()) {
+				continue;
+			}
+			
+			for (CollisionHandler check : colliders) {
+				
+				if (check == h) {
+					continue;
+				}
+				GameObject checkobj = (GameObject) check;
+				Rectangle rect1 = obj.getBoundingBox();
+				Rectangle rect2 = checkobj.getBoundingBox();
+				if (rect1.intersects(rect2)) {
+					collided.add(check);
+				}
+				
+				
+				
+			}
+			
+			if (collided.size() >= 1) {
+					h.onCollision(collided.toArray(new GameObject[collided.size()]));
+				}
+		}
 		
 	}
 
