@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.net;
 
-public class AbstractPacket {
+public interface AbstractPacket {
+	public String getType();
 
 }

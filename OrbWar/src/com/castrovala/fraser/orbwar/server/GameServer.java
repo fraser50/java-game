@@ -33,5 +33,14 @@ public class GameServer extends Thread {
 	public synchronized void setActive(boolean active) {
 		this.active = active;
 	}
+	
+	@Override
+	public void run() {
+		// TODO Manage connections
+		
+		while (active) {
+			
+		}
+	}
 
 }

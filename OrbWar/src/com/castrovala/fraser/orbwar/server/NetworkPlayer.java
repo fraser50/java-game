@@ -6,11 +6,19 @@ public class NetworkPlayer {
 	private GameServer server;
 	
 	public NetworkPlayer(GameServer server) {
-		this.server = server;
+		this.setServer(server);
 	}
 	
 	public void sendPacket(AbstractPacket p) {
 		
+	}
+
+	public GameServer getServer() {
+		return server;
+	}
+
+	public void setServer(GameServer server) {
+		this.server = server;
 	}
 
 }
