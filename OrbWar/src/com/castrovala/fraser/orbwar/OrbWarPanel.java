@@ -33,6 +33,7 @@ import com.castrovala.fraser.orbwar.gui.GuiClickable;
 import com.castrovala.fraser.orbwar.gui.GuiElement;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.GameState;
@@ -66,6 +67,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private boolean renderedbefore;
 	private GameState state = GameState.MENU;
 	private GuiScreen activegui;
+	private GameServer internalserver;
 	
 	public OrbWarPanel() {
 		setBackground(Color.WHITE);
@@ -126,6 +128,32 @@ public class OrbWarPanel extends JPanel implements Runnable {
 							state = GameState.PLAYING;
 						}
 					}
+				}
+				
+				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
+					controller = null;
+					state = GameState.MENU;
+					System.out.println("Trying to stop internal server");
+					internalserver.stopServer();
+					System.out.println("Server stop called");
+					try {
+						internalserver.join();
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					System.out.println("Internal Server died");
+					GuiScreen menuscreen = new GuiScreen();
+					menuscreen.addElement(new GuiButton(new Position(1, 1), new Position(OrbWarPanel.PWIDTH - 1, 50), "S I N G L E P L A Y E R", new Runnable() {
+						
+						@Override
+						public void run() {
+							init_game = true;
+							
+						}
+					}));
+					activegui = menuscreen;
+						
 				}
 			}
 		});
@@ -566,6 +594,22 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public void prepareGame() {
+		
+		internalserver = new GameServer(true);
+		internalserver.start();
+		try {
+			Thread.sleep(40);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		WorldController c = internalserver.getGameThread().getController();
+		c.getZone(new Position(0, 0));
+		c.getZone(new Position(0, 1));
+		
+		c.getZone(new Position(0, 0));
+		c.getZone(new Position(1, 0));
+		
 		controller = new WorldController();
 		for (int i = 1;i <= 1000; i++) {
 			float x = Util.randomRange(0, PWIDTH);

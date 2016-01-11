@@ -25,6 +25,7 @@ public class GameThread extends Thread {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Thread died");
 		
 	}
 
@@ -42,6 +43,15 @@ public class GameThread extends Thread {
 
 	public void setServer(GameServer server) {
 		this.server = server;
+	}
+	
+	public synchronized WorldController getController() {
+		return controller;
+	}
+	
+	public synchronized void stopLogic() {
+		System.out.println("GameThread preparing death");
+		active = false;
 	}
 
 }

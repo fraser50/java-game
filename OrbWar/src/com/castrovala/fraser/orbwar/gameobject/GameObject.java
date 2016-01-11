@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.util.Position;
@@ -25,8 +26,10 @@ public abstract class GameObject {
 	private int maxhealth = 20;
 	private boolean cleaned;
 	private List<GameObject> nearby = new ArrayList<>();
+	private final String uuid;
 	
 	public GameObject(Position pos, WorldProvider controller) {
+		uuid = UUID.randomUUID().toString();
 		this.pos = pos;
 		this.rotation = 0f;
 		this.velocity = new Position(0, 0);
@@ -176,6 +179,10 @@ public abstract class GameObject {
 	
 	public RenderStage getRenderStage() {
 		return RenderStage.BACKGROUND;
+	}
+
+	public String getUuid() {
+		return uuid;
 	}
 	
 }

@@ -14,5 +14,6 @@ public interface WorldProvider {
 	public GameObject[] allObjects();
 	public boolean isServer();
 	public void updateGame();
+	public GameObject getGameObject(String uuid);
 
 }
