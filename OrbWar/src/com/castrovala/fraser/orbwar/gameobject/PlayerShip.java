@@ -7,8 +7,12 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.ControlUser;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
@@ -300,6 +304,38 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	public void setControl(ControlUser user) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public String getType() {
+		return "playership";
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				PlayerShip ship = (PlayerShip) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "playership");
+				jobj.put("x", ship.getPosition().getX());
+				
+				jobj.put("y", ship.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				PlayerShip ship = new PlayerShip(new Position(x, y), null);
+				return ship;
+			}
+		};
+		
+		GameObjectProcessor.addParser("playership", parser);
 	}
 
 }

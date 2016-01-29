@@ -3,6 +3,7 @@ package com.castrovala.fraser.orbwar.util;
 public class Position {
 	protected double x;
 	protected double y;
+	private boolean edited = false;
 	
 	public Position(double x, double y) {
 		this.x = x;
@@ -43,6 +44,14 @@ public class Position {
 	
 	public double distance(Position pos) {
 		return Util.distance(this, pos);
+	}
+
+	public boolean isEdited() {
+		return edited;
+	}
+
+	public void setEdited(boolean edited) {
+		this.edited = edited;
 	}
 
 }

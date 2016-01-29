@@ -184,5 +184,7 @@ public abstract class GameObject {
 	public String getUuid() {
 		return uuid;
 	}
+
+	public abstract String getType();
 	
 }

@@ -104,4 +104,9 @@ public class Asteroid extends GameObject implements CollisionHandler {
 		return RenderStage.SPACEOBJECTS;
 	}
 
+	@Override
+	public String getType() {
+		return "asteroid";
+	}
+
 }

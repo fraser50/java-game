@@ -33,6 +33,8 @@ import com.castrovala.fraser.orbwar.gui.GuiClickable;
 import com.castrovala.fraser.orbwar.gui.GuiElement;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
+import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
@@ -217,6 +219,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+		
+		PositionUpdatePacket.registerPacket();
+		ObjectTransmitPacket.registerPacket();
+		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
 		frame.add(panel);

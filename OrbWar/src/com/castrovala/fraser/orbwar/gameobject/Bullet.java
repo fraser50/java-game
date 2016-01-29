@@ -77,4 +77,9 @@ public class Bullet extends GameObject implements CollisionHandler {
 		return renderimage;
 	}
 
+	@Override
+	public String getType() {
+		return "bullet";
+	}
+
 }
