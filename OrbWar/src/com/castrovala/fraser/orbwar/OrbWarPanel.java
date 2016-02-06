@@ -11,6 +11,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,14 +37,14 @@ import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.server.GameServer;
+import com.castrovala.fraser.orbwar.server.ServerState;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.GameState;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldController;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.util.WorldNetController;
 import com.castrovala.fraser.orbwar.util.WorldZone;
 import com.castrovala.fraser.orbwar.weapons.RechargeWeapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
@@ -57,7 +58,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private volatile boolean running = false;
 	private Graphics dbg;
 	private Image dbImage = null;
-	private volatile WorldProvider controller;
+	private volatile WorldNetController controller;
 	private volatile Position mylocation = new Position(0, 0);
 	public Controllable myship;
 	public static final boolean quickstars = true;
@@ -223,6 +224,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		PositionUpdatePacket.registerPacket();
 		ObjectTransmitPacket.registerPacket();
 		
+		PlayerShip.registerGameObj();
+		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
 		frame.add(panel);
@@ -261,6 +264,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					System.out.println("prepareGame() took " + timetaken + " ms");
 					init_game = false;
 					state = GameState.PLAYING;
+					activegui = null;
 				}
 				gameUpdate();
 				gameRender();
@@ -279,6 +283,17 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 			
 			GameObject obj = (GameObject) myship;
+			if (myship == null) {
+				gameUpdate();
+				gameRender();
+				try {
+					Thread.sleep(updatespeed);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				continue;
+			}
 			
 			if (mylocation.getX() - obj.getPosition().getX() >= 1000000 || mylocation.getY() - obj.getPosition().getY() >= 1000000 ||
 				mylocation.getX() - obj.getPosition().getX() <= -1000000 || mylocation.getY() - obj.getPosition().getY() <= -1000000	) {
@@ -331,6 +346,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				return;
 			}
 			
+		}
+		
+		try {
+			controller.processPackets();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		controller.updateGame();
@@ -603,21 +625,28 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		internalserver = new GameServer(true);
 		internalserver.start();
-		try {
-			Thread.sleep(40);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		while (internalserver.getServerState() != ServerState.RUNNING) {
+			try {
+				Thread.sleep(4);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		WorldController c = internalserver.getGameThread().getController();
+		
+		WorldNetController c = new WorldNetController("127.0.0.1", 5555);
+		controller = c;
+		
+		/*WorldController c = internalserver.getGameThread().getController();
 		c.getZone(new Position(0, 0));
 		c.getZone(new Position(0, 1));
 		
 		c.getZone(new Position(0, 0));
 		c.getZone(new Position(1, 0));
+		*/
 		
-		controller = new WorldController();
-		for (int i = 1;i <= 1000; i++) {
+		//controller = new WorldController();
+		/*for (int i = 1;i <= 1000; i++) {
 			float x = Util.randomRange(0, PWIDTH);
 			float y = Util.randomRange(0, PHEIGHT);
 			controller.getStarpoints().add(new Position(x, y));
@@ -640,6 +669,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		myship = ship;
 		activegui = null;
 		starpoints = controller.getStarpoints();
+		*/
 	}
 
 	public GuiScreen getActivegui() {

@@ -4,11 +4,14 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.util.Controllable;
 
-public class NetworkPlayer {
+public class NetworkPlayer implements ControlUser {
 	private GameServer server;
 	private ArrayList<AbstractPacket> packetQueue = new ArrayList<>();
 	private SocketChannel conn;
+	private String name;
+	private Controllable ship;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -37,6 +40,17 @@ public class NetworkPlayer {
 
 	public void setConn(SocketChannel conn) {
 		this.conn = conn;
+	}
+
+	@Override
+	public Controllable getControl() {
+		return ship;
+	}
+
+	@Override
+	public void setControl(Controllable c) {
+		ship = c;
+		
 	}
 
 }
