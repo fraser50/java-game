@@ -16,6 +16,7 @@ public class Position {
 
 	public void setX(double x) {
 		this.x = x;
+		edited = true;
 	}
 
 	public double getY() {
@@ -24,6 +25,7 @@ public class Position {
 
 	public void setY(double y) {
 		this.y = y;
+		edited = true;
 	}
 	
 	public Position copy() {
@@ -33,12 +35,14 @@ public class Position {
 	public Position add(Position p) {
 		x += p.getX();
 		y += p.getY();
+		edited = true;
 		return this;
 	}
 	
 	public Position subtract(Position p) {
 		x -= p.getX();
 		y -= p.getY();
+		edited = true;
 		return this;
 	}
 	

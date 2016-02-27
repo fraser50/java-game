@@ -52,7 +52,7 @@ public class WorldController implements WorldProvider {
 	}
 	
 	@Override
-	public GameObject[] allObjects() {
+	public synchronized GameObject[] allObjects() {
 		List<GameObject> all = new ArrayList<>();
 		for (WorldZone zone : zones) {
 			for (GameObject obj : zone.getGameobjects()) {

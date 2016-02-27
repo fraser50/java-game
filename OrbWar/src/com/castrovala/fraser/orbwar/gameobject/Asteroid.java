@@ -8,7 +8,11 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import net.minidev.json.JSONObject;
+
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
@@ -48,6 +52,8 @@ public class Asteroid extends GameObject implements CollisionHandler {
 			getPosition().setX(pos.getX());
 			getPosition().setY(pos.getY());
 		}
+		
+		//getPosition().setX(getPosition().getX() + 1);
 	}
 
 	public OrbitControl getOrbit() {
@@ -77,7 +83,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
-		g2d.rotate(Math.toRadians( ((double)this.getRotation() * -1)), centre_x, centre_y);
+		g2d.rotate(Math.toRadians((double)-this.getRotation()), centre_x, centre_y);
 		rd.onRender();
 	}
 	
@@ -107,6 +113,33 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	@Override
 	public String getType() {
 		return "asteroid";
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				Asteroid ast = (Asteroid) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "asteroid");
+				jobj.put("x", ast.getPosition().getX());
+				
+				jobj.put("y", ast.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				Asteroid ast = new Asteroid(new Position(x, y), null);
+				return ast;
+			}
+		};
+		
+		GameObjectProcessor.addParser("asteroid", parser);
 	}
 
 }

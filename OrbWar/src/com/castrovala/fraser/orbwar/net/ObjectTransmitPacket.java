@@ -1,6 +1,6 @@
 package com.castrovala.fraser.orbwar.net;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 public class ObjectTransmitPacket implements AbstractPacket {
 	private JSONObject obj;
@@ -35,6 +35,10 @@ public class ObjectTransmitPacket implements AbstractPacket {
 				ObjectTransmitPacket packet = (ObjectTransmitPacket) p;
 				JSONObject json = new JSONObject();
 				json.put("type", packet.getType());
+				
+				packet.getObj().put("x", 200d);
+				packet.getObj().put("y", 200d);
+				
 				json.put("obj", packet.getObj());
 				return json;
 			}

@@ -2,7 +2,7 @@ package com.castrovala.fraser.orbwar.net;
 
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 public class PacketProcessor {
 	private static HashMap<String, PacketParser> parsers = new HashMap<>();
@@ -13,10 +13,20 @@ public class PacketProcessor {
 	
 	public static JSONObject toJSON(AbstractPacket p) {
 		if (!parsers.containsKey(p.getType())) {
+			//System.out.println("Parser not available");
+			//System.out.println("Packet type name: " + p.getType());
 			return null;
 		}
 		
+		//System.out.println("Looking for parser with name '" + p.getType() + "'");
+		long start = System.currentTimeMillis();
 		PacketParser parser = parsers.get(p.getType());
+		long end = System.currentTimeMillis();
+		long delay = end - start;
+		if (delay >= 2) {
+			System.out.println("Found packet processor in " + delay + "ms");
+		}
+		
 		return parser.toJSON(p);
 	}
 	

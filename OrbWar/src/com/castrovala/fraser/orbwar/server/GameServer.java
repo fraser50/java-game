@@ -8,15 +8,16 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
+import com.castrovala.fraser.orbwar.Constants;
+import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
-import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
+import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
-import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Position;
 
 public class GameServer extends Thread {
@@ -25,7 +26,7 @@ public class GameServer extends Thread {
 	private GameThread gamelogic;
 	private volatile boolean active = true;
 	private ServerSocketChannel serversock;
-	private List<NetworkPlayer> players = new ArrayList<>();
+	private volatile List<NetworkPlayer> players = new ArrayList<>();
 	private ServerState state = ServerState.STARTING;
 	
 	public GameServer(boolean localserver) {
@@ -78,13 +79,12 @@ public class GameServer extends Thread {
 		// TODO Manage connections
 		
 		while (active) {
-			//System.out.println("Server tick");
-			try {
-				Thread.sleep(4);
+			/*try {
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			
 			try {
 				SocketChannel channel = serversock.accept();
@@ -92,17 +92,16 @@ public class GameServer extends Thread {
 				if (channel != null) {
 					NetworkPlayer p = new NetworkPlayer(this, channel);
 					channel.configureBlocking(false);
+					System.out.println("Pending Connection");
 					channel.finishConnect();
 					System.out.println("Player Connected");
-					
-					ObjectTransmitPacket otp = new ObjectTransmitPacket(null);
-					synchronized (gamelogic) {
-						PlayerShip ship = new PlayerShip(new Position(100, 100), gamelogic.getController());
-						otp.setObj(GameObjectProcessor.toJSON(ship));
-						p.sendPacket(otp);
-						
-					}
 					players.add(p);
+					synchronized (gamelogic.getController()) {
+						PlayerShip ship = new PlayerShip(new Position(200, 200), gamelogic.getController());
+						p.setControl(ship);
+						gamelogic.getController().addObject(ship);
+					}
+					
 				}
 				
 			} catch (IOException e) {
@@ -110,14 +109,42 @@ public class GameServer extends Thread {
 				e.printStackTrace();
 			}
 			
-			for (NetworkPlayer p : players.toArray(new NetworkPlayer[players.size()])) {
+			for (NetworkPlayer p : getPlayers().toArray(new NetworkPlayer[getPlayers().size()])) {
 				//System.out.println("Iterating over players");
 				try {
 					SocketChannel channel = p.getConn();
-					for (AbstractPacket pa : p.getPacketQueue()) {
+					int count = 0;
+					//System.out.println(p.getPacketQueue().size() + " packets in queue, 8 will be processed");
+					for (AbstractPacket pa : p.getPacketQueue().toArray(new AbstractPacket[p.getPacketQueue().size()])) {
+						
+						if (pa == null) {
+							System.out.println("Packet is null");
+							continue;
+						}
+						
+						//System.out.println("Packet to transmit class: " + pa.getClass().getName());
+						long start = System.currentTimeMillis();
+						long json_start = start;
+						long start_convert_obj = System.currentTimeMillis();
 						JSONObject jobj = PacketProcessor.toJSON(pa);
+						long end_convert_obj = System.currentTimeMillis();
+						long delay_convert_obj = end_convert_obj - start_convert_obj;
+						
+						if (delay_convert_obj >= 2) {
+							System.out.println("Slow on generating JSONObject! (" + delay_convert_obj + "ms)");
+							System.out.println("Slow Object Class: " + pa.getClass().getName());
+						}
+						
 						String raw_message = jobj.toJSONString();
-						ByteBuffer buf = ByteBuffer.allocate(raw_message.getBytes().length + 4);
+						long json_end = System.currentTimeMillis();
+						long json_delay = json_end - json_start;
+						
+						if (json_delay >= 2) {
+							System.out.println("JSON conversion finished in " + json_delay + "ms");
+						}
+						
+						
+						ByteBuffer buf = ByteBuffer.allocate(Constants.packetsize);
 						
 						ByteBuffer len_buf = ByteBuffer.allocate(4);
 						len_buf.putInt(raw_message.length());
@@ -125,18 +152,50 @@ public class GameServer extends Thread {
 						
 						buf.put(len_bytes);
 						
+						
 						//int l = ByteBuffer.wrap(len_bytes).getInt();
 						//System.out.println("Byte length: " + l);
 						
+						
 						buf.put(raw_message.getBytes());
-						buf.flip();
-						System.out.println("Server: " + buf.toString());
+						long padding_start = System.currentTimeMillis();
+						//for (int i = 1; i < (Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length) + 1; i++) {
+						//	buf.put((byte)'a');
+						//}
+						
+						//String padding = new String(new char[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]).replaceFirst("\0", "a");
+						//buf.put(padding.getBytes());
+						
+						//buf.put(new byte[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]);
+						
+						long padding_end = System.currentTimeMillis();
+						long padding_delay = padding_end - padding_start;
+						
+						if (padding_delay >= 3) {
+							System.out.println("Finished padding in " + padding_delay + "ms");
+						}
+						
+						
+						//buf.flip();
+						buf.position(0);
+						long end = System.currentTimeMillis();
+						long delay = end - start;
+						if (delay >= 10) {
+							System.out.println("Constructed data packet in " + delay + "ms");
+							System.out.println(new String(buf.array()));
+						}
+						
 						channel.write(buf);
+						//System.out.println("Server msg: " + new String(buf.array()));
+						//p.getPacketQueue().remove(pa);
+						count++;
+						if (count >= 600000000) {
+							//break;
+						}
 						
 					}
-					p.getPacketQueue().clear();
 					
-					ByteBuffer buff = ByteBuffer.allocate(65536);
+					/*ByteBuffer buff = ByteBuffer.allocate(65536);
 					if (p.getConn().read(buff) < 1) {
 						continue;
 					}
@@ -155,6 +214,100 @@ public class GameServer extends Thread {
 						value = value.substring(0, 4 + length);
 					}
 					
+					*///System.out.println("Server packet list length: " + packets.size());
+					
+					List<AbstractPacket> packets = new ArrayList<>();
+					long start = System.currentTimeMillis();
+					ByteBuffer buff = ByteBuffer.allocate( Constants.packetsize ); // 65536
+					while (buff.hasRemaining()) {
+						channel.read(buff);
+					}
+					
+					String value = new String(buff.array());
+					//System.out.println("value: " + value);
+					while (value.trim() != "") {
+						System.out.println("Server parsing: " + value.length());
+						//System.out.println("Value: " + value);
+						//if (value.length() <= 4) {
+						//	break;
+						//}
+						
+						String length_str = "";
+						try {
+							length_str = value.substring(0, 4);
+						} catch (StringIndexOutOfBoundsException e) {
+							System.out.println("Length failed");
+							break;
+						}
+						
+						byte[] length_bytes = length_str.getBytes();
+						int length = ByteBuffer.wrap(length_bytes).getInt();
+						
+						if (length == 0) {
+							break;
+						}
+						
+						//if (length + 4 < value.length()) {
+						//	break;
+						//}
+						
+						String json_str;
+						try {
+							json_str = value.substring(4, 4 + length);
+						} catch (StringIndexOutOfBoundsException e) {
+							System.out.println("Out of range");
+							return;
+						}
+						
+						
+						JSONParser parser = new JSONParser();
+						JSONObject jobj;
+						try {
+							jobj = (JSONObject) parser.parse(json_str);
+							AbstractPacket packet = PacketProcessor.fromJSON(jobj);
+							
+							if (packet == null) {
+								System.out.println("Packet is null, no parser exists!");
+							}
+							
+							packets.add(packet);
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						value = value.substring(4 + length, value.length());
+						break;
+					}
+					
+					long end = System.currentTimeMillis();
+					long delay = end - start;
+					
+					for (AbstractPacket pa : packets) {
+						if (pa instanceof KeyPressPacket) {
+							KeyPressPacket kpp = (KeyPressPacket) pa;
+							if (p.getControl() != null) {
+								GameObject ship = (GameObject) p.getControl();
+								switch (kpp.getKey()) {
+									case "up":
+										p.getControl().fly();
+										break;
+									case "fire":
+										p.getControl().fire();
+										break;
+									case "left":
+										p.getControl().left();
+										break;
+									case "right":
+										p.getControl().right();
+										break;
+									default:
+										// Something went wrong
+								}
+							}
+						}
+					}
+					
 					
 					
 					
@@ -167,9 +320,6 @@ public class GameServer extends Thread {
 						e1.printStackTrace();
 					}
 					players.remove(p);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 				
 			}

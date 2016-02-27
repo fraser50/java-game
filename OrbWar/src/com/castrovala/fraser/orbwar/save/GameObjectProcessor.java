@@ -2,7 +2,7 @@ package com.castrovala.fraser.orbwar.save;
 
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 
@@ -13,23 +13,30 @@ public class GameObjectProcessor {
 		parsers.put(type, parser);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static JSONObject toJSON(GameObject obj) {
+		String uuid = obj.getUuid();
 		if (!parsers.containsKey(obj.getType())) {
 			return null;
 		}
 		
 		GameObjParser parser = parsers.get(obj.getType());
-		return parser.toJSON(obj);
+		JSONObject json = parser.toJSON(obj);
+		json.put("uuid", uuid);
+		return json;
 	}
 	
 	public static GameObject fromJSON(JSONObject obj) {
 		String type = (String) obj.get("type");
+		String uuid = (String) obj.get("uuid");
 		if (!parsers.containsKey(type)) {
 			return null;
 		}
 		
 		GameObjParser parser = parsers.get(type);
-		return parser.fromJSON(obj);
+		GameObject g = parser.fromJSON(obj);
+		g.setUuid(uuid);
+		return g;
 	}
 
 }

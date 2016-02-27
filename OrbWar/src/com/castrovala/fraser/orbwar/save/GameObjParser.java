@@ -1,6 +1,6 @@
 package com.castrovala.fraser.orbwar.save;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 

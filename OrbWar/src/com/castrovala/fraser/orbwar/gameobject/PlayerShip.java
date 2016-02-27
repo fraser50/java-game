@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
@@ -69,6 +69,9 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	public void update() {
 		//System.out.println("Health: " + getHealth() + "/" + getMaxhealth());
 		super.update();
+		
+		//setRotation(getRotation() + 1);
+		//forward();
 		
 		if (primaryweapon != null) {
 			primaryweapon.update(this);
@@ -190,18 +193,8 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		g2d.setColor(Color.RED);
 		int rel_x_middle = rel_x + (this.getWidth() / 2);
 		int rel_y_middle = rel_y + (this.getHeight() / 2);
-		g2d.drawLine(rel_x_middle, rel_y_middle, rel_x_middle, rel_y_middle);
+		g2d.drawLine(rel_x_middle, rel_y_middle, rel_x_middle + 20, rel_y_middle + 20);
 		rd.onRender(2);
-		
-		/*g2d.setColor(Color.GREEN);
-		for (GameObject o : getNearbyObjects(1000f)) {
-			if (o != this && o instanceof SmokeParticle) {
-				int rel_x_o = (int)(o.getPosition().getX() - rd.getRenderloc().getX());
-				int rel_y_o = (int)(o.getPosition().getY() - rd.getRenderloc().getY());
-				g2d.drawLine(rel_x, rel_y, rel_x_o, rel_y_o);
-				rd.onRender();
-			}
-		}*/
 	}
 	
 	public static void loadResources() {
@@ -336,6 +329,11 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		};
 		
 		GameObjectProcessor.addParser("playership", parser);
+	}
+	
+	@Override
+	public boolean shouldRotate() {
+		return true;
 	}
 
 }

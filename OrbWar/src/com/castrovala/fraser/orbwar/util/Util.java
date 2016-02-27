@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.util;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
@@ -76,6 +77,16 @@ public class Util {
 		}
 		
 		return angle;
+	}
+	
+	public static byte[] DoubleToBytes(double d) {
+		ByteBuffer buff = ByteBuffer.allocate(8);
+		buff.putDouble(d);
+		return buff.array();
+	}
+	
+	public static double BytesToDouble(ByteBuffer buff) {
+		return buff.getDouble();
 	}
 
 }

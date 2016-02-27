@@ -1,8 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import org.json.simple.JSONObject;
-
 import com.castrovala.fraser.orbwar.util.Position;
+
+import net.minidev.json.JSONObject;
 
 public class PositionUpdatePacket implements AbstractPacket {
 	private Position position;
@@ -16,6 +16,8 @@ public class PositionUpdatePacket implements AbstractPacket {
 	public PositionUpdatePacket(Position position, String obj_id) {
 		this.position = position;
 		this.objectid = obj_id;
+		
+		//System.out.println("PUP has been constructed");
 	}
 
 	public Position getPosition() {
@@ -32,16 +34,17 @@ public class PositionUpdatePacket implements AbstractPacket {
 			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(AbstractPacket p) {
-				if (!(p instanceof PositionUpdatePacket) ) {
-					return null;
-				}
+				//System.out.println("Converting pup to json");
+				//if (!(p instanceof PositionUpdatePacket) ) {
+				//	return null;
+				//}
 				
 				PositionUpdatePacket packet = (PositionUpdatePacket) p;
 				
 				JSONObject json = new JSONObject();
 				json.put("type", p.getType());
-				json.put("x", packet.getPosition().getX());
-				json.put("y", packet.getPosition().getY());
+				json.put("x", Double.toHexString(packet.getPosition().getX()) );
+				json.put("y", Double.toHexString(packet.getPosition().getY()) );
 				json.put("obj_id", packet.getObjectid());
 				return json;
 				
@@ -49,8 +52,8 @@ public class PositionUpdatePacket implements AbstractPacket {
 			
 			@Override
 			public AbstractPacket fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
+				double x = Double.parseDouble(obj.getAsString("x"));
+				double y = Double.parseDouble(obj.getAsString("y"));
 				String obj_id = (String) obj.get("obj_id");
 				
 				PositionUpdatePacket packet = new PositionUpdatePacket(new Position(x, y), obj_id);

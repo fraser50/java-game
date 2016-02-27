@@ -26,7 +26,8 @@ public abstract class GameObject {
 	private int maxhealth = 20;
 	private boolean cleaned;
 	private List<GameObject> nearby = new ArrayList<>();
-	private final String uuid;
+	private String uuid;
+	private volatile boolean changed = false;
 	
 	public GameObject(Position pos, WorldProvider controller) {
 		uuid = UUID.randomUUID().toString();
@@ -78,6 +79,7 @@ public abstract class GameObject {
 	
 	public void setRotation(float rotation) {
 		this.rotation = rotation;
+		changed = true;
 	}
 
 	public Position getVelocity() {
@@ -127,10 +129,12 @@ public abstract class GameObject {
 
 	public void setHealth(int health) {
 		this.health = health;
+		changed = true;
 	}
 	
 	public void hurt(int damage) {
 		health -= damage;
+		changed = true;
 	}
 	
 	public void hurt() {
@@ -184,7 +188,24 @@ public abstract class GameObject {
 	public String getUuid() {
 		return uuid;
 	}
+	
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
-	public abstract String getType();
+	//public abstract String getType();
+	public String getType() { return null;}
+
+	public synchronized boolean isChanged() {
+		return changed;
+	}
+
+	public synchronized void setChanged(boolean changed) {
+		this.changed = changed;
+	}
+	
+	public boolean shouldRotate() {
+		return false;
+	}
 	
 }

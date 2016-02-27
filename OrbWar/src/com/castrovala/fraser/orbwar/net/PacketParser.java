@@ -1,6 +1,6 @@
 package com.castrovala.fraser.orbwar.net;
 
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 public interface PacketParser {
 	public JSONObject toJSON(AbstractPacket p);
