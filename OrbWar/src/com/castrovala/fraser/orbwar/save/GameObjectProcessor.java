@@ -11,9 +11,9 @@ public class GameObjectProcessor {
 	
 	public static void addParser(String type, GameObjParser parser) {
 		parsers.put(type, parser);
+		System.out.println("Added parser '" + type + "' successfully!");
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static JSONObject toJSON(GameObject obj) {
 		String uuid = obj.getUuid();
 		if (!parsers.containsKey(obj.getType())) {

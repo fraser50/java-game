@@ -71,5 +71,10 @@ public class ShieldDrone extends GameObject implements CollisionHandler {
 	public RenderStage getRenderStage() {
 		return RenderStage.SHIPS;
 	}
+	
+	@Override
+	public String getType() {
+		return "shield";
+	}
 
 }

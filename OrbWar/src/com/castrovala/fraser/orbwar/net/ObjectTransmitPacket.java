@@ -4,10 +4,12 @@ import net.minidev.json.JSONObject;
 
 public class ObjectTransmitPacket implements AbstractPacket {
 	private JSONObject obj;
-	private String uuid;
 	
 	public ObjectTransmitPacket(JSONObject obj) {
 		this.setObj(obj);
+		if (obj == null) {
+			throw new NullPointerException("OTP obj was null!");
+		}
 	}
 	
 	
@@ -29,15 +31,14 @@ public class ObjectTransmitPacket implements AbstractPacket {
 	public static void registerPacket() {
 		PacketParser proc = new PacketParser() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(AbstractPacket p) {
 				ObjectTransmitPacket packet = (ObjectTransmitPacket) p;
 				JSONObject json = new JSONObject();
 				json.put("type", packet.getType());
 				
-				packet.getObj().put("x", 200d);
-				packet.getObj().put("y", 200d);
+				packet.getObj().put("x", (double)packet.getObj().get("x"));
+				packet.getObj().put("y", (double)packet.getObj().get("y"));
 				
 				json.put("obj", packet.getObj());
 				return json;

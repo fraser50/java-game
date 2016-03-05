@@ -56,5 +56,10 @@ public class HydrogenParticle extends GameObject {
 	public static BufferedImage getRenderimage() {
 		return renderimage;
 	}
+	
+	@Override
+	public String getType() {
+		return "hydrogen";
+	}
 
 }

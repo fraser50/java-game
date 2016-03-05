@@ -16,6 +16,7 @@ import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
@@ -102,7 +103,7 @@ public class WorldNetController implements WorldProvider {
 
 	@Override
 	public boolean isServer() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -238,6 +239,11 @@ public class WorldNetController implements WorldProvider {
 					}
 					
 				}
+			}
+			
+			if (pack instanceof DeleteObjectPacket) {
+				DeleteObjectPacket dop = (DeleteObjectPacket) pack;
+				getGameObject(dop.getUuid()).delete();
 			}
 			
 			//System.out.println("Not parsed :(");

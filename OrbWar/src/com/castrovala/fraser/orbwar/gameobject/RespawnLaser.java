@@ -8,11 +8,15 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
+
+import net.minidev.json.JSONObject;
 
 public class RespawnLaser extends GameObject {
 	
@@ -76,6 +80,37 @@ public class RespawnLaser extends GameObject {
 	@Override
 	public RenderStage getRenderStage() {
 		return RenderStage.SPACEOBJECTS;
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				RespawnLaser laser = (RespawnLaser) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "rlaser");
+				jobj.put("x", laser.getPosition().getX());
+				
+				jobj.put("y", laser.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				RespawnLaser laser = new RespawnLaser(new Position(x, y), null);
+				return laser;
+			}
+		};
+		
+		GameObjectProcessor.addParser("rlaser", parser);
+	}
+	
+	@Override
+	public String getType() {
+		return "rlaser";
 	}
 
 }

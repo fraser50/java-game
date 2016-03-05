@@ -79,6 +79,7 @@ public class GameServer extends Thread {
 		// TODO Manage connections
 		
 		while (active) {
+			//System.out.println("Server tick");
 			/*try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -86,6 +87,7 @@ public class GameServer extends Thread {
 				e.printStackTrace();
 			}*/
 			
+			//System.out.println("Looking for new connections...");
 			try {
 				SocketChannel channel = serversock.accept();
 				
@@ -100,6 +102,7 @@ public class GameServer extends Thread {
 						PlayerShip ship = new PlayerShip(new Position(200, 200), gamelogic.getController());
 						p.setControl(ship);
 						gamelogic.getController().addObject(ship);
+						System.out.println("Added Player Ship");
 					}
 					
 				}
@@ -108,92 +111,103 @@ public class GameServer extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			//System.out.println("No longer checking for connections");
 			
 			for (NetworkPlayer p : getPlayers().toArray(new NetworkPlayer[getPlayers().size()])) {
 				//System.out.println("Iterating over players");
 				try {
 					SocketChannel channel = p.getConn();
 					int count = 0;
-					//System.out.println(p.getPacketQueue().size() + " packets in queue, 8 will be processed");
-					for (AbstractPacket pa : p.getPacketQueue().toArray(new AbstractPacket[p.getPacketQueue().size()])) {
-						
-						if (pa == null) {
-							System.out.println("Packet is null");
-							continue;
+					//System.out.println("Acquiring packet queue lock...");
+					synchronized (p.getPacketQueue()) {
+						//System.out.println("Lock acquired");
+						//System.out.println(p.getPacketQueue().size() + " packets in queue");
+						for (AbstractPacket pa : p.getPacketQueue()
+								.toArray(new AbstractPacket[p.getPacketQueue().size()])) {
+
+						//for (AbstractPacket pa : p.getPacketQueue()) {
+							//System.out.println("Preparing to send packet");
+							if (pa == null) {
+								System.out.println("Packet is null");
+								continue;
+							}
+
+							//System.out.println("Packet to transmit class: " + pa.getClass().getName());
+							long start = System.currentTimeMillis();
+							long json_start = start;
+							long start_convert_obj = System.currentTimeMillis();
+							JSONObject jobj = PacketProcessor.toJSON(pa);
+							long end_convert_obj = System.currentTimeMillis();
+							long delay_convert_obj = end_convert_obj - start_convert_obj;
+
+							if (delay_convert_obj >= 2) {
+								System.out.println("Slow on generating JSONObject! (" + delay_convert_obj + "ms)");
+								System.out.println("Slow Object Class: " + pa.getClass().getName());
+							}
+
+							String raw_message = jobj.toJSONString();
+							long json_end = System.currentTimeMillis();
+							long json_delay = json_end - json_start;
+
+							if (json_delay >= 2) {
+								System.out.println("JSON conversion finished in " + json_delay + "ms");
+							}
+
+							ByteBuffer buf = ByteBuffer.allocate(Constants.packetsize);
+
+							ByteBuffer len_buf = ByteBuffer.allocate(4);
+							len_buf.putInt(raw_message.length());
+							byte[] len_bytes = len_buf.array();
+
+							buf.put(len_bytes);
+
+							//int l = ByteBuffer.wrap(len_bytes).getInt();
+							//System.out.println("Byte length: " + l);
+
+							buf.put(raw_message.getBytes());
+							long padding_start = System.currentTimeMillis();
+							//for (int i = 1; i < (Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length) + 1; i++) {
+							//	buf.put((byte)'a');
+							//}
+
+							//String padding = new String(new char[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]).replaceFirst("\0", "a");
+							//buf.put(padding.getBytes());
+
+							//buf.put(new byte[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]);
+
+							long padding_end = System.currentTimeMillis();
+							long padding_delay = padding_end - padding_start;
+
+							if (padding_delay >= 3) {
+								//System.out.println("Finished padding in " + padding_delay + "ms");
+							}
+
+							//buf.flip();
+							buf.position(0);
+							long end = System.currentTimeMillis();
+							long delay = end - start;
+							if (delay >= 10) {
+								//System.out.println("Constructed data packet in " + delay + "ms");
+								//System.out.println(new String(buf.array()));
+							}
+
+							channel.write(buf);
+							//System.out.println("Wrote data to socket");
+							//System.out.println("Server msg: " + new String(buf.array()));
+							count++;
+							p.getPacketQueue().remove(pa);
+							if (count >= 600000000) {
+								//break;
+							}
+
 						}
-						
-						//System.out.println("Packet to transmit class: " + pa.getClass().getName());
-						long start = System.currentTimeMillis();
-						long json_start = start;
-						long start_convert_obj = System.currentTimeMillis();
-						JSONObject jobj = PacketProcessor.toJSON(pa);
-						long end_convert_obj = System.currentTimeMillis();
-						long delay_convert_obj = end_convert_obj - start_convert_obj;
-						
-						if (delay_convert_obj >= 2) {
-							System.out.println("Slow on generating JSONObject! (" + delay_convert_obj + "ms)");
-							System.out.println("Slow Object Class: " + pa.getClass().getName());
-						}
-						
-						String raw_message = jobj.toJSONString();
-						long json_end = System.currentTimeMillis();
-						long json_delay = json_end - json_start;
-						
-						if (json_delay >= 2) {
-							System.out.println("JSON conversion finished in " + json_delay + "ms");
-						}
-						
-						
-						ByteBuffer buf = ByteBuffer.allocate(Constants.packetsize);
-						
-						ByteBuffer len_buf = ByteBuffer.allocate(4);
-						len_buf.putInt(raw_message.length());
-						byte[] len_bytes = len_buf.array();
-						
-						buf.put(len_bytes);
-						
-						
-						//int l = ByteBuffer.wrap(len_bytes).getInt();
-						//System.out.println("Byte length: " + l);
-						
-						
-						buf.put(raw_message.getBytes());
-						long padding_start = System.currentTimeMillis();
-						//for (int i = 1; i < (Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length) + 1; i++) {
-						//	buf.put((byte)'a');
-						//}
-						
-						//String padding = new String(new char[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]).replaceFirst("\0", "a");
-						//buf.put(padding.getBytes());
-						
-						//buf.put(new byte[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]);
-						
-						long padding_end = System.currentTimeMillis();
-						long padding_delay = padding_end - padding_start;
-						
-						if (padding_delay >= 3) {
-							System.out.println("Finished padding in " + padding_delay + "ms");
-						}
-						
-						
-						//buf.flip();
-						buf.position(0);
-						long end = System.currentTimeMillis();
-						long delay = end - start;
-						if (delay >= 10) {
-							System.out.println("Constructed data packet in " + delay + "ms");
-							System.out.println(new String(buf.array()));
-						}
-						
-						channel.write(buf);
-						//System.out.println("Server msg: " + new String(buf.array()));
-						//p.getPacketQueue().remove(pa);
-						count++;
-						if (count >= 600000000) {
-							//break;
-						}
+						//System.out.println("Clearing queue");
+						//p.getPacketQueue().clear();
+						//System.out.println("Finished clearing queue");
 						
 					}
+					//System.out.println("Exited sync statement");
+					
 					
 					/*ByteBuffer buff = ByteBuffer.allocate(65536);
 					if (p.getConn().read(buff) < 1) {
@@ -218,10 +232,25 @@ public class GameServer extends Thread {
 					
 					List<AbstractPacket> packets = new ArrayList<>();
 					long start = System.currentTimeMillis();
-					ByteBuffer buff = ByteBuffer.allocate( Constants.packetsize ); // 65536
-					while (buff.hasRemaining()) {
-						channel.read(buff);
+					 // 65536
+					//System.out.println("Server waiting for data");
+					ByteBuffer buff = p.getReceived();
+					if (buff == null) {
+						//System.out.println("Server buffer is empty");
+						buff = ByteBuffer.allocate(Constants.packetsize);
+						p.setReceived(buff);
 					}
+					
+					if (buff.hasRemaining()) {
+						channel.read(buff);
+						//System.out.println("Read some data, going onto next entry");
+						continue;
+					}
+					
+					//buff = ByteBuffer.allocate( Constants.packetsize );
+					//p.setReceived(buff);
+					
+					//System.out.println("Server found data");
 					
 					String value = new String(buff.array());
 					//System.out.println("value: " + value);
@@ -284,11 +313,13 @@ public class GameServer extends Thread {
 					long delay = end - start;
 					
 					for (AbstractPacket pa : packets) {
+						//System.out.println("Server found packet: " + pa.getClass().getName());
 						if (pa instanceof KeyPressPacket) {
 							KeyPressPacket kpp = (KeyPressPacket) pa;
 							if (p.getControl() != null) {
 								GameObject ship = (GameObject) p.getControl();
-								switch (kpp.getKey()) {
+								synchronized (ship) {
+									switch (kpp.getKey()) {
 									case "up":
 										p.getControl().fly();
 										break;
@@ -303,13 +334,14 @@ public class GameServer extends Thread {
 										break;
 									default:
 										// Something went wrong
+									}
 								}
 							}
 						}
 					}
 					
-					
-					
+					buff = ByteBuffer.allocate( Constants.packetsize );
+					p.setReceived(buff);
 					
 				} catch (IOException e) {
 					e.printStackTrace();

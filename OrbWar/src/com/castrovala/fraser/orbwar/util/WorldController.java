@@ -12,6 +12,8 @@ public class WorldController implements WorldProvider {
 	private List<Position> starpoints = new ArrayList<>();
 	private HashMap<GameObject, Float> scanners = new HashMap<>();
 	private HashMap<String, GameObject> objectuuid = new HashMap<>();
+	private List<GameObject> newObjects = new ArrayList<>();
+	private List<GameObject> deadObjects = new ArrayList<>();
 	
 	@Override
 	public WorldZone getZone(Position pos) {
@@ -38,6 +40,7 @@ public class WorldController implements WorldProvider {
 	
 	@Override
 	public void addObject(GameObject o) {
+		getNewObjects().add(o);
 		getZone(Util.toZoneCoords(o.getPosition())).getGameobjects().add(o);
 		objectuuid.put(o.getUuid(), o);
 	}
@@ -86,6 +89,7 @@ public class WorldController implements WorldProvider {
 				}
 				
 				if (obj.isDeleted()) {
+					getDeadObjects().add(obj);
 					zone.getGameobjects().remove(obj);
 					objectuuid.remove(obj.getUuid());
 					continue;
@@ -146,6 +150,18 @@ public class WorldController implements WorldProvider {
 	public GameObject getGameObject(String uuid) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public List<GameObject> getNewObjects() {
+		synchronized (newObjects) {
+			return newObjects;
+		}
+	}
+
+	public List<GameObject> getDeadObjects() {
+		synchronized (deadObjects) {
+			return deadObjects;
+		}
 	}
 
 }

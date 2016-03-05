@@ -6,10 +6,14 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
+
+import net.minidev.json.JSONObject;
 
 public class Bullet extends GameObject implements CollisionHandler {
 	private static BufferedImage renderimage;
@@ -80,6 +84,32 @@ public class Bullet extends GameObject implements CollisionHandler {
 	@Override
 	public String getType() {
 		return "bullet";
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				Bullet bullet = (Bullet) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "bullet");
+				jobj.put("x", bullet.getPosition().getX());
+				
+				jobj.put("y", bullet.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				Bullet bullet = new Bullet(new Position(x , y), null, null);
+				return bullet;
+			}
+		};
+			
+		GameObjectProcessor.addParser("bullet", parser);
 	}
 
 }

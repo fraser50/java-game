@@ -11,7 +11,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
+import com.castrovala.fraser.orbwar.gameobject.RespawnPoint;
 import com.castrovala.fraser.orbwar.gameobject.ShieldDrone;
 import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
@@ -37,6 +37,7 @@ import com.castrovala.fraser.orbwar.gui.GuiClickable;
 import com.castrovala.fraser.orbwar.gui.GuiElement;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
@@ -230,9 +231,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		PositionUpdatePacket.registerPacket();
 		HealthUpdatePacket.registerPacket();
 		KeyPressPacket.registerPacket();
+		DeleteObjectPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
+		Bullet.registerGameObj();
+		RespawnPoint.registerGameObj();
+		RespawnLaser.registerGameObj();
 		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
@@ -365,7 +370,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		if (activecontrol != null) {
 			KeyPressPacket p = new KeyPressPacket(activecontrol);
-			System.out.println("Key type: " + p.getKey());
+			//System.out.println("Key type: " + p.getKey());
 			activecontrol = null;
 			controller.sendPacket(p);
 		}
@@ -492,31 +497,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				int rel_y = (int)(obj.getPosition().getY() - mylocation.getY());
 				if (rel_x >= 0 && rel_x <= PWIDTH && rel_y >= 0 && rel_y <= PHEIGHT) {
 					stages.get(obj.getRenderStage()).add(obj);
-					
-					/*int centre_x = rel_x + (obj.getWidth() / 2);
-					int centre_y = rel_y + (obj.getHeight() / 2);
-					
-					long objrenderstart = System.currentTimeMillis();
-					obj.render(g2d, rel_x, rel_y, centre_x, centre_y, rd);
-					long objrenderend = System.currentTimeMillis();
-					long objrenderdelay = objrenderend - objrenderstart;
-					if (!renderedbefore) {
-						System.out.println("Rendered obj in " + objrenderdelay + "ms");
-					}
-					
-					if (debug && obj instanceof CollisionHandler) {
-						Rectangle rect = obj.getBoundingBox();
-						int start_x = (int) (rect.x - mylocation.getX());
-						int start_y = (int) (rect.y - mylocation.getY());
-						int end_x = (int) ( (rect.x + rect.getWidth()) - mylocation.getX() );
-						int end_y = (int) ( (rect.y + rect.getHeight()) - mylocation.getY() );
-						dbg.setColor(Color.RED);
-						dbg.drawLine(start_x, start_y, end_x, start_y);
-						dbg.drawLine(start_x, end_y, end_x, end_y);
-						dbg.drawLine(start_x, start_y, start_x, end_y);
-						dbg.drawLine(end_x, start_y, end_x, end_y);
-						rendereditems += 4;	
-					}*/
 							
 //					dbg.fillRect(rel_x, rel_y, 100, 100);
 				}

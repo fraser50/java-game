@@ -1,24 +1,25 @@
 package com.castrovala.fraser.orbwar.server;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
-import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.WorldZone;
 
 public class NetworkPlayer implements ControlUser {
 	private GameServer server;
-	private volatile ArrayList<AbstractPacket> packetQueue = new ArrayList<>();
+	private volatile List<AbstractPacket> packetQueue = Collections.synchronizedList(new ArrayList<AbstractPacket>());
 	private SocketChannel conn;
 	private String name;
 	private Controllable ship;
 	private List<WorldZone> seenZones = new ArrayList<>();
 	public Position currentpos = new Position(0, 0);
-	private int healthupdateamount = 0;
+	private volatile ByteBuffer received;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -33,11 +34,13 @@ public class NetworkPlayer implements ControlUser {
 		this.server = server;
 	}
 
-	public synchronized ArrayList<AbstractPacket> getPacketQueue() {
-		return packetQueue;
+	public List<AbstractPacket> getPacketQueue() {
+		synchronized (packetQueue) {
+			return packetQueue;
+		}
 	}
 	
-	public synchronized void sendPacket(AbstractPacket packet) {
+	public void sendPacket(AbstractPacket packet) {
 		if (packet == null) {
 			throw new NullPointerException("Value was null");
 		}
@@ -79,6 +82,14 @@ public class NetworkPlayer implements ControlUser {
 
 	public synchronized List<WorldZone> getSeenZones() {
 		return seenZones;
+	}
+
+	public ByteBuffer getReceived() {
+		return received;
+	}
+
+	public synchronized void setReceived(ByteBuffer received) {
+		this.received = received;
 	}
 
 }

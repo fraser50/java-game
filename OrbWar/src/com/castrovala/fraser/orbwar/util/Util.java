@@ -8,7 +8,7 @@ import com.castrovala.fraser.orbwar.gameobject.GameObject;
 public class Util {
 	public static long randomRange(long min, long max) {
 		Random rand = new Random();
-		long number = min + ((long) (rand.nextDouble() * (max - min)));
+		long number = min + (long) (rand.nextDouble() * (max - min));
 		return number;
 		//return rand.n(max - min) + 1) + min;
 	}

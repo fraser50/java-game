@@ -307,7 +307,6 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	public static void registerGameObj() {
 		GameObjParser parser = new GameObjParser() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(GameObject obj) {
 				PlayerShip ship = (PlayerShip) obj;

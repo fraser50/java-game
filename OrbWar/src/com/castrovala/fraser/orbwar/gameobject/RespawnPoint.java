@@ -3,9 +3,13 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
+
+import net.minidev.json.JSONObject;
 
 public class RespawnPoint extends GameObject {
 	private int timealive;
@@ -74,6 +78,37 @@ public class RespawnPoint extends GameObject {
 		}
 		
 		timealive++;
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				RespawnPoint point = (RespawnPoint) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "rpoint");
+				jobj.put("x", point.getPosition().getX());
+				
+				jobj.put("y", point.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				RespawnPoint point = new RespawnPoint(new Position(x, y), null);
+				return point;
+			}
+		};
+		
+		GameObjectProcessor.addParser("rpoint", parser);
+	}
+	
+	@Override
+	public String getType() {
+		return "rpoint";
 	}
 
 }

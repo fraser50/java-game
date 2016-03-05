@@ -116,4 +116,9 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 		return renderimage;
 	}
 
+	@Override
+	public String getType() {
+		return "turret";
+	}
+
 }

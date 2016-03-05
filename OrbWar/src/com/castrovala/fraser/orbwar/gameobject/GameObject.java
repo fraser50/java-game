@@ -194,7 +194,7 @@ public abstract class GameObject {
 	}
 
 	//public abstract String getType();
-	public String getType() { return null;}
+	public abstract String getType();
 
 	public synchronized boolean isChanged() {
 		return changed;

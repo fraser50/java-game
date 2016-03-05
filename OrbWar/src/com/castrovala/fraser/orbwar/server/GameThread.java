@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.server;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
+import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
@@ -24,8 +25,6 @@ public class GameThread extends Thread {
 	@Override
 	public void run() {
 		controller = new WorldController();
-		//PlayerShip ship = new PlayerShip(new Position(200, 200), controller);
-		//controller.addObject(ship);
 		while (active) {
 			synchronized (controller) {
 				controller.updateGame();
@@ -83,6 +82,29 @@ public class GameThread extends Thread {
 						}
 					}
 				}
+			}
+			
+			synchronized (controller) {
+				for (GameObject obj : controller.getNewObjects()) {
+					if (obj.isDeleted() || obj.isCleaned()) {
+						continue;
+					}
+					
+					for (NetworkPlayer player : getServer().getPlayers()) {
+						ObjectTransmitPacket otp = new ObjectTransmitPacket(GameObjectProcessor.toJSON(obj));
+						player.sendPacket(otp);
+					}
+				}
+				
+				controller.getNewObjects().clear();
+				
+				for (GameObject obj : controller.getDeadObjects()) {
+					for (NetworkPlayer player : getServer().getPlayers()) {
+						DeleteObjectPacket dop = new DeleteObjectPacket(obj.getUuid());
+						player.sendPacket(dop);
+					}
+				}
+				controller.getDeadObjects().clear();
 			}
 			
 			

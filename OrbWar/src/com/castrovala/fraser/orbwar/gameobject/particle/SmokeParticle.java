@@ -50,5 +50,10 @@ public class SmokeParticle extends GameObject {
 	public static BufferedImage getRenderimage() {
 		return renderimage;
 	}
+	
+	@Override
+	public String getType() {
+		return "smoke";
+	}
 
 }

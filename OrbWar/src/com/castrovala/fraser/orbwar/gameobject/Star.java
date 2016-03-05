@@ -86,4 +86,9 @@ public class Star extends GameObject {
 		return RenderStage.SPACEOBJECTS;
 	}
 
+	@Override
+	public String getType() {
+		return "star";
+	}
+
 }

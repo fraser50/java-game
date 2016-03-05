@@ -3,38 +3,26 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
-
-import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
-import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
-import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
 
+import net.minidev.json.JSONObject;
+
 public class Asteroid extends GameObject implements CollisionHandler {
-	OrbitControl orbit;
-	private List<Position> points = new ArrayList<>();
 	private static BufferedImage renderimage;
 
 	public Asteroid(Position pos, WorldProvider controller) {
 		super(pos, controller);
 		setWidth(64);
 		setHeight(64);
-		for (int i = 1; i<10; i++) {
-			float rotation = (float) Util.randomRange(0, 360);
-			float speed = (float) Util.randomRange(5, 32);
-			Position p = Util.angleToVel(rotation, speed);
-			points.add(p);
-		}
 		
 	}
 	
@@ -46,22 +34,6 @@ public class Asteroid extends GameObject implements CollisionHandler {
 		if (rotation >= 360) {
 			setRotation(0);
 		}
-//		getPosition().setX(getPosition().getX() + 1);
-		if (orbit != null) {
-			Position pos = orbit.updateOrbit();
-			getPosition().setX(pos.getX());
-			getPosition().setY(pos.getY());
-		}
-		
-		//getPosition().setX(getPosition().getX() + 1);
-	}
-
-	public OrbitControl getOrbit() {
-		return orbit;
-	}
-
-	public void setOrbit(OrbitControl orbit) {
-		this.orbit = orbit;
 	}
 
 	@Override
@@ -73,10 +45,6 @@ public class Asteroid extends GameObject implements CollisionHandler {
 			}
 		}
 		
-	}
-
-	public List<Position> getPoints() {
-		return points;
 	}
 	
 	@Override
@@ -107,7 +75,8 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	
 	@Override
 	public RenderStage getRenderStage() {
-		return RenderStage.SPACEOBJECTS;
+		//return RenderStage.SPACEOBJECTS;
+		return super.getRenderStage();
 	}
 
 	@Override
@@ -118,7 +87,6 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	public static void registerGameObj() {
 		GameObjParser parser = new GameObjParser() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(GameObject obj) {
 				Asteroid ast = (Asteroid) obj;
