@@ -11,6 +11,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -361,12 +362,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			
 		}
 		
-		/*try {
+		try {
 			controller.processPackets();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
 		if (activecontrol != null) {
 			KeyPressPacket p = new KeyPressPacket(activecontrol);

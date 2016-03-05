@@ -28,6 +28,7 @@ public class WorldNetController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
 	private HashMap<String, GameObject> objids = new HashMap<>();
 	private List<AbstractPacket> packetQueue = new ArrayList<>();
+	private ByteBuffer receiveBuffer;
 	private int objectcount;
 	
 	public WorldNetController(String host, int port) {
@@ -134,7 +135,19 @@ public class WorldNetController implements WorldProvider {
 		//System.out.println("Process packets called");
 		List<AbstractPacket> packets = new ArrayList<>();
 		long start = System.currentTimeMillis();
-		ByteBuffer buff = ByteBuffer.allocate( Constants.packetsize ); // 65536
+		//if (receiveBuffer == null) {
+		//	receiveBuffer = ByteBuffer.allocate(Constants.packetsize);
+		//}
+		
+		ByteBuffer buff;
+		
+		if (receiveBuffer == null) {
+			buff = ByteBuffer.allocate( Constants.packetsize ); // 65536
+			receiveBuffer = buff;
+		} else {
+			buff = receiveBuffer;
+		}
+		
 		while (buff.hasRemaining()) {
 			channel.read(buff);
 		}
@@ -243,13 +256,23 @@ public class WorldNetController implements WorldProvider {
 			
 			if (pack instanceof DeleteObjectPacket) {
 				DeleteObjectPacket dop = (DeleteObjectPacket) pack;
-				getGameObject(dop.getUuid()).delete();
+				if (getGameObject(dop.getUuid()) != null) {
+					getGameObject(dop.getUuid()).delete();
+				}
+				
 			}
 			
 			//System.out.println("Not parsed :(");
 			//System.out.println("Serialised data: " + PacketProcessor.toJSON(pack));
 		}
 		
+		//if (channel.)
+		//
+		receiveBuffer = ByteBuffer.allocate(Constants.packetsize);
+		channel.read(receiveBuffer);
+		if (receiveBuffer.position() > 0) {
+			processPackets();
+		}
 	}
 
 	public int getObjectcount() {

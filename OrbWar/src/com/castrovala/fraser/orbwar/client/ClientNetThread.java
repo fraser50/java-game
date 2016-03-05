@@ -14,11 +14,14 @@ public class ClientNetThread extends Thread {
 	
 	@Override
 	public void run() {
-		while (active) {
+		while (active && false) {
 			try {
 				controller.processPackets();
-				//Thread.sleep(1);
+				Thread.sleep(1);
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

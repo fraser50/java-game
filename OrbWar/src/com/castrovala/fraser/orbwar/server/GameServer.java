@@ -80,12 +80,12 @@ public class GameServer extends Thread {
 		
 		while (active) {
 			//System.out.println("Server tick");
-			/*try {
-				Thread.sleep(1);
+			try {
+				Thread.sleep(4);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}*/
+			}
 			
 			//System.out.println("Looking for new connections...");
 			try {
