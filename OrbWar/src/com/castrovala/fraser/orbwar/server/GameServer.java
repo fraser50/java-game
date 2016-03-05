@@ -100,6 +100,7 @@ public class GameServer extends Thread {
 					players.add(p);
 					synchronized (gamelogic.getController()) {
 						PlayerShip ship = new PlayerShip(new Position(200, 200), gamelogic.getController());
+						ship.setControl(p);
 						p.setControl(ship);
 						gamelogic.getController().addObject(ship);
 						System.out.println("Added Player Ship");

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.server.ControlUser;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
@@ -15,9 +16,16 @@ public class RespawnPoint extends GameObject {
 	private int timealive;
 	private float speed = 2;
 	private List<RespawnLaser> lasers = new ArrayList<>();
+	private ControlUser user;
 
-	public RespawnPoint(Position pos, WorldProvider controller) {
+	public RespawnPoint(Position pos, WorldProvider controller, ControlUser user) {
 		super(pos, controller);
+		this.user = user;
+	}
+	
+	@Deprecated
+	public RespawnPoint(Position pos, WorldProvider controller) {
+		this(pos, controller, null);
 	}
 	
 	@Override
@@ -53,6 +61,14 @@ public class RespawnPoint extends GameObject {
 			Position pos = getPosition().copy();
 			pos.subtract(new Position(32, 32));
 			PlayerShip ship = new PlayerShip(pos, getController());
+			
+			if (user != null) {
+				user.setControl(ship);
+				ship.setControl(user);
+			} else {
+				System.out.println("ControlUser is NULL!");
+			}
+			
 			getController().addObject(ship);
 			//getController().setShip(ship);
 		}
@@ -109,6 +125,14 @@ public class RespawnPoint extends GameObject {
 	@Override
 	public String getType() {
 		return "rpoint";
+	}
+
+	public ControlUser getUser() {
+		return user;
+	}
+
+	public void setUser(ControlUser user) {
+		this.user = user;
 	}
 
 }

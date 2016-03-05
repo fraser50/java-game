@@ -37,6 +37,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	private double speed;
 	private double maxspeed = 6d; // 6d
 	private boolean handbrake;
+	private ControlUser user;
 	
 	public PlayerShip(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -190,11 +191,13 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
 		g2d.rotate(Math.toRadians( ((double)this.getRotation() * -1)), centre_x, centre_y);
 		
+		g2d.setColor(Color.GREEN);
+		int green = (int) (getHealth() * 64) / getMaxhealth();
+		g2d.fillRect(rel_x, rel_y - 10, green, 5);
+		
 		g2d.setColor(Color.RED);
-		int rel_x_middle = rel_x + (this.getWidth() / 2);
-		int rel_y_middle = rel_y + (this.getHeight() / 2);
-		g2d.drawLine(rel_x_middle, rel_y_middle, rel_x_middle + 20, rel_y_middle + 20);
-		rd.onRender(2);
+		g2d.fillRect(rel_x + green, rel_y - 10, 64 - green, 5);
+		rd.onRender(4);
 	}
 	
 	public static void loadResources() {
@@ -243,7 +246,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	public void death() {
 		Position pos = getPosition().copy();
 		pos.add(new Position(getWidth() / 2, getHeight() / 2));
-		RespawnPoint point = new RespawnPoint(pos, getController());
+		RespawnPoint point = new RespawnPoint(pos, getController(), getControl());
 		getController().addObject(point);
 	}
 
@@ -290,12 +293,12 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	
 	@Override
 	public ControlUser getControl() {
-		return null;
+		return user;
 	};
 
 	@Override
 	public void setControl(ControlUser user) {
-		// TODO Auto-generated method stub
+		this.user = user;
 		
 	}
 
