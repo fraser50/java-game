@@ -78,6 +78,21 @@ public class WorldController implements WorldProvider {
 		for (WorldZone zone : getZones().toArray(new WorldZone[getZones().size()])) {
 			for (GameObject obj : (zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()]))) {
 				
+				if (scanners.containsKey(obj)) {
+					for (GameObject detected : obj.getNearby().toArray(new GameObject[obj.getNearby().size()])) {
+						
+						if (detected.isDeleted() || detected.isCleaned()) {
+							obj.getNearby().remove(detected);
+						}
+						
+						float scanrange = scanners.get(obj);
+						float distance = (float) Util.distance(obj.getPosition(), detected.getPosition());
+						if (distance > scanrange) {
+							obj.getNearby().remove(detected);
+						}
+						
+					} 
+				}
 				for (GameObject scan : getScanners().keySet()) {
 					if (scan == obj) {
 						continue;

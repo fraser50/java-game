@@ -1,11 +1,9 @@
 package com.castrovala.fraser.orbwar.server;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
-import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
-import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Position;
@@ -20,11 +18,12 @@ public class GameThread extends Thread {
 	
 	public GameThread(GameServer server) {
 		this.setServer(server);
+		controller = new WorldController();
 	}
 	
 	@Override
 	public void run() {
-		controller = new WorldController();
+		
 		while (active) {
 			synchronized (controller) {
 				controller.updateGame();
@@ -135,7 +134,10 @@ public class GameThread extends Thread {
 	}
 	
 	public synchronized WorldController getController() {
-		return controller;
+		synchronized (controller) {
+			return controller;
+		}
+		
 	}
 	
 	public synchronized void stopLogic() {

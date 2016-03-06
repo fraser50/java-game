@@ -192,11 +192,11 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		g2d.rotate(Math.toRadians( ((double)this.getRotation() * -1)), centre_x, centre_y);
 		
 		g2d.setColor(Color.GREEN);
-		int green = (int) (getHealth() * 64) / getMaxhealth();
+		int green = (int) (getHealth() * getWidth()) / getMaxhealth();
 		g2d.fillRect(rel_x, rel_y - 10, green, 5);
 		
 		g2d.setColor(Color.RED);
-		g2d.fillRect(rel_x + green, rel_y - 10, 64 - green, 5);
+		g2d.fillRect(rel_x + green, rel_y - 10, getWidth() - green, 5);
 		rd.onRender(4);
 	}
 	

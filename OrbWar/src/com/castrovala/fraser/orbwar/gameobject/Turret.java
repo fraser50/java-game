@@ -1,11 +1,16 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.castrovala.fraser.orbwar.editor.Editor;
+import com.castrovala.fraser.orbwar.editor.EditorManager;
+import com.castrovala.fraser.orbwar.save.GameObjParser;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
@@ -14,6 +19,8 @@ import com.castrovala.fraser.orbwar.util.WorldProvider;
 import com.castrovala.fraser.orbwar.weapons.BulletGun;
 import com.castrovala.fraser.orbwar.weapons.Weapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
+
+import net.minidev.json.JSONObject;
 
 public class Turret extends GameObject implements WeaponOwner, CollisionHandler {
 	private static BufferedImage renderimage;
@@ -53,13 +60,19 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 			primary.update(this);
 		}
 		
+		if (target != null) {
+			if (target.isDeleted() || target.isCleaned()) {
+				target = null;
+			} 
+		}
 		
 		if (target == null) {
-			for (GameObject obj : getNearbyObjects(300)) {
-				if (obj instanceof PlayerShip) {
+			for (GameObject obj : getNearbyObjects(3000)) {
+				if (obj instanceof Asteroid) {
 					target = obj;
 					break;
 				}
+				
 			}
 			
 			if (target == null) {
@@ -87,15 +100,13 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 		g2d.rotate(Math.toRadians( ((double)this.getRotation() * -1)), centre_x, centre_y);
 		rd.onRender();
 		
-		/*g2d.setColor(Color.GREEN);
-		for (GameObject o : getNearbyObjects(300)) {
-			if (o != this) {
-				int rel_x_o = (int)(o.getPosition().getX() - rd.getRenderloc().getX());
-				int rel_y_o = (int)(o.getPosition().getY() - rd.getRenderloc().getY());
-				g2d.drawLine(rel_x, rel_y, rel_x_o, rel_y_o);
-				rd.onRender();
-			}
-		}*/
+		g2d.setColor(Color.GREEN);
+		int green = (int) (getHealth() * getWidth()) / getMaxhealth();
+		g2d.fillRect(rel_x, rel_y - 10, green, 5);
+		
+		g2d.setColor(Color.RED);
+		g2d.fillRect(rel_x + green, rel_y - 10, getWidth() - green, 5);
+		rd.onRender(4);
 	}
 	
 	public static void loadResources() {
@@ -119,6 +130,49 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	@Override
 	public String getType() {
 		return "turret";
+	}
+	
+	public static void registerGameObj() {
+		GameObjParser parser = new GameObjParser() {
+			
+			@Override
+			public JSONObject toJSON(GameObject obj) {
+				Turret turret = (Turret) obj;
+				JSONObject jobj = new JSONObject();
+				jobj.put("type", "turret");
+				jobj.put("x", turret.getPosition().getX());
+				
+				jobj.put("y", turret.getPosition().getY());
+				return jobj;
+			}
+			
+			@Override
+			public GameObject fromJSON(JSONObject obj) {
+				double x = (double) obj.get("x");
+				double y = (double) obj.get("y");
+				Turret turret = new Turret(new Position(x, y), null);
+				return turret;
+			}
+		};
+		
+		GameObjectProcessor.addParser("turret", parser);
+	}
+	
+	public static void registerEditor() {
+		Editor e = new Editor("Turret") {
+			
+			@Override
+			public GameObject spawn(WorldProvider controller) {
+				return new Turret(new Position(0, 0), controller);
+			}
+		};
+		
+		EditorManager.addEditor(e);
+	}
+	
+	@Override
+	public boolean shouldRotate() {
+		return true;
 	}
 
 }

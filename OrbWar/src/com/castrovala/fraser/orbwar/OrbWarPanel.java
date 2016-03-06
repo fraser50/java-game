@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -11,17 +12,18 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.castrovala.fraser.orbwar.client.ClientNetThread;
+import com.castrovala.fraser.orbwar.editor.Editor;
+import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
@@ -39,10 +41,12 @@ import com.castrovala.fraser.orbwar.gui.GuiElement;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
+import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.server.MPGameInfo;
 import com.castrovala.fraser.orbwar.server.ServerState;
@@ -69,7 +73,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private volatile WorldNetController controller;
 	private volatile Position mylocation = new Position(0, 0);
 	public Controllable myship;
-	public static final boolean quickstars = true;
 	public static final boolean debug = true;
 	private List<Position> starpoints = new ArrayList<>();
 	private boolean init_game = false;
@@ -79,14 +82,16 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private GameState state = GameState.MENU;
 	private GuiScreen activegui;
 	private GameServer internalserver;
-	private ClientNetThread internalprocessorthread;
 	private String activecontrol = null;
 	private List<MPGameInfo> activeGames = new ArrayList<>();
+	private GameObject editorObj;
+	private Position mousePos = null;
+	private boolean clicked = false;
 	
 	public OrbWarPanel() {
 		
 		for (int i = 1; i<3;i++) {
-			MPGameInfo info = new MPGameInfo("Test", "127.0.0.1", 5555);
+			MPGameInfo info = new MPGameInfo("Test" + i, "127.0.0.1", 5555);
 			activeGames.add(info);
 		}
 		
@@ -105,6 +110,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		SmokeParticle.loadResources();
 		ShieldDrone.loadResources();
 		
+		Asteroid.registerEditor();
+		Turret.registerEditor();
+		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
 		}
@@ -119,13 +127,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
 					System.out.println("Terminating game");
-					internalprocessorthread.finish();
-					try {
-						internalprocessorthread.join();
-					} catch (InterruptedException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
 					controller = null;
 					state = GameState.MENU;
 					System.out.println("Trying to stop internal server");
@@ -141,10 +142,14 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					activegui = getMainMenu();
 				}
 				
+				if (state == GameState.MENU) {
+					return;
+				}
 				
 				if (myship == null) {
 					//return;
 				}
+				
 				if (keyCode == KeyEvent.VK_LEFT) {
 					activecontrol = "left";
 					//myship.left();
@@ -179,6 +184,32 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						}
 					}
 				}
+				if (keyCode == KeyEvent.VK_M) {
+					editorObj = null;
+					activecontrol = "menu";
+				}
+				
+				if (keyCode == KeyEvent.VK_NUMPAD4 && editorObj != null) {
+					editorObj.setRotation(editorObj.getRotation() - 10);
+					if (editorObj.getRotation() < 0) {
+						editorObj.setRotation(360);
+					}
+					
+					if (editorObj.getRotation() > 360) {
+						editorObj.setRotation(0);
+					}
+				}
+				
+				if (keyCode == KeyEvent.VK_NUMPAD6 && editorObj != null) {
+					editorObj.setRotation(editorObj.getRotation() + 10);
+					if (editorObj.getRotation() < 0) {
+						editorObj.setRotation(360);
+					}
+					
+					if (editorObj.getRotation() > 360) {
+						editorObj.setRotation(0);
+					}
+				}
 					
 						
 			}
@@ -194,7 +225,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
+				if (state == GameState.PLAYING && editorObj != null) {
+					clicked = true;
+				}
 				
 			}
 			
@@ -229,6 +262,25 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		});
 		
+		addMouseMotionListener(new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				if (mousePos == null) {
+					mousePos = new Position(e.getX(), e.getY());
+				} else {
+					mousePos.setX(e.getX());
+					mousePos.setY(e.getY());
+				}
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				
+			}
+		});
+		
 		// Create menu GUI
 		activegui = getMainMenu();
 	}
@@ -241,12 +293,14 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		HealthUpdatePacket.registerPacket();
 		KeyPressPacket.registerPacket();
 		DeleteObjectPacket.registerPacket();
+		EditorTransmitPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
 		Bullet.registerGameObj();
 		RespawnPoint.registerGameObj();
 		RespawnLaser.registerGameObj();
+		Turret.registerGameObj();
 		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
@@ -368,6 +422,16 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				return;
 			}
 			
+			if (editorObj != null && clicked) {
+				EditorTransmitPacket etp = new EditorTransmitPacket(GameObjectProcessor.toJSON(editorObj));
+				controller.sendPacket(etp);
+				clicked = false;
+			}
+			
+			if (editorObj != null) {
+				editorObj.setPosition(mousePos.copy().subtract(new Position(editorObj.getWidth() / 2, editorObj.getHeight() / 2)));
+			}
+			
 		}
 		
 		try {
@@ -377,11 +441,17 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			e.printStackTrace();
 		}
 		
+		
 		if (activecontrol != null) {
-			KeyPressPacket p = new KeyPressPacket(activecontrol);
-			//System.out.println("Key type: " + p.getKey());
-			activecontrol = null;
-			controller.sendPacket(p);
+			if (activecontrol.equals("menu")) {
+				activegui = getEditorScreen();
+				activecontrol = null;
+			} else {
+				KeyPressPacket p = new KeyPressPacket(activecontrol);
+				activecontrol = null;
+				controller.sendPacket(p);
+			}
+			
 		}
 		
 		controller.updateGame();
@@ -439,16 +509,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					newposx = OrbWarPanel.PWIDTH - newposx;
 				}
 				
-				if (newposx < 0) {
-					//int xdiv = newposx / OrbWarPanel.PWIDTH;
-					//newposx = (int) (newposx - (OrbWarPanel.PWIDTH / xdiv));
-					//int xdiv = -(newposx / OrbWarPanel.PWIDTH);
-					//newposx = (int) (newposx - (OrbWarPanel.PWIDTH / xdiv));
-					
-					//int xdiv = -(newposx / OrbWarPanel.PWIDTH);
-					//newposx = (int) (newposx - (OrbWarPanel.PWIDTH / xdiv));
-				}
-				
 				if (offsety > OrbWarPanel.PHEIGHT) {
 					offsety /= OrbWarPanel.PHEIGHT;
 				}
@@ -457,7 +517,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			rendereditems++;
 		}
 		
-		if (activegui != null) {
+		if (activegui != null && state == GameState.MENU) {
 			for (GuiElement e : activegui.getElements()) {
 				e.render(g2d);
 			}
@@ -511,6 +571,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 			}
 		}
+		
 		if (debug) {
 			//This is for debugging purposes
 			for (WorldZone zone : chosenzones) {
@@ -597,6 +658,26 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			} else {
 				g2d.setColor(Color.RED);
 				g2d.drawString("OFF", 115, 201);
+			}
+		}
+		
+		if (editorObj != null) {
+			int rel_x = (int)(editorObj.getPosition().getX() - mylocation.getX());
+			int rel_y = (int)(editorObj.getPosition().getY() - mylocation.getY());
+			
+			int centre_x = rel_x + (editorObj.getWidth() / 2);
+			int centre_y = rel_y + (editorObj.getHeight() / 2);
+			
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+			
+			editorObj.render(g2d, rel_x, rel_y, centre_x, centre_y, rd);
+			
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+		}
+		
+		if (activegui != null) {
+			for (GuiElement e : activegui.getElements()) {
+				e.render(g2d);
 			}
 		}
 		
@@ -693,7 +774,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		int current = 0;
 		GuiScreen screen = new GuiScreen();
 		for (MPGameInfo info : activeGames) {
-			screen.addElement(new GuiButton(new Position(4, 2 + (current * 24)), new Position(OrbWarPanel.PWIDTH - 2, 20 + (current * 24)), "Test", new Runnable() {
+			screen.addElement(new GuiButton(new Position(4, 2 + (current * 24)), new Position(OrbWarPanel.PWIDTH - 2, 20 + (current * 24)), info.getName(), new Runnable() {
 				
 				@Override
 				public void run() {
@@ -716,11 +797,38 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		return screen;
 	}
 	
+	public GuiScreen getEditorScreen() {
+		int current = 0;
+		GuiScreen screen = new GuiScreen();
+		for (final Editor e : EditorManager.getEditors()) {
+			screen.addElement(new GuiButton(new Position(4, 2 + (current * 24)), new Position(OrbWarPanel.PWIDTH - 2, 20 + (current * 24)), e.getName(), new Runnable() {
+				
+				@Override
+				public void run() {
+					editorObj = e.spawn(controller);
+					activegui = null;
+					clicked = false;
+					
+				}
+			}, Color.LIGHT_GRAY).setText(Color.BLACK));
+			current++;
+		}
+		
+		screen.addElement(new GuiButton(new Position(4, PHEIGHT - 100), new Position(PWIDTH - 2, PHEIGHT - 30), "Back", new Runnable() {
+			
+			@Override
+			public void run() {
+				activegui = null;
+				
+			}
+		}, Color.DARK_GRAY));
+		
+		return screen;
+	}
+	
 	public void joinServer(String host, int port) {
 		WorldNetController c = new WorldNetController(host, port);
 		controller = c;
-		internalprocessorthread = new ClientNetThread(controller);
-		internalprocessorthread.start();
 	}
 
 }

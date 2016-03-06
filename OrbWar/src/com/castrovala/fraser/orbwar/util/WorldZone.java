@@ -45,8 +45,8 @@ public class WorldZone {
 				long chosen_x = Util.randomRange((long)startpos.x, (long)endpos.x);
 				long chosen_y = Util.randomRange((long)startpos.y, (long)endpos.y);
 				Position pos = new Position(chosen_x, chosen_y);
-				Asteroid aster = new Asteroid(pos, controller);
-				controller.addObject(aster);
+				//Asteroid aster = new Asteroid(pos, controller);
+				//controller.addObject(aster);
 			}
 			
 		}

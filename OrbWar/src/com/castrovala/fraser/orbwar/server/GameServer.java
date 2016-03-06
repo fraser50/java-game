@@ -7,6 +7,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -16,8 +17,10 @@ import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Position;
 
 public class GameServer extends Thread {
@@ -188,13 +191,9 @@ public class GameServer extends Thread {
 							long end = System.currentTimeMillis();
 							long delay = end - start;
 							if (delay >= 10) {
-								//System.out.println("Constructed data packet in " + delay + "ms");
-								//System.out.println(new String(buf.array()));
 							}
 
 							channel.write(buf);
-							//System.out.println("Wrote data to socket");
-							//System.out.println("Server msg: " + new String(buf.array()));
 							count++;
 							p.getPacketQueue().remove(pa);
 							if (count >= 600000000) {
@@ -202,34 +201,7 @@ public class GameServer extends Thread {
 							}
 
 						}
-						//System.out.println("Clearing queue");
-						//p.getPacketQueue().clear();
-						//System.out.println("Finished clearing queue");
-						
 					}
-					//System.out.println("Exited sync statement");
-					
-					
-					/*ByteBuffer buff = ByteBuffer.allocate(65536);
-					if (p.getConn().read(buff) < 1) {
-						continue;
-					}
-					
-					List<AbstractPacket> packets = new ArrayList<>();
-					String value = buff.toString();
-					while (value != "") {
-						String length_str = value.substring(0, 4);
-						byte[] length_bytes = length_str.getBytes();
-						int length = ByteBuffer.wrap(length_bytes).getInt();
-						String json_str = value.substring(4, 4 + length);
-						JSONParser parser = new JSONParser();
-						JSONObject jobj = (JSONObject) parser.parse(json_str);
-						AbstractPacket packet = PacketProcessor.fromJSON(jobj);
-						packets.add(packet);
-						value = value.substring(0, 4 + length);
-					}
-					
-					*///System.out.println("Server packet list length: " + packets.size());
 					
 					List<AbstractPacket> packets = new ArrayList<>();
 					long start = System.currentTimeMillis();
@@ -244,19 +216,13 @@ public class GameServer extends Thread {
 					
 					if (buff.hasRemaining()) {
 						channel.read(buff);
-						//System.out.println("Read some data, going onto next entry");
 						continue;
 					}
-					
-					//buff = ByteBuffer.allocate( Constants.packetsize );
-					//p.setReceived(buff);
-					
-					//System.out.println("Server found data");
 					
 					String value = new String(buff.array());
 					//System.out.println("value: " + value);
 					while (value.trim() != "") {
-						System.out.println("Server parsing: " + value.length());
+						//System.out.println("Server parsing: " + value.length());
 						//System.out.println("Value: " + value);
 						//if (value.length() <= 4) {
 						//	break;
@@ -321,22 +287,33 @@ public class GameServer extends Thread {
 								GameObject ship = (GameObject) p.getControl();
 								synchronized (ship) {
 									switch (kpp.getKey()) {
-									case "up":
-										p.getControl().fly();
-										break;
-									case "fire":
-										p.getControl().fire();
-										break;
-									case "left":
-										p.getControl().left();
-										break;
-									case "right":
-										p.getControl().right();
-										break;
-									default:
-										// Something went wrong
+										case "up":
+											p.getControl().fly();
+											break;
+										case "fire":
+											p.getControl().fire();
+											break;
+										case "left":
+											p.getControl().left();
+											break;
+										case "right":
+											p.getControl().right();
+											break;
+										default:
+											// Something went wrong
 									}
 								}
+							}
+							
+						}
+						
+						if (pa instanceof EditorTransmitPacket) {
+							EditorTransmitPacket etp = (EditorTransmitPacket) pa;
+							GameObject obj = GameObjectProcessor.fromJSON(etp.getObj());
+							synchronized (gamelogic.getController()) {
+								obj.setController(gamelogic.getController());
+								obj.setUuid(UUID.randomUUID().toString());
+								gamelogic.getController().addObject(obj);
 							}
 						}
 					}
@@ -359,6 +336,7 @@ public class GameServer extends Thread {
 			
 			
 		}
+			
 		try {
 			serversock.close();
 			System.out.println("Closed server socket");

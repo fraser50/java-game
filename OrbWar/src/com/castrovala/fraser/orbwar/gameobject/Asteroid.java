@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.castrovala.fraser.orbwar.editor.Editor;
+import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -108,6 +110,18 @@ public class Asteroid extends GameObject implements CollisionHandler {
 		};
 		
 		GameObjectProcessor.addParser("asteroid", parser);
+	}
+	
+	public static void registerEditor() {
+		Editor e = new Editor("Asteroid") {
+			
+			@Override
+			public GameObject spawn(WorldProvider controller) {
+				return new Asteroid(new Position(0, 0), controller);
+			}
+		};
+		
+		EditorManager.addEditor(e);
 	}
 
 }
