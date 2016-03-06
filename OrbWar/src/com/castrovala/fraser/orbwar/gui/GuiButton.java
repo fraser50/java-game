@@ -8,13 +8,20 @@ import com.castrovala.fraser.orbwar.util.Position;
 public class GuiButton extends GuiElement implements GuiClickable {
 	private String label;
 	private Runnable run;
+	private Color fill;
+	private Color text = Color.WHITE;
 
-	public GuiButton(Position start, Position end, String label, Runnable run) {
+	public GuiButton(Position start, Position end, String label, Runnable run, Color fill) {
 		super(start, end);
 		this.label = label;
 		this.run = run;
+		this.fill = fill;
 		
 		
+	}
+	
+	public GuiButton(Position start, Position end, String label, Runnable run) {
+		this(start, end, label, run, null);
 	}
 	
 	@Override
@@ -25,11 +32,16 @@ public class GuiButton extends GuiElement implements GuiClickable {
 		int endx = (int) getEnd().getX();
 		int endy = (int) getEnd().getY();
 		
+		if (fill != null) {
+			g.setColor(fill);
+			g.fillRect(startx, starty, endx - startx, endy - starty);
+		}
 		g.setColor(Color.WHITE);
 		g.drawRect(startx, starty, endx - startx, endy - starty);
 		int offsetx = (int) ((endx - startx) * 0.5);
-		int offsety = (int) ((endy - starty) * 0.5);
+		int offsety = (int) ((endy - starty) * 0.5 + 5);
 		
+		g.setColor(text);
 		g.drawString(label, startx + offsetx, starty + offsety);
 		
 	}
@@ -56,6 +68,15 @@ public class GuiButton extends GuiElement implements GuiClickable {
 			run.run();
 		}
 		
+	}
+
+	public Color getText() {
+		return text;
+	}
+
+	public GuiButton setText(Color text) {
+		this.text = text;
+		return this;
 	}
 
 }

@@ -44,6 +44,7 @@ import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.server.GameServer;
+import com.castrovala.fraser.orbwar.server.MPGameInfo;
 import com.castrovala.fraser.orbwar.server.ServerState;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
@@ -80,8 +81,15 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private GameServer internalserver;
 	private ClientNetThread internalprocessorthread;
 	private String activecontrol = null;
+	private List<MPGameInfo> activeGames = new ArrayList<>();
 	
 	public OrbWarPanel() {
+		
+		for (int i = 1; i<3;i++) {
+			MPGameInfo info = new MPGameInfo("Test", "127.0.0.1", 5555);
+			activeGames.add(info);
+		}
+		
 		setBackground(Color.WHITE);
 		setPreferredSize(new Dimension(PWIDTH, PHEIGHT));
 		setFocusable(true);
@@ -658,13 +666,14 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				init_game = true;
 				
 			}
-		}));
+		}, Color.CYAN).setText(Color.BLACK));
 		
 		menuscreen.addElement(new GuiButton(new Position(1, 60), new Position(OrbWarPanel.PWIDTH - 1, 110), "M U L T I P L A Y E R", new Runnable() {
 			
 			@Override
 			public void run() {
-				Scanner scan = new Scanner(System.in);
+				activegui = getMultiplayerScreen();
+				/*Scanner scan = new Scanner(System.in);
 				System.out.println("Host");
 				String host = scan.nextLine();
 				System.out.println("Port");
@@ -672,12 +681,39 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				scan.close();
 				joinServer(host, port);
 				activegui = null;
-				state = GameState.PLAYING;
+				state = GameState.PLAYING;*/
 				
 			}
-		}));
+		}, Color.LIGHT_GRAY).setText(Color.BLACK));
 		
 		return menuscreen;
+	}
+	
+	public GuiScreen getMultiplayerScreen() {
+		int current = 0;
+		GuiScreen screen = new GuiScreen();
+		for (MPGameInfo info : activeGames) {
+			screen.addElement(new GuiButton(new Position(4, 2 + (current * 24)), new Position(OrbWarPanel.PWIDTH - 2, 20 + (current * 24)), "Test", new Runnable() {
+				
+				@Override
+				public void run() {
+					System.out.println("Test");
+					
+				}
+			}, Color.LIGHT_GRAY).setText(Color.BLACK));
+			current++;
+		}
+		
+		screen.addElement(new GuiButton(new Position(4, PHEIGHT - 100), new Position(PWIDTH - 2, PHEIGHT - 30), "Back", new Runnable() {
+			
+			@Override
+			public void run() {
+				activegui = getMainMenu();
+				
+			}
+		}, Color.DARK_GRAY));
+		
+		return screen;
 	}
 	
 	public void joinServer(String host, int port) {
