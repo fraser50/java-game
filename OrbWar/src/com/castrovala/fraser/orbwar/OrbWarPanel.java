@@ -26,6 +26,7 @@ import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
+import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
@@ -85,8 +86,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private String activecontrol = null;
 	private List<MPGameInfo> activeGames = new ArrayList<>();
 	private GameObject editorObj;
-	private Position mousePos = null;
-	private boolean clicked = false;
+	private volatile Position mousePos = null;
+	private volatile boolean clicked = false;
 	
 	public OrbWarPanel() {
 		
@@ -301,6 +302,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		RespawnPoint.registerGameObj();
 		RespawnLaser.registerGameObj();
 		Turret.registerGameObj();
+		Explosion.registerGameObj();
 		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();

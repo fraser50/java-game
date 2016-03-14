@@ -39,7 +39,7 @@ public class WorldController implements WorldProvider {
 	}
 	
 	@Override
-	public void addObject(GameObject o) {
+	public synchronized void addObject(GameObject o) {
 		getNewObjects().add(o);
 		getZone(Util.toZoneCoords(o.getPosition())).getGameobjects().add(o);
 		objectuuid.put(o.getUuid(), o);
@@ -107,6 +107,7 @@ public class WorldController implements WorldProvider {
 					getDeadObjects().add(obj);
 					zone.getGameobjects().remove(obj);
 					objectuuid.remove(obj.getUuid());
+					getScanners().remove(obj);
 					continue;
 				}
 				

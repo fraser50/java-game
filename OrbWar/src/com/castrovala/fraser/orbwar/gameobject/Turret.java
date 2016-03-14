@@ -28,11 +28,11 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	private Weapon primary;
 	
 	public Turret(Position pos, WorldProvider controller) {
-		super(pos, controller, 100); // 100
+		super(pos, controller, 10); // 100
 		setWidth(64);
 		setHeight(64);
-		setHealth(100); // 100
-		setMaxhealth(100);
+		//setHealth(100); // 100
+		//setMaxhealth(100);
 		primary = new BulletGun();
 	}
 
@@ -56,6 +56,10 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	@Override
 	public void update() {
 		super.update();
+		if (isDeleted()) {
+			return;
+		}
+		
 		if (primary != null) {
 			primary.update(this);
 		}
@@ -173,6 +177,12 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	@Override
 	public boolean shouldRotate() {
 		return true;
+	}
+	
+	@Override
+	public void death() {;
+		Explosion ex = new Explosion(getPosition().copy(), getController());
+		getController().addObject(ex);
 	}
 
 }

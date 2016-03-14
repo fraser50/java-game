@@ -279,9 +279,14 @@ public class GameServer extends Thread {
 					long end = System.currentTimeMillis();
 					long delay = end - start;
 					
+					boolean gotcontrol = false;
 					for (AbstractPacket pa : packets) {
 						//System.out.println("Server found packet: " + pa.getClass().getName());
 						if (pa instanceof KeyPressPacket) {
+							if (gotcontrol) {
+								continue;
+							}
+							
 							KeyPressPacket kpp = (KeyPressPacket) pa;
 							if (p.getControl() != null) {
 								GameObject ship = (GameObject) p.getControl();
@@ -304,17 +309,20 @@ public class GameServer extends Thread {
 									}
 								}
 							}
+							gotcontrol = true;
 							
 						}
 						
 						if (pa instanceof EditorTransmitPacket) {
 							EditorTransmitPacket etp = (EditorTransmitPacket) pa;
 							GameObject obj = GameObjectProcessor.fromJSON(etp.getObj());
+							
 							synchronized (gamelogic.getController()) {
 								obj.setController(gamelogic.getController());
 								obj.setUuid(UUID.randomUUID().toString());
 								gamelogic.getController().addObject(obj);
 							}
+							
 						}
 					}
 					

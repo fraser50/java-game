@@ -133,7 +133,7 @@ public class GameThread extends Thread {
 		this.server = server;
 	}
 	
-	public synchronized WorldController getController() {
+	public WorldController getController() {
 		synchronized (controller) {
 			return controller;
 		}

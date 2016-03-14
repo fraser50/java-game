@@ -148,8 +148,12 @@ public class WorldNetController implements WorldProvider {
 			buff = receiveBuffer;
 		}
 		
+		//int currpos = buff.position();
 		while (buff.hasRemaining()) {
 			channel.read(buff);
+			//if (buff.position() == currpos) {
+			//	return;
+			//}
 		}
 		
 		String value = new String(buff.array());

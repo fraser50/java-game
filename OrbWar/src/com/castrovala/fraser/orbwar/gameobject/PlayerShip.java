@@ -248,6 +248,9 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		pos.add(new Position(getWidth() / 2, getHeight() / 2));
 		RespawnPoint point = new RespawnPoint(pos, getController(), getControl());
 		getController().addObject(point);
+		
+		Explosion ex = new Explosion(pos.copy(), getController());
+		getController().addObject(ex);
 	}
 
 	public double getMaxspeed() {
