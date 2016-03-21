@@ -15,12 +15,14 @@ import net.minidev.json.parser.ParseException;
 import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 
 public class WorldNetController implements WorldProvider {
@@ -30,8 +32,9 @@ public class WorldNetController implements WorldProvider {
 	private List<AbstractPacket> packetQueue = new ArrayList<>();
 	private ByteBuffer receiveBuffer;
 	private int objectcount;
+	private Position pos;
 	
-	public WorldNetController(String host, int port) {
+	public WorldNetController(String host, int port, Position pos) {
 		//super();
 		
 		try {
@@ -52,10 +55,12 @@ public class WorldNetController implements WorldProvider {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		this.pos = pos;
 	}
 	
-	public WorldNetController() {
-		this("127.0.0.1", 5555);
+	public WorldNetController(Position pos) {
+		this("127.0.0.1", 5555, pos);
 	}
 
 	@Override
@@ -109,8 +114,15 @@ public class WorldNetController implements WorldProvider {
 
 	@Override
 	public void updateGame() {
-		for (WorldZone zone : zones) {
+		for (WorldZone zone : zones.toArray(new WorldZone[zones.size()])) {
 			for (GameObject obj : zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()])) {
+				
+				WorldZone ozone = getZone(Util.toZoneCoords(obj.getPosition()));
+				
+				if (ozone != zone) {
+					zone.getGameobjects().remove(obj);
+					ozone.getGameobjects().add(obj);
+				}
 				
 				if (obj.isDeleted() || obj.isCleaned()) {
 					zone.getGameobjects().remove(obj);
@@ -131,7 +143,7 @@ public class WorldNetController implements WorldProvider {
 		return objids.get(uuid);
 	}
 	
-	public void processPackets() throws IOException {
+	public void processPackets(int depth) throws IOException {
 		//System.out.println("Process packets called");
 		List<AbstractPacket> packets = new ArrayList<>();
 		long start = System.currentTimeMillis();
@@ -263,7 +275,14 @@ public class WorldNetController implements WorldProvider {
 				if (getGameObject(dop.getUuid()) != null) {
 					getGameObject(dop.getUuid()).delete();
 				}
+				System.out.println("Object deleted");
 				
+			}
+			
+			if (pack instanceof ScreenUpdatePacket) {
+				ScreenUpdatePacket sup = (ScreenUpdatePacket) pack;
+				pos.setX(sup.getPos().getX());
+				pos.setY(sup.getPos().getY());
 			}
 			
 			//System.out.println("Not parsed :(");
@@ -275,8 +294,12 @@ public class WorldNetController implements WorldProvider {
 		receiveBuffer = ByteBuffer.allocate(Constants.packetsize);
 		channel.read(receiveBuffer);
 		if (receiveBuffer.position() > 0) {
-			processPackets();
+			processPackets(depth++);
 		}
+	}
+	
+	public void processPackets() throws IOException {
+		processPackets(0);
 	}
 
 	public int getObjectcount() {

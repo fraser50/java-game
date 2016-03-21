@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -47,6 +48,7 @@ import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.server.MPGameInfo;
@@ -120,7 +122,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				System.out.println("Key Pressed");
 				
 				int keyCode = e.getKeyCode();
 				if (keyCode == KeyEvent.VK_ENTER && state == GameState.MENU) {
@@ -140,6 +141,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						e1.printStackTrace();
 					}
 					System.out.println("Internal Server died");
+					internalserver = null;
+					mylocation = new Position(0, 0);
 					activegui = getMainMenu();
 				}
 				
@@ -295,6 +298,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		KeyPressPacket.registerPacket();
 		DeleteObjectPacket.registerPacket();
 		EditorTransmitPacket.registerPacket();
+		ScreenUpdatePacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -431,7 +435,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 			
 			if (editorObj != null) {
-				editorObj.setPosition(mousePos.copy().subtract(new Position(editorObj.getWidth() / 2, editorObj.getHeight() / 2)));
+				editorObj.setPosition(mousePos.copy().subtract(new Position(editorObj.getWidth() / 2, editorObj.getHeight() / 2)).add(mylocation));
 			}
 			
 		}
@@ -493,26 +497,26 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			int newposx = (int) star.getX();
 			int newposy = (int) star.getY();
 			if (state == GameState.PLAYING) {
-				offsetx = (int) (mylocation.getX() / 4);
-				offsety = (int) (mylocation.getY() / 4);
+				offsetx = (int) ( -(mylocation.getX() / 4) );
+				offsety = (int) ( -(mylocation.getY() / 4) );
 				
 				newposx = (int) (star.getX() + offsetx);
 				newposy = (int) (star.getY() + offsety);
 				
-				if (newposx > OrbWarPanel.PWIDTH) {
-					int xdiv = newposx / OrbWarPanel.PWIDTH;
-					if (xdiv < 0) {
-						xdiv = -xdiv;
-					}
-					newposx = (int) (newposx - (OrbWarPanel.PWIDTH / xdiv));
-					newposx = OrbWarPanel.PWIDTH - newposx;
-					
-				} else {
-					newposx = OrbWarPanel.PWIDTH - newposx;
+				while (newposx < 0) {
+					newposx += PWIDTH;
 				}
 				
-				if (offsety > OrbWarPanel.PHEIGHT) {
-					offsety /= OrbWarPanel.PHEIGHT;
+				while (newposx > PWIDTH) {
+					newposx -= PWIDTH;
+				}
+				
+				while (newposy < 0) {
+					newposy += PHEIGHT;
+				}
+				
+				while (newposy > PHEIGHT) {
+					newposy -= PHEIGHT;
 				}
 			}
 			dbg.drawLine( newposx, newposy, newposx, newposy );
@@ -566,7 +570,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			for (GameObject obj : zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()])) {
 				int rel_x = (int)(obj.getPosition().getX() - mylocation.getX());
 				int rel_y = (int)(obj.getPosition().getY() - mylocation.getY());
-				if (rel_x >= 0 && rel_x <= PWIDTH && rel_y >= 0 && rel_y <= PHEIGHT) {
+				if ( (rel_x >= 0 && rel_x <= PWIDTH && rel_y >= 0 && rel_y <= PHEIGHT ) || (rel_x + obj.getWidth() >= 0 && rel_x + obj.getWidth() <= PWIDTH && rel_y + obj.getHeight() >= 0 && rel_y + obj.getHeight() <= PHEIGHT) || true  ) {
 					stages.get(obj.getRenderStage()).add(obj);
 							
 //					dbg.fillRect(rel_x, rel_y, 100, 100);
@@ -769,6 +773,23 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}, Color.LIGHT_GRAY).setText(Color.BLACK));
 		
+		menuscreen.addElement(new GuiButton(new Position(1, 120), new Position(OrbWarPanel.PWIDTH - 1, 170), "C O N N E C T", new Runnable() {
+			
+			@Override
+			public void run() {
+				Scanner scan = new Scanner(System.in);
+				System.out.println("Host");
+				String host = scan.nextLine();
+				System.out.println("Port");
+				int port = new Integer(scan.nextLine());
+				scan.close();
+				joinServer(host, port);
+				activegui = null;
+				state = GameState.PLAYING;
+				
+			}
+		}, Color.LIGHT_GRAY).setText(Color.BLACK));
+		
 		return menuscreen;
 	}
 	
@@ -829,7 +850,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public void joinServer(String host, int port) {
-		WorldNetController c = new WorldNetController(host, port);
+		WorldNetController c = new WorldNetController(host, port, mylocation);
 		controller = c;
 	}
 

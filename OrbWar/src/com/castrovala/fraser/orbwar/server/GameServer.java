@@ -338,6 +338,9 @@ public class GameServer extends Thread {
 						e1.printStackTrace();
 					}
 					players.remove(p);
+					if (p.getControl() != null) {
+						((GameObject)p.getControl()).delete();
+					}
 				}
 				
 			}

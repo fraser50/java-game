@@ -78,6 +78,13 @@ public class WorldController implements WorldProvider {
 		for (WorldZone zone : getZones().toArray(new WorldZone[getZones().size()])) {
 			for (GameObject obj : (zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()]))) {
 				
+				WorldZone ozone = getZone(Util.toZoneCoords(obj.getPosition()));
+				if (ozone != zone) {
+					zone.getGameobjects().remove(obj);
+					ozone.getGameobjects().add(obj);
+					continue;
+				}
+				
 				if (scanners.containsKey(obj)) {
 					for (GameObject detected : obj.getNearby().toArray(new GameObject[obj.getNearby().size()])) {
 						
@@ -121,9 +128,25 @@ public class WorldController implements WorldProvider {
 					obj.update();
 				}
 				
+				/*if (obj.getPosition().getX() > 2048 - 70) {
+					obj.getPosition().setX(2048 - 70);
+				}
+				
+				if (obj.getPosition().getY() > 2048 - 70) {
+					obj.getPosition().setY(2048 - 70);
+				}
+				
+				if (obj.getPosition().getX() < -256) {
+					obj.getPosition().setX(-256);
+				}
+				
+				if (obj.getPosition().getY() < -256) {
+					obj.getPosition().setY(-256);
+				}
+				
 				if (obj instanceof CollisionHandler) {
 					colliders.add( (CollisionHandler)obj);
-				}
+				}*/
 			}
 		}
 		

@@ -18,7 +18,7 @@ public class NetworkPlayer implements ControlUser {
 	private String name;
 	private Controllable ship;
 	private List<WorldZone> seenZones = new ArrayList<>();
-	public Position currentpos = new Position(0, 0);
+	private Position currentpos = new Position(0, 0);
 	private volatile ByteBuffer received;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
@@ -90,6 +90,14 @@ public class NetworkPlayer implements ControlUser {
 
 	public synchronized void setReceived(ByteBuffer received) {
 		this.received = received;
+	}
+
+	public Position getCurrentpos() {
+		return currentpos;
+	}
+
+	public void setCurrentpos(Position currentpos) {
+		this.currentpos = currentpos;
 	}
 
 }
