@@ -40,6 +40,8 @@ import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.GuiButton;
 import com.castrovala.fraser.orbwar.gui.GuiClickable;
 import com.castrovala.fraser.orbwar.gui.GuiElement;
+import com.castrovala.fraser.orbwar.gui.GuiFocusable;
+import com.castrovala.fraser.orbwar.gui.GuiInputField;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
@@ -88,8 +90,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private String activecontrol = null;
 	private List<MPGameInfo> activeGames = new ArrayList<>();
 	private GameObject editorObj;
-	private volatile Position mousePos = null;
+	private volatile Position mousePos = new Position(0, 0);
 	private volatile boolean clicked = false;
+	private char typedchar;
+	private GuiFocusable focused;
 	
 	public OrbWarPanel() {
 		
@@ -124,6 +128,26 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			public void keyPressed(KeyEvent e) {
 				
 				int keyCode = e.getKeyCode();
+				
+				if (activegui != null) {
+					for (GuiElement el : activegui.getElements()) {
+						if (!(el instanceof GuiFocusable)) {
+							continue;
+						}
+						
+						GuiFocusable focus = (GuiFocusable) el;
+						if (focus == focused) {
+							char key = e.getKeyChar();
+							if (Character.isDefined(key)) {
+								focus.onCharEnter(key);
+								focus.onKeyPress(e);
+							}
+							break;
+						}
+						
+					}
+				}
+				
 				if (keyCode == KeyEvent.VK_ENTER && state == GameState.MENU) {
 					init_game = true;
 				}
@@ -250,6 +274,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			@Override
 			public void mouseClicked(MouseEvent ev) {
 				if (activegui != null) {
+					boolean wipefocused = true;
 					for (GuiElement e : activegui.getElements()) {
 						if (e instanceof GuiClickable) {
 							GuiClickable c = (GuiClickable) e;
@@ -260,6 +285,37 @@ public class OrbWarPanel extends JPanel implements Runnable {
 								c.onClick();
 							}
 						}
+						
+						if (e instanceof GuiFocusable) {
+							
+							
+							GuiFocusable f = (GuiFocusable) e;
+							Rectangle mrect = new Rectangle(ev.getX(), ev.getY(), 1, 1);
+							Position lb = e.getEnd().copy().subtract(e.getStart());
+							Rectangle elemrect = new Rectangle((int)e.getStart().getX(), (int)e.getStart().getY(), (int)lb.getX(), (int)lb.getY());
+							
+							if (mrect.intersects(elemrect)) {
+								
+								if (focused == e) {
+									wipefocused = false;
+									continue;
+								}
+								
+								f.setFocus(true);
+								
+								if (focused != null) {
+									focused.setFocus(false);
+									focused = null;
+								}
+								focused = f;
+								wipefocused = false;
+							}
+						}
+					}
+					
+					if (wipefocused && focused != null) {
+						focused.setFocus(false);
+						focused = null;
 					}
 				}
 				
@@ -336,7 +392,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	public void run() {
 		running = true;
 		while (running) {
-			int updatespeed = 1000 / 60;
+			int updatespeed = 20;//1000 / 60;
 			if (state == GameState.MENU) {
 				if (init_game) {
 					long start = System.currentTimeMillis();
@@ -423,6 +479,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	private void gameUpdate() {
+		
+		if (activegui != null) {
+			for (GuiElement e : activegui.getElements()) {
+				e.update((int)mousePos.getX(), (int)mousePos.getY());
+			}
+		}
+		
 		if (running) {
 			if (state == GameState.MENU || state == GameState.PAUSED) {
 				return;
@@ -525,7 +588,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		if (activegui != null && state == GameState.MENU) {
 			for (GuiElement e : activegui.getElements()) {
-				e.render(g2d);
+				e.render(g2d, (int)mousePos.getX(), (int)mousePos.getY());
 			}
 		}
 		
@@ -583,14 +646,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			for (WorldZone zone : chosenzones) {
 				int start_x = (int) (zone.getStartPoint().getX() - mylocation.getX());
 				int start_y = (int) (zone.getStartPoint().getY() - mylocation.getY());
-				
-				int end_x = (int) (zone.getEndPoint().getX() - mylocation.getX());
-				int end_y = (int) (zone.getEndPoint().getY() - mylocation.getY());
-				dbg.setColor(Color.CYAN);
-				dbg.drawLine(start_x, start_y, end_x, start_y);
-				dbg.drawLine(start_x, end_y, end_x, end_y);
-				dbg.drawLine(start_x, start_y, start_x, end_y);
-				dbg.drawLine(end_x, start_y, end_x, end_y);
+				g2d.setColor(Color.CYAN);
+				g2d.drawRect(start_x, start_y, WorldZone.len_x, WorldZone.len_y);
 				rendereditems += 4;
 			
 			}	
@@ -616,46 +673,41 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					Rectangle rect = obj.getBoundingBox();
 					int start_x = (int) (rect.x - mylocation.getX());
 					int start_y = (int) (rect.y - mylocation.getY());
-					int end_x = (int) ( (rect.x + rect.getWidth()) - mylocation.getX() );
-					int end_y = (int) ( (rect.y + rect.getHeight()) - mylocation.getY() );
-					dbg.setColor(Color.RED);
-					dbg.drawLine(start_x, start_y, end_x, start_y);
-					dbg.drawLine(start_x, end_y, end_x, end_y);
-					dbg.drawLine(start_x, start_y, start_x, end_y);
-					dbg.drawLine(end_x, start_y, end_x, end_y);
-					rendereditems += 4;	
+					g2d.setColor(Color.RED);
+					g2d.drawRect(start_x, start_y, obj.getWidth(), obj.getHeight());
+					rendereditems++;	
 				}
 						
 //				dbg.fillRect(rel_x, rel_y, 100, 100);
 			}
 		}
 		
-		dbg.setColor(Color.CYAN);
+		g2d.setColor(Color.CYAN);
 		rendereditems += 3;
 		rendereditems += rd.getRendereditems();
-		dbg.drawString("Items rendered: " + String.valueOf(rendereditems), 40, 40);
-		dbg.drawString("Render time: " + String.valueOf(rendertime), 40, 60);
-		dbg.drawString("Update time: " + String.valueOf(new Random().nextInt(64) + 1), 40, 80); // updatetime
+		g2d.drawString("Items rendered: " + String.valueOf(rendereditems), 40, 40);
+		g2d.drawString("Render time: " + String.valueOf(rendertime), 40, 60);
+		g2d.drawString("Update time: " + String.valueOf(new Random().nextInt(64) + 1), 40, 80); // updatetime
 		
 		if (myship instanceof WeaponOwner) {
 			WeaponOwner owner = (WeaponOwner) myship;
 			if (owner.getPrimaryweapon() != null && owner.getPrimaryweapon() instanceof RechargeWeapon) {
 				RechargeWeapon weapon = (RechargeWeapon) owner.getPrimaryweapon();
-				dbg.drawString("Primary: " + Util.toPercent(weapon.getCharge(), weapon.getMaxCharge()) + "%", 40, 100);
+				g2d.drawString("Primary: " + Util.toPercent(weapon.getCharge(), weapon.getMaxCharge()) + "%", 40, 100);
 				rendereditems++;
 			}
 		}
 		
 		if (myship instanceof GameObject) {
 			GameObject s = (GameObject) myship;
-			dbg.drawString("Health: " + Util.toPercent(s.getHealth(), s.getMaxhealth()) + "%", 40, 120);
-			dbg.drawString("X: " + s.getPosition().getX(), 40, 140);
-			dbg.drawString("Y: " + s.getPosition().getY(), 40, 160);
+			g2d.drawString("Health: " + Util.toPercent(s.getHealth(), s.getMaxhealth()) + "%", 40, 120);
+			g2d.drawString("X: " + s.getPosition().getX(), 40, 140);
+			g2d.drawString("Y: " + s.getPosition().getY(), 40, 160);
 		}
 		
 		if (myship instanceof PlayerShip) {
 			PlayerShip ps = (PlayerShip) myship;
-			dbg.drawString("Speed: " + ps.getSpeed(), 40, 180);
+			g2d.drawString("Speed: " + ps.getSpeed(), 40, 180);
 			g2d.setColor(Color.CYAN);
 			g2d.drawString("Handbrake:", 40, 200);
 			if (ps.isHandbrake()) {
@@ -683,7 +735,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		if (activegui != null) {
 			for (GuiElement e : activegui.getElements()) {
-				e.render(g2d);
+				e.render(g2d, (int)mousePos.getX(), (int) mousePos.getY());
 			}
 		}
 		
@@ -777,18 +829,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			
 			@Override
 			public void run() {
-				Scanner scan = new Scanner(System.in);
-				System.out.println("Host");
-				String host = scan.nextLine();
-				System.out.println("Port");
-				int port = new Integer(scan.nextLine());
-				scan.close();
-				joinServer(host, port);
-				activegui = null;
-				state = GameState.PLAYING;
+				activegui = getConnectScreen();
 				
 			}
 		}, Color.LIGHT_GRAY).setText(Color.BLACK));
+		
+		menuscreen.addElement(new GuiInputField(new Position(1, 180), new Position(OrbWarPanel.PWIDTH, 230)));
 		
 		return menuscreen;
 	}
@@ -846,6 +892,16 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}, Color.DARK_GRAY));
 		
+		return screen;
+	}
+	
+	public GuiScreen getConnectScreen() {
+		GuiScreen screen = new GuiScreen();
+		GuiInputField ipfield = new GuiInputField(new Position(0, 0), new Position(PWIDTH, 80));
+		GuiInputField portfield = new GuiInputField(new Position(0, 90), new Position(PWIDTH, 170));
+		
+		screen.addElement(ipfield);
+		screen.addElement(portfield);
 		return screen;
 	}
 	

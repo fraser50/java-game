@@ -25,7 +25,7 @@ public class GuiButton extends GuiElement implements GuiClickable {
 	}
 	
 	@Override
-	public void render(Graphics2D g) {
+	public void render(Graphics2D g, int mousex, int mousey) {
 		int startx = (int) getStart().getX();
 		int starty = (int) getStart().getY();
 		
@@ -33,9 +33,15 @@ public class GuiButton extends GuiElement implements GuiClickable {
 		int endy = (int) getEnd().getY();
 		
 		if (fill != null) {
-			g.setColor(fill);
+			if (collided(mousex, mousey)) {
+				g.setColor(fill.darker());
+			} else {
+				g.setColor(fill);
+			}
+			
 			g.fillRect(startx, starty, endx - startx, endy - starty);
 		}
+		
 		g.setColor(Color.WHITE);
 		g.drawRect(startx, starty, endx - startx, endy - starty);
 		int offsetx = (int) ((endx - startx) * 0.5);

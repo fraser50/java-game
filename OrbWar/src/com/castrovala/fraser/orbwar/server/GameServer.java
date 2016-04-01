@@ -348,6 +348,15 @@ public class GameServer extends Thread {
 			
 		}
 			
+		for (NetworkPlayer player : getPlayers()) {
+			try {
+				player.getConn().close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		try {
 			serversock.close();
 			System.out.println("Closed server socket");

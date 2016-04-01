@@ -30,7 +30,7 @@ public abstract class GuiElement {
 		this.end = end;
 	}
 	
-	public abstract void render(Graphics2D g);
+	public abstract void render(Graphics2D g, int mousex, int mousey);
 	
 	public boolean collided(int x, int y) {
 		Rectangle me = new Rectangle((int)start.getX(), (int)start.getY(), 
@@ -39,5 +39,7 @@ public abstract class GuiElement {
 		return me.intersects(other);
 		
 	}
+	
+	public void update(int mousex, int mousey) {}
 
 }

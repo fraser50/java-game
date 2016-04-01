@@ -275,7 +275,6 @@ public class WorldNetController implements WorldProvider {
 				if (getGameObject(dop.getUuid()) != null) {
 					getGameObject(dop.getUuid()).delete();
 				}
-				System.out.println("Object deleted");
 				
 			}
 			

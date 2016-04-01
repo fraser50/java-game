@@ -19,7 +19,7 @@ public class BulletGun implements RechargeWeapon {
 	@Override
 	public void fire(GameObject user) {
 		if (user instanceof Turret) {
-			max = 5; // 100
+			//max = 5; // 100
 		}
 		
 		if (charge >= max) {

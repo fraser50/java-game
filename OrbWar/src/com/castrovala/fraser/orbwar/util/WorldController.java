@@ -142,11 +142,11 @@ public class WorldController implements WorldProvider {
 				
 				if (obj.getPosition().getY() < -256) {
 					obj.getPosition().setY(-256);
-				}
+				}*/
 				
 				if (obj instanceof CollisionHandler) {
 					colliders.add( (CollisionHandler)obj);
-				}*/
+				}
 			}
 		}
 		
