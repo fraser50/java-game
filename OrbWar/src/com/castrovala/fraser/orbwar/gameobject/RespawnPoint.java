@@ -112,9 +112,7 @@ public class RespawnPoint extends GameObject {
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				RespawnPoint point = new RespawnPoint(new Position(x, y), null);
+				RespawnPoint point = new RespawnPoint(null, null);
 				return point;
 			}
 		};

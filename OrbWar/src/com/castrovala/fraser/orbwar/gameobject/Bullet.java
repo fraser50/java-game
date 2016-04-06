@@ -3,7 +3,6 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.math.BigDecimal;
 
 import javax.imageio.ImageIO;
 
@@ -104,15 +103,8 @@ public class Bullet extends GameObject implements CollisionHandler {
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				
-				Number dx = obj.getAsNumber("x");
-				Number dy = obj.getAsNumber("y");
-				double x, y;
 				
-				x = dx.doubleValue();
-				y = dy.doubleValue();
-				
-				
-				Bullet bullet = new Bullet(new Position(x , y), null, null);
+				Bullet bullet = new Bullet(null, null, null);
 				return bullet;
 			}
 		};

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.util.Position;
 
 public class GameObjectProcessor {
 	private static HashMap<String, GameObjParser> parsers = new HashMap<>();
@@ -31,6 +32,12 @@ public class GameObjectProcessor {
 	public static GameObject fromJSON(JSONObject obj) {
 		String type = (String) obj.get("type");
 		String uuid = (String) obj.get("uuid");
+		Number dx = obj.getAsNumber("x");
+		Number dy = obj.getAsNumber("y");
+		double x, y;
+		
+		x = dx.doubleValue();
+		y = dy.doubleValue();
 		float rotation = ((Double) obj.get("rotation")).floatValue();
 		int health = ((Integer) obj.get("health")).intValue();
 		if (!parsers.containsKey(type)) {
@@ -42,6 +49,7 @@ public class GameObjectProcessor {
 		g.setUuid(uuid);
 		g.setRotation(rotation);
 		g.setHealth(health);
+		g.setPosition(new Position(x, y));
 		return g;
 	}
 

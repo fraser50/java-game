@@ -98,9 +98,7 @@ public class RespawnLaser extends GameObject {
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				RespawnLaser laser = new RespawnLaser(new Position(x, y), null);
+				RespawnLaser laser = new RespawnLaser(null, null);
 				return laser;
 			}
 		};

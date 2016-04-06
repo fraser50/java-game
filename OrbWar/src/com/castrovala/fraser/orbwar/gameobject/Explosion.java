@@ -68,9 +68,7 @@ public class Explosion extends GameObject {
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				Explosion ex = new Explosion(new Position(x, y), null);
+				Explosion ex = new Explosion(null, null);
 				return ex;
 			}
 		};

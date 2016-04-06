@@ -46,6 +46,20 @@ public class Position {
 		return this;
 	}
 	
+	public Position divide(Position p) {
+		x /= p.getX();
+		y /= p.getY();
+		edited = true;
+		return this;
+	}
+	
+	public Position multiply(Position p) {
+		x *= p.getX();
+		y *= p.getY();
+		edited = true;
+		return this;
+	}
+	
 	public double distance(Position pos) {
 		return Util.distance(this, pos);
 	}

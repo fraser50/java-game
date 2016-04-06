@@ -102,9 +102,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				Asteroid ast = new Asteroid(new Position(x, y), null);
+				Asteroid ast = new Asteroid(null, null);
 				return ast;
 			}
 		};

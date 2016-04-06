@@ -326,9 +326,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				PlayerShip ship = new PlayerShip(new Position(x, y), null);
+				PlayerShip ship = new PlayerShip(null, null);
 				return ship;
 			}
 		};

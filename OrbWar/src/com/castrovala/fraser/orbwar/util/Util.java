@@ -60,11 +60,15 @@ public class Util {
 		return percent;
 	}
 	
-	public static float targetRadius(GameObject a, GameObject b) {
-		Position pos = a.getPosition().copy();
-		pos.subtract(b.getPosition());
-		double d = Math.toDegrees(Math.atan2((int)pos.getX(), (int)b.getPosition().getY() - a.getPosition().getY()) );
+	public static float targetRadius(Position a, Position b) {
+		Position pos = a.copy();
+		pos.subtract(b);
+		double d = Math.toDegrees(Math.atan2((int)pos.getX(), (int)b.getY() - a.getY()) );
 		return (float) d ;
+	}
+	
+	public static float targetRadius(GameObject a, GameObject b) {
+		return targetRadius(a.getPosition(), b.getPosition());
 	}
 	
 	public static double fixAngle(double angle) {

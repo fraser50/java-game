@@ -72,7 +72,7 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 		
 		if (target == null) {
 			for (GameObject obj : getNearbyObjects(3000)) {
-				if (obj instanceof Asteroid) {
+				if (obj instanceof PlayerShip) {
 					target = obj;
 					break;
 				}
@@ -91,6 +91,49 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 		}
 		
 		float requiredrota = Util.targetRadius(target, this);
+		
+		if (target instanceof PlayerShip) {
+			PlayerShip ship = (PlayerShip) target;
+			double speed = ship.getSpeed();
+			boolean finished = false;
+			long iter = 1;
+			/*while (!finished) {
+				Position pos = ship.getPosition().copy().add(Util.angleToVel(ship.getRotation(), (float)speed * iter));
+				requiredrota = Util.targetRadius(pos, getPosition());
+				double timeship = Util.distance(ship.getPosition().copy(), pos) / speed;
+				Position targetpos = Util.angleToVel(requiredrota, 5);
+				double timebullet = Util.distance(getPosition().copy(), pos) / 5;
+				System.out.println("iter: " + iter);
+				System.out.println("timeship: " + timeship);
+				System.out.println("timebullet: " + timebullet);
+				System.out.println("");
+				if (timebullet < timeship + 1 && timebullet >= timebullet) {
+					finished = true;
+				}
+				iter++;
+			}*/
+			
+			Position pos = ship.getPosition().copy();
+			Position bulletpos = getPosition().copy();
+			double distance = Util.distance(pos, bulletpos);
+			double time = distance / 5;
+			double newspeed = speed;
+			//double distancemoved = time * ship.getSpeed();
+			double distancemoved = 0;
+			for (int i = 1; i < (int)time + 1; i++) {
+				distancemoved += newspeed;
+				newspeed -= 0.01d;
+				if (newspeed <= 0) {
+					break;
+				}
+			}
+			
+			Position targetpos = pos.copy().add(Util.angleToVel(ship.getRotation(), (float)distancemoved));
+			requiredrota = Util.targetRadius(targetpos, bulletpos);
+			
+		}
+		
+		
 		setRotation(requiredrota);
 		if (primary != null) {
 			primary.fire(this);
@@ -152,9 +195,7 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				Turret turret = new Turret(new Position(x, y), null);
+				Turret turret = new Turret(null, null);
 				return turret;
 			}
 		};
