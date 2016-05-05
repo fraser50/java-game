@@ -8,14 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-
 import com.castrovala.fraser.orbwar.Constants;
+import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
-import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
@@ -23,16 +19,22 @@ import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ShipDataPacket;
+import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 public class WorldNetController implements WorldProvider {
 	private SocketChannel channel;
 	private List<WorldZone> zones = new ArrayList<>();
 	private HashMap<String, GameObject> objids = new HashMap<>();
-	private List<AbstractPacket> packetQueue = new ArrayList<>();
 	private ByteBuffer receiveBuffer;
 	private int objectcount;
 	private Position pos;
+	private HashMap<String, ClientPlayer> clients = new HashMap<>();
 	
 	public WorldNetController(String host, int port, Position pos) {
 		//super();
@@ -284,6 +286,17 @@ public class WorldNetController implements WorldProvider {
 				pos.setY(sup.getPos().getY());
 			}
 			
+			if (pack instanceof ShipDataPacket) {
+				ShipDataPacket supp = (ShipDataPacket) pack;
+				ClientPlayer p = new ClientPlayer(supp.getName(), supp.isAdmin());
+				clients.put(supp.getShipid(), p);
+			}
+			
+			if (pack instanceof ShipRemovePacket) {
+				ShipRemovePacket srp = (ShipRemovePacket) pack;
+				clients.remove(srp.getUuid());
+			}
+			
 			//System.out.println("Not parsed :(");
 			//System.out.println("Serialised data: " + PacketProcessor.toJSON(pack));
 		}
@@ -385,6 +398,10 @@ public class WorldNetController implements WorldProvider {
 		//if (count >= 600000000) {
 			//break;
 		//}
+	}
+
+	public HashMap<String, ClientPlayer> getClients() {
+		return clients;
 	}
 	
 

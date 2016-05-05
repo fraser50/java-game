@@ -85,4 +85,12 @@ public class GuiButton extends GuiElement implements GuiClickable {
 		return this;
 	}
 
+	public Color getFill() {
+		return fill;
+	}
+
+	public void setFill(Color fill) {
+		this.fill = fill;
+	}
+
 }

@@ -5,13 +5,18 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
+import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.ShipDataPacket;
+import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.WorldZone;
 
 public class NetworkPlayer implements ControlUser {
+	private UUID id = UUID.randomUUID();
 	private GameServer server;
 	private volatile List<AbstractPacket> packetQueue = Collections.synchronizedList(new ArrayList<AbstractPacket>());
 	private SocketChannel conn;
@@ -76,7 +81,17 @@ public class NetworkPlayer implements ControlUser {
 
 	@Override
 	public void setControl(Controllable c) {
+		if (ship != null) {
+			ShipRemovePacket srp = new ShipRemovePacket( ((GameObject)ship).getUuid());
+			sendPacket(srp);
+		}
+		
 		ship = c;
+		
+		if (ship != null) {
+			ShipDataPacket supp = new ShipDataPacket(name, ((GameObject)ship).getUuid());
+			sendPacket(supp);
+		}
 		
 	}
 
@@ -98,6 +113,22 @@ public class NetworkPlayer implements ControlUser {
 
 	public void setCurrentpos(Position currentpos) {
 		this.currentpos = currentpos;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
 	}
 
 }

@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-
 import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
@@ -20,8 +16,14 @@ import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
+import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.Position;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 public class GameServer extends Thread {
 	private boolean localserver;
@@ -96,18 +98,39 @@ public class GameServer extends Thread {
 				
 				if (channel != null) {
 					NetworkPlayer p = new NetworkPlayer(this, channel);
+					p.setName("Test");
 					channel.configureBlocking(false);
 					System.out.println("Pending Connection");
 					channel.finishConnect();
 					System.out.println("Player Connected");
 					players.add(p);
 					synchronized (gamelogic.getController()) {
-						PlayerShip ship = new PlayerShip(new Position(200, 200), gamelogic.getController());
+						PlayerShip ship = new PlayerShip(new Position(300, 300), gamelogic.getController());
 						ship.setControl(p);
 						p.setControl(ship);
+						
+						
 						gamelogic.getController().addObject(ship);
 						System.out.println("Added Player Ship");
+						
+						for (GameObject obj : gamelogic.getController().allObjects()) {
+							if (obj == ship) {
+								continue;
+							}
+							
+							if (!(obj instanceof Controllable)) {
+								continue;
+							}
+							
+							Controllable c = (Controllable) obj;
+							
+							NetworkPlayer tp = (NetworkPlayer) c.getControl();
+							
+							ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid());
+							p.sendPacket(supp);
+						}
 					}
+					
 					
 				}
 				

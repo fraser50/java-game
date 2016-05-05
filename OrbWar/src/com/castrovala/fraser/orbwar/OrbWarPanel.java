@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
@@ -51,6 +51,8 @@ import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ShipDataPacket;
+import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.server.MPGameInfo;
@@ -92,7 +94,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private GameObject editorObj;
 	private volatile Position mousePos = new Position(0, 0);
 	private volatile boolean clicked = false;
-	private char typedchar;
 	private GuiFocusable focused;
 	
 	public OrbWarPanel() {
@@ -355,6 +356,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		DeleteObjectPacket.registerPacket();
 		EditorTransmitPacket.registerPacket();
 		ScreenUpdatePacket.registerPacket();
+		ShipDataPacket.registerPacket();
+		ShipRemovePacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -532,6 +535,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 //		System.out.println("renderer called");
 		if (dbImage == null) {
 			dbImage = createImage(PWIDTH, PHEIGHT);
+			Graphics2D g2d = (Graphics2D) dbImage.getGraphics();
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			if (dbImage == null) {
 				System.out.println("dbImage is null");
 				return;
@@ -544,9 +551,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}
 		Graphics2D g2d = (Graphics2D) dbImage.getGraphics();
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		
 		
 //		System.out.println("Adding all zones");
 		dbg.setColor(Color.BLACK);
@@ -663,6 +668,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				
 				long objrenderstart = System.currentTimeMillis();
 				obj.render(g2d, rel_x, rel_y, centre_x, centre_y, rd);
+				
+				if (controller.getClients().containsKey(obj.getUuid())) {
+					ClientPlayer p = controller.getClients().get(obj.getUuid());
+					g2d.setColor(Color.WHITE);
+					g2d.drawString(p.getName(), rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ), rel_y - 20);
+				}
+				
 				long objrenderend = System.currentTimeMillis();
 				long objrenderdelay = objrenderend - objrenderstart;
 				if (!renderedbefore) {
