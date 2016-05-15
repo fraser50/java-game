@@ -36,32 +36,25 @@ public class WorldNetController implements WorldProvider {
 	private Position pos;
 	private HashMap<String, ClientPlayer> clients = new HashMap<>();
 	
-	public WorldNetController(String host, int port, Position pos) {
+	public WorldNetController(String host, int port, Position pos) throws IOException {
 		//super();
+		channel = SocketChannel.open();
+		channel.configureBlocking(false);
+		channel.connect(new InetSocketAddress(host, port));
 		
-		try {
-			channel = SocketChannel.open();
-			channel.configureBlocking(false);
-			channel.connect(new InetSocketAddress(host, port));
-			
-			while (!channel.finishConnect()) {
-				try {
-					Thread.sleep(2);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		while (!channel.finishConnect()) {
+			try {
+				Thread.sleep(2);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 		this.pos = pos;
 	}
 	
-	public WorldNetController(Position pos) {
+	public WorldNetController(Position pos) throws IOException {
 		this("127.0.0.1", 5555, pos);
 	}
 

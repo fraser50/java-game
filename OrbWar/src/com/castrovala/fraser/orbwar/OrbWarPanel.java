@@ -399,7 +399,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			if (state == GameState.MENU) {
 				if (init_game) {
 					long start = System.currentTimeMillis();
-					prepareGame();
+					try {
+						prepareGame();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					long end = System.currentTimeMillis();
 					long timetaken = end - start;
 					System.out.println("prepareGame() took " + timetaken + " ms");
@@ -776,7 +781,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 	}
 	
-	public void prepareGame() {
+	public void prepareGame() throws IOException {
 		
 		internalserver = new GameServer(true);
 		internalserver.start();
@@ -909,15 +914,62 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	
 	public GuiScreen getConnectScreen() {
 		GuiScreen screen = new GuiScreen();
-		GuiInputField ipfield = new GuiInputField(new Position(0, 0), new Position(PWIDTH, 80));
-		GuiInputField portfield = new GuiInputField(new Position(0, 90), new Position(PWIDTH, 170));
+		final GuiInputField ipfield = new GuiInputField(new Position(0, 0), new Position(PWIDTH, 80));
+		final GuiInputField portfield = new GuiInputField(new Position(0, 90), new Position(PWIDTH, 170));
+		
+		
+		GuiButton connectbutton = new GuiButton(new Position(4, PHEIGHT - 200), new Position(PWIDTH - 2, PHEIGHT - 120), "Connect", new Runnable() {
+			
+			@Override
+			public void run() {
+				int port;
+				String host;
+				
+				try {
+					port = Integer.parseInt(portfield.getText());
+					
+				} catch (NumberFormatException e) {
+					return;
+				}
+				
+				host = ipfield.getText();
+				
+				try {
+					joinServer(host, port);
+					activegui = null;
+					state = GameState.PLAYING;
+				} catch (IOException e) {
+					
+				}
+				
+			}
+		});
+		
+		GuiButton backbutton = new GuiButton(new Position(4, PHEIGHT - 100), new Position(PWIDTH - 2, PHEIGHT - 30), "Back", new Runnable() {
+			
+			@Override
+			public void run() {
+				activegui = getMainMenu();
+				
+			}
+		});
+		
+		connectbutton.setFill(Color.GREEN);
+		backbutton.setFill(Color.CYAN);
+		
+		connectbutton.setText(Color.BLACK);
+		backbutton.setText(Color.BLACK);
+		
 		
 		screen.addElement(ipfield);
 		screen.addElement(portfield);
+		
+		screen.addElement(connectbutton);
+		screen.addElement(backbutton);
 		return screen;
 	}
 	
-	public void joinServer(String host, int port) {
+	public void joinServer(String host, int port) throws IOException {
 		WorldNetController c = new WorldNetController(host, port, mylocation);
 		controller = c;
 	}
