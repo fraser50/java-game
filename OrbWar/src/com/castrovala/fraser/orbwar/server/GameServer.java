@@ -193,14 +193,6 @@ public class GameServer extends Thread {
 
 							buf.put(raw_message.getBytes());
 							long padding_start = System.currentTimeMillis();
-							//for (int i = 1; i < (Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length) + 1; i++) {
-							//	buf.put((byte)'a');
-							//}
-
-							//String padding = new String(new char[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]).replaceFirst("\0", "a");
-							//buf.put(padding.getBytes());
-
-							//buf.put(new byte[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]);
 
 							long padding_end = System.currentTimeMillis();
 							long padding_delay = padding_end - padding_start;
