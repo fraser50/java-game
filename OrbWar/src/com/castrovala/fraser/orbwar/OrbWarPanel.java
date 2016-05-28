@@ -384,6 +384,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	public void startGame() {
 		if (game == null || !running) {
 			game = new Thread(this);
+			game.setName("Client Thread");
 			game.start();
 		}
 	}

@@ -36,6 +36,7 @@ public class GameServer extends Thread {
 	
 	public GameServer(boolean localserver) {
 		this.localserver = localserver;
+		this.setName("Server Thread");
 	}
 
 	public synchronized boolean isLocalserver() {
@@ -86,7 +87,7 @@ public class GameServer extends Thread {
 		while (active) {
 			//System.out.println("Server tick");
 			try {
-				Thread.sleep(4);
+				Thread.sleep(15);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

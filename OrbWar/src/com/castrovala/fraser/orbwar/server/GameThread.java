@@ -20,6 +20,7 @@ public class GameThread extends Thread {
 	public GameThread(GameServer server) {
 		this.setServer(server);
 		controller = new WorldController();
+		this.setName("Game Thread");
 	}
 	
 	@Override
