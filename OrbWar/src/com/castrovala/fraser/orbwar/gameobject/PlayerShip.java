@@ -38,6 +38,8 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	private double maxspeed = 6d; // 6d
 	private boolean handbrake;
 	private ControlUser user;
+	private final int healingrate = 1;
+	private int timeundamaged = 0;
 	
 	public PlayerShip(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -142,6 +144,19 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		
 		if (speed < 0) {
 			speed = 0;
+		}
+		
+		timeundamaged++;
+		if (timeundamaged >= 1000) {
+			timeundamaged = 925;
+			setHealth(getHealth() + healingrate);
+			if (getHealth() > getMaxhealth()) {
+				setHealth(getMaxhealth());
+			}
+		}
+		
+		if (getHealth() == getMaxhealth()) {
+			timeundamaged = 0;
 		}
 		
 	}
@@ -337,6 +352,12 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	@Override
 	public boolean shouldRotate() {
 		return true;
+	}
+	
+	@Override
+	public void hurt(int damage) {
+		super.hurt(damage);
+		timeundamaged = 0;
 	}
 
 }
