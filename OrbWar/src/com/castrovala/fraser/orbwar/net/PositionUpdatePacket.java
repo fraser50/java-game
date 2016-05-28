@@ -31,13 +31,8 @@ public class PositionUpdatePacket implements AbstractPacket {
 	public static void registerPacket() {
 		PacketParser parser = new PacketParser() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(AbstractPacket p) {
-				//System.out.println("Converting pup to json");
-				//if (!(p instanceof PositionUpdatePacket) ) {
-				//	return null;
-				//}
 				
 				PositionUpdatePacket packet = (PositionUpdatePacket) p;
 				

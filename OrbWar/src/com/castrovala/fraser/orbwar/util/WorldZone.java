@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 
 public class WorldZone {
@@ -18,7 +17,7 @@ public class WorldZone {
 	public WorldZone(long x, long y, WorldProvider controller) {
 		this.x = x;
 		this.y = y;
-		this.controller = controller;
+		this.setController(controller);
 	}
 
 	public List<GameObject> getGameobjects() {
@@ -50,6 +49,14 @@ public class WorldZone {
 			}
 			
 		}
+	}
+
+	public WorldProvider getController() {
+		return controller;
+	}
+
+	public void setController(WorldProvider controller) {
+		this.controller = controller;
 	}
 
 }

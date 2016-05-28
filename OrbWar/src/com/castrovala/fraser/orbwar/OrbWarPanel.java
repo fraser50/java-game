@@ -23,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
+import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
@@ -44,6 +45,7 @@ import com.castrovala.fraser.orbwar.gui.GuiFocusable;
 import com.castrovala.fraser.orbwar.gui.GuiInputField;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
@@ -95,6 +97,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private volatile Position mousePos = new Position(0, 0);
 	private volatile boolean clicked = false;
 	private GuiFocusable focused;
+	private boolean chatgui;
+	private String currentmsg = "";
 	
 	public OrbWarPanel() {
 		
@@ -147,6 +151,32 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						}
 						
 					}
+				}
+				
+				if (!chatgui && keyCode == KeyEvent.VK_C) {
+					chatgui = true;
+					return;
+				}
+				
+				if (chatgui) {
+					
+					if (keyCode == KeyEvent.VK_ENTER) {
+						ChatEnterPacket cep = new ChatEnterPacket(currentmsg);
+						currentmsg = "";
+						chatgui = false;
+						controller.sendPacket(cep);
+						return;
+					}
+					
+					if (keyCode == KeyEvent.VK_BACK_SPACE && currentmsg.length() != 0) {
+						currentmsg = currentmsg.substring(0, currentmsg.length() - 1);
+					} else {
+						char key = e.getKeyChar();
+						if (Character.isDefined(key)) {
+							currentmsg = currentmsg + key;
+						}
+					}
+					return;
 				}
 				
 				if (keyCode == KeyEvent.VK_ENTER && state == GameState.MENU) {
@@ -358,6 +388,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ScreenUpdatePacket.registerPacket();
 		ShipDataPacket.registerPacket();
 		ShipRemovePacket.registerPacket();
+		ChatEnterPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -757,7 +788,24 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}
 		
-//		System.out.println("Loaded> " + rendereditems);
+		if (controller.getMessages().size() > 20) {
+			controller.getMessages().remove(controller.getMessages().get(0));
+		}
+		
+		int currmsg = 0;
+		for (ServerMessage msg : controller.getMessages()) {
+			int x = 20;
+			int y = 250 + (20 * currmsg);
+			g2d.setColor(Color.CYAN);
+			g2d.drawString(msg.getValue(), x, y);
+			currmsg++;
+		}
+		
+		if (chatgui) {
+			g2d.setColor(Color.LIGHT_GRAY);
+			g2d.drawString(currentmsg + "_", 20, 250 + (20 * 21));
+		}
+		
 		long repaintstart = System.currentTimeMillis();
 		repaint();
 		long repaintend = System.currentTimeMillis();

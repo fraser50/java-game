@@ -10,9 +10,11 @@ import java.util.List;
 
 import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
+import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
@@ -35,6 +37,7 @@ public class WorldNetController implements WorldProvider {
 	private int objectcount;
 	private Position pos;
 	private HashMap<String, ClientPlayer> clients = new HashMap<>();
+	private List<ServerMessage> messages = new ArrayList<>();
 	
 	public WorldNetController(String host, int port, Position pos) throws IOException {
 		//super();
@@ -290,6 +293,11 @@ public class WorldNetController implements WorldProvider {
 				clients.remove(srp.getUuid());
 			}
 			
+			if (pack instanceof ChatEnterPacket) {
+				ChatEnterPacket cep = (ChatEnterPacket) pack;
+				messages.add(new ServerMessage(cep.getMessage()));
+			}
+			
 			//System.out.println("Not parsed :(");
 			//System.out.println("Serialised data: " + PacketProcessor.toJSON(pack));
 		}
@@ -396,6 +404,9 @@ public class WorldNetController implements WorldProvider {
 	public HashMap<String, ClientPlayer> getClients() {
 		return clients;
 	}
-	
+
+	public List<ServerMessage> getMessages() {
+		return messages;
+	}
 
 }

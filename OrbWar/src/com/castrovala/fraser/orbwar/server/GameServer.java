@@ -13,6 +13,7 @@ import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
@@ -130,6 +131,20 @@ public class GameServer extends Thread {
 							ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid());
 							p.sendPacket(supp);
 						}
+						
+						ShipDataPacket sdp = new ShipDataPacket(null, null);
+						for (NetworkPlayer pl : getPlayers()) {
+							if (pl == p) {
+								continue;
+							}
+							
+							if (pl.getControl() != null) {
+								sdp.setName(pl.getName());
+								sdp.setShipid(((GameObject)pl.getControl()).getUuid());
+								p.sendPacket(sdp);
+							}
+						}
+						
 					}
 					
 					
@@ -339,6 +354,52 @@ public class GameServer extends Thread {
 								gamelogic.getController().addObject(obj);
 							}
 							
+						}
+						
+						if (pa instanceof ChatEnterPacket) {
+							ChatEnterPacket cep = (ChatEnterPacket) pa;
+							if (cep.getMessage().length() > 0) {
+								String message = "[" + p.getName() + "] " + cep.getMessage();
+								ChatEnterPacket cepp = new ChatEnterPacket(message);
+								
+								if (cep.getMessage().startsWith("/name")) {
+									if (cep.getMessage().length() <= 6) {
+										message = "You need to enter a name to use this!";
+										cepp.setMessage(message);
+										p.sendPacket(cepp);
+										message = "";
+									} else {
+										String name = cep.getMessage().substring(6);
+										if (name.trim().length() == 0) {
+											message = "That name is not suitable";
+											p.sendPacket(new ChatEnterPacket(message));
+										} else {
+											message = "'" + p.getName() + "' changed their name to '" + name + "'";
+											cepp.setMessage(message);
+											p.setName(name);
+											synchronized (gamelogic.getController()) {
+												if (p.getControl() != null) {
+													ShipDataPacket sdp = new ShipDataPacket(name,
+															((GameObject) p.getControl()).getUuid());
+													for (NetworkPlayer np : getPlayers()) {
+														np.sendPacket(sdp);
+													} 
+												}
+											}
+										}
+										
+									}
+								}
+								
+								for (NetworkPlayer pl : getPlayers()) {
+									
+									if (message.replace(" ", "").length() == 0) {
+										break;
+									}
+									
+									pl.sendPacket(cepp);
+								}
+							}
 						}
 					}
 					
