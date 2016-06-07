@@ -18,6 +18,8 @@ import net.minidev.json.JSONObject;
 public class Bullet extends GameObject implements CollisionHandler {
 	private static BufferedImage renderimage;
 	private GameObject parent;
+	private Position initialpos;
+	private long timeborn;
 	
 	public Bullet(Position pos, WorldProvider controller, GameObject parent) {
 		super(pos, controller);
@@ -26,6 +28,8 @@ public class Bullet extends GameObject implements CollisionHandler {
 		setMaxhealth(1000);
 		setHealth(1000);
 		this.parent = parent;
+		setInitialpos(getPosition().copy());
+		timeborn = System.currentTimeMillis();
 	}
 
 	@Override
@@ -54,6 +58,30 @@ public class Bullet extends GameObject implements CollisionHandler {
 			delete();
 		} else {
 			hurt();
+			setChanged(false);
+		}
+		
+		getPosition().setEdited(false);
+	}
+	
+	@Override
+	public void clientUpdate() {
+		super.update();
+		
+		long timepassed = System.currentTimeMillis() - timeborn;
+		int loopsince = (int) (timepassed / (1000 / 60));
+		
+		double dx = loopsince * getVelocity().getX();
+		double dy = loopsince * getVelocity().getY();
+		
+		getPosition().setX(getInitialpos().getX() + dx);
+		getPosition().setY(getInitialpos().getY() + dy);
+		
+		if (getHealth() <= 0) {
+			delete();
+		} else {
+			hurt();
+			setChanged(false);
 		}
 	}
 	
@@ -94,22 +122,44 @@ public class Bullet extends GameObject implements CollisionHandler {
 				Bullet bullet = (Bullet) obj;
 				JSONObject jobj = new JSONObject();
 				jobj.put("type", "bullet");
-				jobj.put("x", bullet.getPosition().getX());
+				jobj.put("x", bullet.getInitialpos().getX());
 				
-				jobj.put("y", bullet.getPosition().getY());
+				jobj.put("y", bullet.getInitialpos().getY());
+				
+				jobj.put("velx", bullet.getVelocity().getX());
+				jobj.put("vely", bullet.getVelocity().getY());
+				
+				jobj.put("birth", String.valueOf(bullet.getTimeborn()));
 				return jobj;
 			}
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				
-				
 				Bullet bullet = new Bullet(null, null, null);
+				bullet.getVelocity().setX(obj.getAsNumber("velx").doubleValue());
+				bullet.getVelocity().setY(obj.getAsNumber("vely").doubleValue());
+				bullet.setTimeborn(new Long(obj.getAsString("born")).longValue());
 				return bullet;
 			}
 		};
 			
 		GameObjectProcessor.addParser("bullet", parser);
+	}
+
+	public Position getInitialpos() {
+		return initialpos;
+	}
+
+	public void setInitialpos(Position initialpos) {
+		this.initialpos = initialpos;
+	}
+
+	public long getTimeborn() {
+		return timeborn;
+	}
+
+	public void setTimeborn(long timeborn) {
+		this.timeborn = timeborn;
 	}
 
 }

@@ -131,6 +131,8 @@ public class WorldNetController implements WorldProvider {
 				if (obj instanceof Asteroid) {
 					obj.update();
 				}
+				
+				obj.clientUpdate();
 			}
 		}
 		
@@ -205,6 +207,7 @@ public class WorldNetController implements WorldProvider {
 			JSONParser parser = new JSONParser();
 			JSONObject jobj;
 			try {
+				System.out.println(json_str);
 				jobj = (JSONObject) parser.parse(json_str);
 				AbstractPacket packet = PacketProcessor.fromJSON(jobj);
 				

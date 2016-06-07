@@ -189,6 +189,10 @@ public class GameServer extends Thread {
 							}
 
 							String raw_message = jobj.toJSONString();
+							if (raw_message.length() > Constants.packetsize + 4) {
+								System.out.println("PACKET IS FAR TOO BIG!!!!!!!!!!!!!!!!!!!!!!!!!!");
+							}
+							
 							long json_end = System.currentTimeMillis();
 							long json_delay = json_end - json_start;
 
@@ -209,6 +213,9 @@ public class GameServer extends Thread {
 
 							buf.put(raw_message.getBytes());
 							long padding_start = System.currentTimeMillis();
+							
+							int remaining = buf.remaining();
+							String repeat = new String(new char[remaining]);
 
 							long padding_end = System.currentTimeMillis();
 							long padding_delay = padding_end - padding_start;
