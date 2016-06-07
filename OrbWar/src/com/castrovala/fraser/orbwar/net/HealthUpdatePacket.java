@@ -35,9 +35,9 @@ public class HealthUpdatePacket implements AbstractPacket {
 			@Override
 			public AbstractPacket fromJSON(JSONObject obj) {
 				String uuid = (String) obj.get("uuid");
-				int health = (int) obj.get("health");
-				double rotation = (double) obj.get("rotation");
-				return new HealthUpdatePacket(uuid, (int)health, (float)rotation);
+				int health = obj.getAsNumber("health").intValue();
+				double rotation = obj.getAsNumber("rotation").doubleValue();
+				return new HealthUpdatePacket(uuid, health, (float)rotation);
 			}
 		};
 		

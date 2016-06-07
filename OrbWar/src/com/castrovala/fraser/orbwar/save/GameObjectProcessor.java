@@ -38,8 +38,8 @@ public class GameObjectProcessor {
 		
 		x = dx.doubleValue();
 		y = dy.doubleValue();
-		float rotation = ((Double) obj.get("rotation")).floatValue();
-		int health = ((Integer) obj.get("health")).intValue();
+		float rotation = obj.getAsNumber("rotation").floatValue();
+		int health = obj.getAsNumber("health").intValue();
 		if (!parsers.containsKey(type)) {
 			return null;
 		}
