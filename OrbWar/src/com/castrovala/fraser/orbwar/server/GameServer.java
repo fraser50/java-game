@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
@@ -160,7 +159,6 @@ public class GameServer extends Thread {
 				//System.out.println("Iterating over players");
 				try {
 					SocketChannel channel = p.getConn();
-					int count = 0;
 					//System.out.println("Acquiring packet queue lock...");
 					synchronized (p.getPacketQueue()) {
 						//System.out.println("Lock acquired");
@@ -189,9 +187,6 @@ public class GameServer extends Thread {
 							}
 
 							String raw_message = jobj.toJSONString();
-							if (raw_message.length() > Constants.packetsize + 4) {
-								System.out.println("PACKET IS FAR TOO BIG!!!!!!!!!!!!!!!!!!!!!!!!!!");
-							}
 							
 							long json_end = System.currentTimeMillis();
 							long json_delay = json_end - json_start;
@@ -200,7 +195,7 @@ public class GameServer extends Thread {
 								System.out.println("JSON conversion finished in " + json_delay + "ms");
 							}
 
-							ByteBuffer buf = ByteBuffer.allocate(Constants.packetsize);
+							ByteBuffer buf = ByteBuffer.allocate(raw_message.getBytes().length + 4);
 
 							ByteBuffer len_buf = ByteBuffer.allocate(4);
 							len_buf.putInt(raw_message.length());
@@ -212,17 +207,6 @@ public class GameServer extends Thread {
 							//System.out.println("Byte length: " + l);
 
 							buf.put(raw_message.getBytes());
-							long padding_start = System.currentTimeMillis();
-							
-							int remaining = buf.remaining();
-							String repeat = new String(new char[remaining]);
-
-							long padding_end = System.currentTimeMillis();
-							long padding_delay = padding_end - padding_start;
-
-							if (padding_delay >= 3) {
-								//System.out.println("Finished padding in " + padding_delay + "ms");
-							}
 
 							//buf.flip();
 							buf.position(0);
@@ -232,90 +216,60 @@ public class GameServer extends Thread {
 							}
 
 							channel.write(buf);
-							count++;
 							p.getPacketQueue().remove(pa);
-							if (count >= 600000000) {
-								//break;
-							}
 
 						}
 					}
 					
 					List<AbstractPacket> packets = new ArrayList<>();
-					long start = System.currentTimeMillis();
-					 // 65536
-					//System.out.println("Server waiting for data");
+					//long start = System.currentTimeMillis();
+					
+					if (p.getRecievedLen() == null) {
+						p.setRecievedLen(ByteBuffer.allocate(4));
+					}
+					
+					if (p.getRecievedLen().hasRemaining()) {
+						channel.read(p.getRecievedLen());
+						if (p.getRecievedLen().hasRemaining()) {
+							continue;
+						}
+						p.getRecievedLen().position(0);
+					}
+					
 					ByteBuffer buff = p.getReceived();
 					if (buff == null) {
-						//System.out.println("Server buffer is empty");
-						buff = ByteBuffer.allocate(Constants.packetsize);
+						buff = ByteBuffer.allocate(p.getRecievedLen().getInt());
 						p.setReceived(buff);
 					}
 					
 					if (buff.hasRemaining()) {
 						channel.read(buff);
-						continue;
+						if (buff.hasRemaining()) {
+							continue;
+						}
 					}
 					
 					String value = new String(buff.array());
 					//System.out.println("value: " + value);
-					while (value.trim() != "") {
-						//System.out.println("Server parsing: " + value.length());
-						//System.out.println("Value: " + value);
-						//if (value.length() <= 4) {
-						//	break;
-						//}
+					
+					JSONParser parser = new JSONParser(NORM_PRIORITY);
+					JSONObject jobj;
+					try {
+						jobj = (JSONObject) parser.parse(value);
+						AbstractPacket packet = PacketProcessor.fromJSON(jobj);
 						
-						String length_str = "";
-						try {
-							length_str = value.substring(0, 4);
-						} catch (StringIndexOutOfBoundsException e) {
-							System.out.println("Length failed");
-							break;
+						if (packet == null) {
+							System.out.println("Packet is null, no parser exists!");
 						}
 						
-						byte[] length_bytes = length_str.getBytes();
-						int length = ByteBuffer.wrap(length_bytes).getInt();
-						
-						if (length == 0) {
-							break;
-						}
-						
-						//if (length + 4 < value.length()) {
-						//	break;
-						//}
-						
-						String json_str;
-						try {
-							json_str = value.substring(4, 4 + length);
-						} catch (StringIndexOutOfBoundsException e) {
-							System.out.println("Out of range");
-							return;
-						}
-						
-						
-						JSONParser parser = new JSONParser();
-						JSONObject jobj;
-						try {
-							jobj = (JSONObject) parser.parse(json_str);
-							AbstractPacket packet = PacketProcessor.fromJSON(jobj);
-							
-							if (packet == null) {
-								System.out.println("Packet is null, no parser exists!");
-							}
-							
-							packets.add(packet);
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						value = value.substring(4 + length, value.length());
-						break;
+						packets.add(packet);
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 					
-					long end = System.currentTimeMillis();
-					long delay = end - start;
+					//long end = System.currentTimeMillis();
+					//long delay = end - start;
 					
 					boolean gotcontrol = false;
 					for (AbstractPacket pa : packets) {
@@ -410,7 +364,8 @@ public class GameServer extends Thread {
 						}
 					}
 					
-					buff = ByteBuffer.allocate( Constants.packetsize );
+					buff = null;
+					p.setRecievedLen(null);
 					p.setReceived(buff);
 					
 				} catch (IOException e) {

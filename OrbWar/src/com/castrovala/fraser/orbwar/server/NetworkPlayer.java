@@ -25,6 +25,7 @@ public class NetworkPlayer implements ControlUser {
 	private List<WorldZone> seenZones = new ArrayList<>();
 	private Position currentpos = new Position(0, 0);
 	private volatile ByteBuffer received;
+	private volatile ByteBuffer recievedLen;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -129,6 +130,14 @@ public class NetworkPlayer implements ControlUser {
 
 	public void setId(UUID id) {
 		this.id = id;
+	}
+
+	public ByteBuffer getRecievedLen() {
+		return recievedLen;
+	}
+
+	public void setRecievedLen(ByteBuffer recievedLen) {
+		this.recievedLen = recievedLen;
 	}
 
 }

@@ -28,7 +28,11 @@ public class Bullet extends GameObject implements CollisionHandler {
 		setMaxhealth(1000);
 		setHealth(1000);
 		this.parent = parent;
-		setInitialpos(getPosition().copy());
+		
+		if (getPosition() != null) {
+			setInitialpos(getPosition().copy());
+		}
+		
 		timeborn = System.currentTimeMillis();
 	}
 
@@ -52,8 +56,15 @@ public class Bullet extends GameObject implements CollisionHandler {
 	public void update() {
 		super.update();
 		
-		getPosition().setX(getPosition().getX() + getVelocity().getX());
-		getPosition().setY(getPosition().getY() + getVelocity().getY());
+		long timepassed = System.currentTimeMillis() - timeborn;
+		int loopsince = (int) (timepassed / (1000 / 60));
+		
+		double dx = loopsince * getVelocity().getX();
+		double dy = loopsince * getVelocity().getY();
+		
+		getPosition().setX(getInitialpos().getX() + dx);
+		getPosition().setY(getInitialpos().getY() + dy);
+		
 		if (getHealth() <= 0) {
 			delete();
 		} else {
@@ -129,7 +140,10 @@ public class Bullet extends GameObject implements CollisionHandler {
 				jobj.put("velx", bullet.getVelocity().getX());
 				jobj.put("vely", bullet.getVelocity().getY());
 				
-				jobj.put("birth", String.valueOf(bullet.getTimeborn()));
+				jobj.put("ix", bullet.getInitialpos().getX());
+				jobj.put("iy", bullet.getInitialpos().getY());
+				
+				jobj.put("birth", bullet.getTimeborn());
 				return jobj;
 			}
 			
@@ -138,7 +152,8 @@ public class Bullet extends GameObject implements CollisionHandler {
 				Bullet bullet = new Bullet(null, null, null);
 				bullet.getVelocity().setX(obj.getAsNumber("velx").doubleValue());
 				bullet.getVelocity().setY(obj.getAsNumber("vely").doubleValue());
-				bullet.setTimeborn(new Long(obj.getAsString("born")).longValue());
+				bullet.setTimeborn(obj.getAsNumber("birth").longValue());
+				bullet.setInitialpos(new Position(obj.getAsNumber("ix").doubleValue(), obj.getAsNumber("iy").doubleValue()));
 				return bullet;
 			}
 		};

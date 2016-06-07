@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.castrovala.fraser.orbwar.Constants;
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
@@ -34,6 +33,7 @@ public class WorldNetController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
 	private HashMap<String, GameObject> objids = new HashMap<>();
 	private ByteBuffer receiveBuffer;
+	private ByteBuffer receiveBufferLen;
 	private int objectcount;
 	private Position pos;
 	private HashMap<String, ClientPlayer> clients = new HashMap<>();
@@ -49,7 +49,6 @@ public class WorldNetController implements WorldProvider {
 			try {
 				Thread.sleep(2);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -80,7 +79,6 @@ public class WorldNetController implements WorldProvider {
 
 	@Override
 	public List<Position> getStarpoints() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -95,13 +93,11 @@ public class WorldNetController implements WorldProvider {
 
 	@Override
 	public HashMap<GameObject, Float> getScanners() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public GameObject[] allObjects() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -127,7 +123,6 @@ public class WorldNetController implements WorldProvider {
 					objids.remove(obj.getUuid());
 				}
 				
-				//TODO Add client-side game-object update code
 				if (obj instanceof Asteroid) {
 					obj.update();
 				}
@@ -144,89 +139,56 @@ public class WorldNetController implements WorldProvider {
 	}
 	
 	public void processPackets(int depth) throws IOException {
-		//System.out.println("Process packets called");
 		List<AbstractPacket> packets = new ArrayList<>();
-		long start = System.currentTimeMillis();
-		//if (receiveBuffer == null) {
-		//	receiveBuffer = ByteBuffer.allocate(Constants.packetsize);
-		//}
+		//long start = System.currentTimeMillis();
 		
-		ByteBuffer buff;
+		ByteBuffer buff = receiveBuffer;
 		
-		if (receiveBuffer == null) {
-			buff = ByteBuffer.allocate( Constants.packetsize ); // 65536
-			receiveBuffer = buff;
-		} else {
-			buff = receiveBuffer;
+		if (receiveBufferLen == null) {
+			receiveBufferLen = ByteBuffer.allocate(4);
 		}
 		
-		//int currpos = buff.position();
-		while (buff.hasRemaining()) {
-			channel.read(buff);
-			//if (buff.position() == currpos) {
-			//	return;
-			//}
-		}
-		
-		String value = new String(buff.array());
-		//System.out.println("value: " + value);
-		while (value.trim() != "") {
-			//System.out.println("Value: " + value);
-			//if (value.length() <= 4) {
-			//	break;
-			//}
-			
-			String length_str = "";
-			try {
-				length_str = value.substring(0, 4);
-			} catch (StringIndexOutOfBoundsException e) {
-				System.out.println("Length failed");
-				break;
-			}
-			
-			byte[] length_bytes = length_str.getBytes();
-			int length = ByteBuffer.wrap(length_bytes).getInt();
-			
-			if (length == 0) {
-				break;
-			}
-			
-			//if (length + 4 < value.length()) {
-			//	break;
-			//}
-			
-			String json_str;
-			try {
-				json_str = value.substring(4, 4 + length);
-			} catch (StringIndexOutOfBoundsException e) {
-				System.out.println("Out of range");
+		if (receiveBufferLen.hasRemaining()) {
+			channel.read(receiveBufferLen);
+			if (receiveBufferLen.hasRemaining()) {
 				return;
 			}
 			
-			
-			JSONParser parser = new JSONParser();
-			JSONObject jobj;
-			try {
-				System.out.println(json_str);
-				jobj = (JSONObject) parser.parse(json_str);
-				AbstractPacket packet = PacketProcessor.fromJSON(jobj);
-				
-				if (packet == null) {
-					System.out.println("Packet is null, no parser exists!");
-				}
-				
-				packets.add(packet);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			value = value.substring(4 + length, value.length());
-			break;
 		}
 		
-		long end = System.currentTimeMillis();
-		long delay = end - start;
+		receiveBufferLen.position(0);
+		
+		if (buff == null) {
+			receiveBuffer = ByteBuffer.allocate(receiveBufferLen.getInt());
+			buff = receiveBuffer;
+		}
+		
+		if (buff.hasRemaining()) {
+			channel.read(buff);
+			if (buff.hasRemaining()) {
+				return;
+			}
+		}
+		
+		String value = new String(buff.array());
+		
+		JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
+		JSONObject jobj;
+		try {
+			jobj = (JSONObject) parser.parse(value);
+			AbstractPacket packet = PacketProcessor.fromJSON(jobj);
+			
+			if (packet == null) {
+				System.out.println("Packet is null, no parser exists!");
+			}
+			
+			packets.add(packet);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		//long end = System.currentTimeMillis();
+		//long delay = end - start;
 		//System.out.println("Finished data parsing in " + delay + "ms");
 		
 		for (AbstractPacket pack : packets) {
@@ -305,11 +267,11 @@ public class WorldNetController implements WorldProvider {
 			//System.out.println("Serialised data: " + PacketProcessor.toJSON(pack));
 		}
 		
-		//if (channel.)
-		//
-		receiveBuffer = ByteBuffer.allocate(Constants.packetsize);
-		channel.read(receiveBuffer);
-		if (receiveBuffer.position() > 0) {
+		receiveBufferLen = ByteBuffer.allocate(4);
+		receiveBuffer = null;
+		
+		channel.read(receiveBufferLen);
+		if (receiveBufferLen.position() > 0) {
 			processPackets(depth++);
 		}
 	}
@@ -348,39 +310,15 @@ public class WorldNetController implements WorldProvider {
 		}
 		
 		
-		ByteBuffer buf = ByteBuffer.allocate(Constants.packetsize);
+		ByteBuffer buf = ByteBuffer.allocate(raw_message.getBytes().length + 4);
 		
 		ByteBuffer len_buf = ByteBuffer.allocate(4);
 		len_buf.putInt(raw_message.length());
 		byte[] len_bytes = len_buf.array();
 		
 		buf.put(len_bytes);
-		
-		
-		//int l = ByteBuffer.wrap(len_bytes).getInt();
-		//System.out.println("Byte length: " + l);
-		
-		
 		buf.put(raw_message.getBytes());
-		long padding_start = System.currentTimeMillis();
-		//for (int i = 1; i < (Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length) + 1; i++) {
-		//	buf.put((byte)'a');
-		//}
 		
-		//String padding = new String(new char[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]).replaceFirst("\0", "a");
-		//buf.put(padding.getBytes());
-		
-		//buf.put(new byte[(Constants.packetsize) - (len_bytes.length + raw_message.getBytes().length)]);
-		
-		long padding_end = System.currentTimeMillis();
-		long padding_delay = padding_end - padding_start;
-		
-		if (padding_delay >= 3) {
-			System.out.println("Finished padding in " + padding_delay + "ms");
-		}
-		
-		
-		//buf.flip();
 		buf.position(0);
 		long end = System.currentTimeMillis();
 		long delay = end - start;
@@ -392,7 +330,6 @@ public class WorldNetController implements WorldProvider {
 		try {
 			channel.write(buf);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
