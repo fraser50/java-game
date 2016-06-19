@@ -19,7 +19,7 @@ public class GameThread extends Thread {
 	
 	public GameThread(GameServer server) {
 		this.setServer(server);
-		controller = new WorldController();
+		controller = new WorldController(server);
 		this.setName("Game Thread");
 	}
 	
@@ -92,6 +92,9 @@ public class GameThread extends Thread {
 					}
 					
 					for (NetworkPlayer player : getServer().getPlayers()) {
+						if (GameObjectProcessor.toJSON(obj) == null) {
+							System.out.println("couldn't parse " + obj.getClass().toString());
+						}
 						ObjectTransmitPacket otp = new ObjectTransmitPacket(GameObjectProcessor.toJSON(obj));
 						player.sendPacket(otp);
 					}

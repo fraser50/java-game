@@ -12,6 +12,7 @@ import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
@@ -20,6 +21,7 @@ import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -261,6 +263,14 @@ public class WorldNetController implements WorldProvider {
 			if (pack instanceof ChatEnterPacket) {
 				ChatEnterPacket cep = (ChatEnterPacket) pack;
 				messages.add(new ServerMessage(cep.getMessage()));
+			}
+			
+			if (pack instanceof ShieldUpdatePacket) {
+				ShieldUpdatePacket p = (ShieldUpdatePacket) pack;
+				OliverMothership obj = (OliverMothership) getGameObject(p.getShipid());
+				if (obj != null) {
+					obj.setShield(p.isShieldActive());
+				}
 			}
 			
 			//System.out.println("Not parsed :(");

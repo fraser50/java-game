@@ -7,6 +7,7 @@ public class OrbitControl {
 	private float rotation;
 	private float speed;
 	private float rate;
+	private GameObject target;
 	
 	public OrbitControl(GameObject body, float speed, float rate) {
 		this.body = body;
@@ -20,9 +21,17 @@ public class OrbitControl {
 		if (rotation >= 360) {
 			rotation = 0;
 		}
+		
+		double targetw = 0;
+		double targeth = 0;
+		if (target != null) {
+			targetw = target.getWidth();
+			targeth = target.getHeight();
+		}
+		
 		Position vel = Util.angleToVel(rotation, speed);
-		Position pos = new Position(vel.getX() + body.getPosition().getX(),
-									vel.getY() + body.getPosition().getY());
+		Position pos = new Position(vel.getX() + (targetw / 2) + body.getPosition().getX() + (body.getWidth() / 4),
+									vel.getY() + (targeth / 2) + body.getPosition().getY() + (body.getHeight() / 4));
 		return pos;
 	}
 
@@ -56,6 +65,14 @@ public class OrbitControl {
 
 	public void setBody(GameObject body) {
 		this.body = body;
+	}
+
+	public GameObject getTarget() {
+		return target;
+	}
+
+	public void setTarget(GameObject target) {
+		this.target = target;
 	}
 
 }

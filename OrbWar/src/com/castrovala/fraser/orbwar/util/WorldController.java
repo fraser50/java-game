@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.server.GameServer;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
@@ -14,6 +15,11 @@ public class WorldController implements WorldProvider {
 	private HashMap<String, GameObject> objectuuid = new HashMap<>();
 	private List<GameObject> newObjects = new ArrayList<>();
 	private List<GameObject> deadObjects = new ArrayList<>();
+	private GameServer server;
+	
+	public WorldController(GameServer server) {
+		this.server = server;
+	}
 	
 	@Override
 	public WorldZone getZone(Position pos) {
@@ -68,8 +74,7 @@ public class WorldController implements WorldProvider {
 
 	@Override
 	public boolean isServer() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -201,6 +206,11 @@ public class WorldController implements WorldProvider {
 		synchronized (deadObjects) {
 			return deadObjects;
 		}
+	}
+
+	public synchronized GameServer getServer() {
+		return server;
+		
 	}
 
 }

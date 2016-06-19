@@ -30,10 +30,12 @@ import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
 import com.castrovala.fraser.orbwar.gameobject.RespawnPoint;
 import com.castrovala.fraser.orbwar.gameobject.ShieldDrone;
+import com.castrovala.fraser.orbwar.gameobject.ShieldGenerator;
 import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
@@ -53,6 +55,7 @@ import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -121,9 +124,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		RespawnLaser.loadResources();
 		SmokeParticle.loadResources();
 		ShieldDrone.loadResources();
+		OliverMothership.loadResources();
+		ShieldGenerator.loadResources();
 		
 		Asteroid.registerEditor();
 		Turret.registerEditor();
+		OliverMothership.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -389,6 +395,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ShipDataPacket.registerPacket();
 		ShipRemovePacket.registerPacket();
 		ChatEnterPacket.registerPacket();
+		ShieldUpdatePacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -397,6 +404,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		RespawnLaser.registerGameObj();
 		Turret.registerGameObj();
 		Explosion.registerGameObj();
+		OliverMothership.registerGameObj();
+		ShieldGenerator.registerGameObj();
 		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();

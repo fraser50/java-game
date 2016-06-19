@@ -18,7 +18,7 @@ public class GameObjectProcessor {
 	public static JSONObject toJSON(GameObject obj) {
 		String uuid = obj.getUuid();
 		if (!parsers.containsKey(obj.getType())) {
-			return null;
+			System.out.println("couldn't find a parser for '" + obj.getType() + "'");
 		}
 		
 		GameObjParser parser = parsers.get(obj.getType());
