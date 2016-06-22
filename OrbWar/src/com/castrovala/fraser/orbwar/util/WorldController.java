@@ -62,14 +62,7 @@ public class WorldController implements WorldProvider {
 	
 	@Override
 	public synchronized GameObject[] allObjects() {
-		List<GameObject> all = new ArrayList<>();
-		for (WorldZone zone : zones) {
-			for (GameObject obj : zone.getGameobjects()) {
-				all.add(obj);
-			}
-		}
-		
-		return all.toArray(new GameObject[all.size()]);
+		return objectuuid.values().toArray(new GameObject[objectuuid.values().size()]);
 	}
 
 	@Override
@@ -192,8 +185,7 @@ public class WorldController implements WorldProvider {
 
 	@Override
 	public GameObject getGameObject(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
+		return objectuuid.get(uuid);
 	}
 
 	public List<GameObject> getNewObjects() {

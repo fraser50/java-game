@@ -26,6 +26,7 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	private static BufferedImage renderimage;
 	private GameObject target;
 	private Weapon primary;
+	private Position targetlpos;
 	
 	public Turret(Position pos, WorldProvider controller) {
 		super(pos, controller, 10); // 100
@@ -90,35 +91,17 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 			return;
 		}
 		
-		float requiredrota = Util.targetRadius(target, this);
+		float requiredrota;
 		
 		if (target instanceof PlayerShip) {
 			PlayerShip ship = (PlayerShip) target;
 			double speed = ship.getSpeed();
-			boolean finished = false;
-			long iter = 1;
-			/*while (!finished) {
-				Position pos = ship.getPosition().copy().add(Util.angleToVel(ship.getRotation(), (float)speed * iter));
-				requiredrota = Util.targetRadius(pos, getPosition());
-				double timeship = Util.distance(ship.getPosition().copy(), pos) / speed;
-				Position targetpos = Util.angleToVel(requiredrota, 5);
-				double timebullet = Util.distance(getPosition().copy(), pos) / 5;
-				System.out.println("iter: " + iter);
-				System.out.println("timeship: " + timeship);
-				System.out.println("timebullet: " + timebullet);
-				System.out.println("");
-				if (timebullet < timeship + 1 && timebullet >= timebullet) {
-					finished = true;
-				}
-				iter++;
-			}*/
 			
 			Position pos = ship.getPosition().copy();
 			Position bulletpos = getPosition().copy();
 			double distance = Util.distance(pos, bulletpos);
 			double time = distance / 5;
 			double newspeed = speed;
-			//double distancemoved = time * ship.getSpeed();
 			double distancemoved = 0;
 			for (int i = 1; i < (int)time + 1; i++) {
 				distancemoved += newspeed;
@@ -131,6 +114,8 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 			Position targetpos = pos.copy().add(Util.angleToVel(ship.getRotation(), (float)distancemoved));
 			requiredrota = Util.targetRadius(targetpos, bulletpos);
 			
+		} else {
+			requiredrota = Util.targetRadius(target, this);
 		}
 		
 		

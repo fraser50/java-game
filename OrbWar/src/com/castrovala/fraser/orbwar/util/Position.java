@@ -71,5 +71,15 @@ public class Position {
 	public void setEdited(boolean edited) {
 		this.edited = edited;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Position)) {
+			return false;
+		}
+		
+		Position pos = (Position) obj;
+		return pos.x == x && pos.y == y;
+		
+	}
 }
