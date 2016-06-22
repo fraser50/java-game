@@ -27,8 +27,8 @@ public class Planet extends GameObject {
 	public Planet(Position pos, WorldProvider controller) {
 		super(pos, controller);
 		
-		setWidth(64);
-		setHeight(64);
+		setWidth(128);
+		setHeight(128);
 	}
 
 	@Override
@@ -40,18 +40,18 @@ public class Planet extends GameObject {
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		
 		if (rd.isEditor()) {
-			g2d.drawOval(rel_x, rel_y, 64, 64);
+			g2d.drawOval(rel_x, rel_y, getWidth(), getHeight());
 			return;
 		}
 		
 		BufferedImage img = planetimages.get(getUuid());
 		if (img == null) {
-			img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
+			img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 			
-			for (int x = 1; x < 65; x++) {
-				for (int y = 1; y < 65; y++) {
+			for (int x = 1; x < getWidth() + 1; x++) {
+				for (int y = 1; y < getHeight() + 1; y++) {
 					OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
-					double value = noise.eval(x / 5.5, y / 5.5, 0, 0.225);
+					double value = noise.eval(x / 9.5, y / 9.5, 0, 0.225);
 					//System.out.println("Noise value: " + value);
 					if (value > 0) {
 						//System.out.println("Land");
@@ -65,7 +65,7 @@ public class Planet extends GameObject {
 						//System.out.println("Water");
 						int r = 0;
 						int g = 0;
-						int b = 255;
+						int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
 						img.setRGB(x - 1, y - 1, rgb);
 					}
@@ -80,8 +80,8 @@ public class Planet extends GameObject {
 			g2dimg.setComposite(AlphaComposite.Clear);
 			g2dimg.setStroke(new BasicStroke(5));
 			for (int i = 0; i < 361; i++) {
-				Position vel = Util.angleToVel(i, 34);
-				g2dimg.drawLine((int)vel.getX() + 32, (int)vel.getY() + 32, (int)(vel.getX() * 8) + 32, (int)(vel.getY() * 8) + 32);
+				Position vel = Util.angleToVel(i, (getWidth() / 2) + 2);
+				g2dimg.drawLine((int)vel.getX() + (getWidth() / 2), (int)vel.getY() + (getHeight() / 2), (int)(vel.getX() * 8) + (getWidth() / 2), (int)(vel.getY() * 8) + (getHeight() / 2));
 			}
 			
 			g2dimg.setComposite(AlphaComposite.SrcOver);
