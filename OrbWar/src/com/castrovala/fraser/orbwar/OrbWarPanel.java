@@ -31,6 +31,7 @@ import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
+import com.castrovala.fraser.orbwar.gameobject.Planet;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
 import com.castrovala.fraser.orbwar.gameobject.RespawnPoint;
@@ -130,6 +131,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		Asteroid.registerEditor();
 		Turret.registerEditor();
 		OliverMothership.registerEditor();
+		Planet.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -406,6 +408,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		Explosion.registerGameObj();
 		OliverMothership.registerGameObj();
 		ShieldGenerator.registerGameObj();
+		Planet.registerGameObj();
 		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
@@ -778,6 +781,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		if (editorObj != null) {
+			if (editorObj.getPosition() == null) return;
 			int rel_x = (int)(editorObj.getPosition().getX() - mylocation.getX());
 			int rel_y = (int)(editorObj.getPosition().getY() - mylocation.getY());
 			
@@ -786,7 +790,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
 			
+			rd.setEditor(true);
 			editorObj.render(g2d, rel_x, rel_y, centre_x, centre_y, rd);
+			rd.setEditor(false);
 			
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 		}

@@ -5,6 +5,7 @@ public class RenderDebug {
 	private long start;
 	private long end;
 	private Position renderloc;
+	private boolean editor;
 	
 	public RenderDebug(int rendereditems, long start, long end, Position renderloc) {
 		this.rendereditems = rendereditems;
@@ -59,6 +60,14 @@ public class RenderDebug {
 
 	public void setRenderloc(Position renderloc) {
 		this.renderloc = renderloc;
+	}
+
+	public boolean isEditor() {
+		return editor;
+	}
+
+	public void setEditor(boolean editor) {
+		this.editor = editor;
 	}
 
 }
