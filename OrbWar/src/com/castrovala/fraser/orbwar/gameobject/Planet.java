@@ -51,7 +51,7 @@ public class Planet extends GameObject {
 			for (int x = 1; x < getWidth() + 1; x++) {
 				for (int y = 1; y < getHeight() + 1; y++) {
 					OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
-					double value = noise.eval(x / 9.5, y / 9.5, 0, 0.225);
+					double value = noise.eval(x / 14.5, y / 14.5, 0, 0.5);
 					//System.out.println("Noise value: " + value);
 					if (value > 0) {
 						//System.out.println("Land");
@@ -65,7 +65,8 @@ public class Planet extends GameObject {
 						//System.out.println("Water");
 						int r = 0;
 						int g = 0;
-						int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
+						//int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
+						int b = (int) (100 - (value * 100) );
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
 						img.setRGB(x - 1, y - 1, rgb);
 					}
