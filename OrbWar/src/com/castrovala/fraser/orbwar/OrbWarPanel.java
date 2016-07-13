@@ -207,6 +207,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					internalserver = null;
 					mylocation = new Position(0, 0);
 					activegui = getMainMenu();
+					editorObj = null;
 				}
 				
 				if (state == GameState.MENU) {
@@ -716,7 +717,20 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				int centre_y = rel_y + (obj.getHeight() / 2);
 				
 				long objrenderstart = System.currentTimeMillis();
+				
+				int start_x = (int) (obj.getBoundingBox().getX() - mylocation.getX());
+				int start_y = (int) (obj.getBoundingBox().getY() - mylocation.getY());
+				Rectangle objrect = new Rectangle(start_x, start_y, obj.getWidth(), obj.getHeight());
+				Rectangle mouserect = new Rectangle((int)mousePos.getX(), (int)mousePos.getY(), 1, 1);
+				
+				if (mouserect.intersects(objrect)) {
+					rd.setTouching(true);
+					rd.setMousepos(mousePos);
+				}
+				
 				obj.render(g2d, rel_x, rel_y, centre_x, centre_y, rd);
+				
+				rd.setTouching(false);
 				
 				if (controller.getClients().containsKey(obj.getUuid())) {
 					ClientPlayer p = controller.getClients().get(obj.getUuid());
@@ -732,8 +746,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				
 				if (debug && obj instanceof CollisionHandler) {
 					Rectangle rect = obj.getBoundingBox();
-					int start_x = (int) (rect.x - mylocation.getX());
-					int start_y = (int) (rect.y - mylocation.getY());
+					start_x = (int) (rect.x - mylocation.getX());
+					start_y = (int) (rect.y - mylocation.getY());
 					g2d.setColor(Color.RED);
 					g2d.drawRect(start_x, start_y, obj.getWidth(), obj.getHeight());
 					rendereditems++;	

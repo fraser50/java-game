@@ -1,11 +1,20 @@
 package com.castrovala.fraser.orbwar.util;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import net.minidev.json.JSONObject;
 
 public class MaterialStore {
 	private HashMap<String, Integer> materials = new HashMap<>();
+	
+	public MaterialStore(JSONObject obj) {
+		for (Entry<String, Object> m : obj.entrySet()) {
+			addMaterial(m.getKey(), obj.getAsNumber(m.getKey()).intValue());
+		}
+	}
+	
+	public MaterialStore() {}
 
 	public HashMap<String, Integer> getMaterials() {
 		return materials;
@@ -36,7 +45,7 @@ public class MaterialStore {
 		if (materials.get(material) - amount <= 0) {
 			materials.remove(material);
 		} else {
-			materials.put(material, materials.get(material) + amount);
+			materials.put(material, materials.get(material) - amount);
 		}
 		
 	}

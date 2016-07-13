@@ -1,8 +1,13 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -12,6 +17,7 @@ import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
+import com.castrovala.fraser.orbwar.util.MaterialStore;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
@@ -20,11 +26,41 @@ import net.minidev.json.JSONObject;
 
 public class Asteroid extends GameObject implements CollisionHandler {
 	private static BufferedImage renderimage;
+	private MaterialStore mstore;
+
+	public MaterialStore getMstore() {
+		return mstore;
+	}
+
+	public void setMstore(MaterialStore mstore) {
+		this.mstore = mstore;
+	}
 
 	public Asteroid(Position pos, WorldProvider controller) {
 		super(pos, controller);
 		setWidth(64);
 		setHeight(64);
+		
+		mstore = new MaterialStore();
+		
+		List<String[]> materials = new ArrayList<>();
+		materials.add(new String[] { "gold", "55" } );
+		materials.add(new String[] { "rock", "2" } );
+		materials.add(new String[] { "carbon", "4" } );
+		materials.add(new String[] { "silicon", "7" } );
+		materials.add(new String[] { "uranium", "100" } );
+		
+		int chancesgiven = 200;
+		
+		for (int i = 1; i < chancesgiven + 1; i++) {
+			Random r = new Random();
+			for (String[] m : materials) {
+				int chance = Integer.parseInt(m[1]);
+				if (r.nextInt(chance) == r.nextInt(chance)) {
+					mstore.addMaterial(m[0], 1);
+				}
+			}
+		}
 		
 	}
 	
@@ -55,6 +91,27 @@ public class Asteroid extends GameObject implements CollisionHandler {
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
 		g2d.rotate(Math.toRadians((double)-this.getRotation()), centre_x, centre_y);
 		rd.onRender();
+		
+		if (rd.isTouching()) {
+			Position mouse = rd.getMousepos();
+			int x = (int) mouse.getX();
+			int y = (int) mouse.getY();
+			
+			g2d.setColor(Color.GREEN);
+			
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
+			
+			g2d.fillRect(x - 50, y - 50, 100, mstore.getMaterials().keySet().size() * 20);
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+			
+			g2d.setColor(Color.WHITE);
+			int i = 1;
+			for (String key : mstore.getMaterials().keySet()) {
+				g2d.drawString(key + " " + mstore.getMaterials().get(key), x - 50, y - 60 + (20 * i));
+				i++;
+			}
+		}
+		
 	}
 	
 	public static void loadResources() {
@@ -97,12 +154,23 @@ public class Asteroid extends GameObject implements CollisionHandler {
 				jobj.put("x", ast.getPosition().getX());
 				
 				jobj.put("y", ast.getPosition().getY());
+				
+				if (ast.getMstore() != null) {
+					jobj.put("materials", ast.getMstore().toJSON());
+				}
+				
 				return jobj;
 			}
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				Asteroid ast = new Asteroid(null, null);
+				
+				if (obj.containsKey("materials")) {
+					MaterialStore mstore = new MaterialStore((JSONObject)obj.get("materials"));
+					ast.setMstore(mstore);
+				}
+				
 				return ast;
 			}
 		};
@@ -115,7 +183,9 @@ public class Asteroid extends GameObject implements CollisionHandler {
 			
 			@Override
 			public GameObject spawn(WorldProvider controller) {
-				return new Asteroid(new Position(0, 0), controller);
+				Asteroid ast = new Asteroid(new Position(0, 0), controller);
+				ast.setMstore(null);
+				return ast;
 			}
 		};
 		

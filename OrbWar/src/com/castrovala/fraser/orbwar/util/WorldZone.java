@@ -1,9 +1,11 @@
 package com.castrovala.fraser.orbwar.util;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 
 public class WorldZone {
@@ -37,15 +39,39 @@ public class WorldZone {
 	public void populate() {
 		Position startpos = getStartPoint();
 		Position endpos = getEndPoint();
+		List<Rectangle> prevAst = new ArrayList<>();
 		
 		for (int i = 1; i <= 5;i++) {
 			Random rand = new Random();
-			if (rand.nextInt(5 + 1) == rand.nextInt(5 + 1)) {
-				long chosen_x = Util.randomRange((long)startpos.x, (long)endpos.x);
-				long chosen_y = Util.randomRange((long)startpos.y, (long)endpos.y);
+			if (rand.nextInt(10) == rand.nextInt(10)) {
+				long chosen_x = 0;
+				long chosen_y = 0;
+				
+				boolean isTouched = true;
+				Rectangle thisAst = new Rectangle((int)chosen_x, (int)chosen_y, 64, 64);
+				
+				while (isTouched) {
+					
+					chosen_x = Util.randomRange((long)startpos.x, (long)endpos.x);
+					chosen_y = Util.randomRange((long)startpos.y, (long)endpos.y);
+					
+					
+					isTouched = false;
+					for (Rectangle rect : prevAst) {
+						if (rect.intersects(thisAst)) {
+							System.out.println("Intersects");
+							isTouched = true;
+							break;
+						}
+					}
+					thisAst = new Rectangle((int)chosen_x, (int)chosen_y, 64, 64);
+				}
+				
+				prevAst.add(thisAst);
+				
 				Position pos = new Position(chosen_x, chosen_y);
-				//Asteroid aster = new Asteroid(pos, controller);
-				//controller.addObject(aster);
+				Asteroid aster = new Asteroid(pos, controller);
+				controller.addObject(aster);
 			}
 			
 		}

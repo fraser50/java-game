@@ -6,6 +6,8 @@ public class RenderDebug {
 	private long end;
 	private Position renderloc;
 	private boolean editor;
+	private boolean isTouching;
+	private Position mousepos;
 	
 	public RenderDebug(int rendereditems, long start, long end, Position renderloc) {
 		this.rendereditems = rendereditems;
@@ -68,6 +70,22 @@ public class RenderDebug {
 
 	public void setEditor(boolean editor) {
 		this.editor = editor;
+	}
+
+	public boolean isTouching() {
+		return isTouching;
+	}
+
+	public void setTouching(boolean isTouching) {
+		this.isTouching = isTouching;
+	}
+
+	public Position getMousepos() {
+		return mousepos;
+	}
+
+	public void setMousepos(Position mousepos) {
+		this.mousepos = mousepos;
 	}
 
 }
