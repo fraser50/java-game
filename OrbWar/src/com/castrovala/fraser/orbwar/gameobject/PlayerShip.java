@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -179,11 +180,6 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	}
 	
 	public void forward() {
-		//double radian = Math.toRadians(getRotation());
-		//float vx = (float) Math.cos(radian - Math.toRadians(45) - 0.80f) * 16; //4
-		//float vy = (float) Math.sin(radian - Math.toRadians(45) - 0.80f) * 16; //4
-		//getPosition().setX(getPosition().getX() + vx);
-		//getPosition().setY(getPosition().getY() + vy);
 		speed += 2; // 2
 		
 	}
@@ -201,10 +197,10 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
-		
+		AffineTransform orig = g2d.getTransform();
 		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
-		g2d.rotate(Math.toRadians( ((double)this.getRotation() * -1)), centre_x, centre_y);
+		g2d.setTransform(orig);
 		
 		g2d.setColor(Color.GREEN);
 		int green = (int) (getHealth() * getWidth()) / getMaxhealth();

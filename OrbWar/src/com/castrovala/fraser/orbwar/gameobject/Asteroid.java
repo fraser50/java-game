@@ -3,6 +3,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -87,9 +88,10 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
+		AffineTransform orig = g2d.getTransform();
 		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
-		g2d.rotate(Math.toRadians((double)-this.getRotation()), centre_x, centre_y);
+		g2d.setTransform(orig);
 		rd.onRender();
 		
 		if (rd.isTouching()) {
