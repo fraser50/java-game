@@ -1,5 +1,9 @@
 package com.castrovala.fraser.orbwar.util;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -91,6 +95,39 @@ public class Util {
 	
 	public static double BytesToDouble(ByteBuffer buff) {
 		return buff.getDouble();
+	}
+	
+	public static void renderLightning(Graphics2D g2d, Position start, Position finish) {
+		long seed = System.currentTimeMillis() / 80;
+		//long seed = Long.MAX_VALUE;
+		Random r = new Random(seed);
+		
+		Stroke prevstroke = g2d.getStroke();
+		g2d.setStroke(new BasicStroke(1));
+		
+		float lineangle = Util.targetRadius(finish, start) - 90;
+		double distance = Util.distance(start, finish);
+		
+		Position prev = null;
+		g2d.setColor(Color.WHITE);
+		
+		
+		for (int i = 1; i < distance + 1; i+=4) {
+			Position pointinline = Util.angleToVel(lineangle + 90, i);
+			
+			if (prev != null) {
+				g2d.drawLine((int)prev.getX(), (int)prev.getY(), (int)pointinline.getX(), (int)pointinline.getY());
+			}
+			
+			float randomangle = lineangle + r.nextInt(360) + 1;
+			Position v = Util.angleToVel(randomangle, r.nextInt(7));
+			Position newpointinline = new Position(pointinline.x, pointinline.y).add(v);
+			prev = newpointinline;
+			g2d.drawLine((int)pointinline.getX(), (int)pointinline.getY(), (int)newpointinline.getX(), (int)newpointinline.getY());
+		}
+		
+		g2d.setStroke(prevstroke);
+		
 	}
 
 }
