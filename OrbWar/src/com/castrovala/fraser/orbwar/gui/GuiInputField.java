@@ -7,9 +7,10 @@ import java.awt.event.KeyEvent;
 import com.castrovala.fraser.orbwar.world.Position;
 
 public class GuiInputField extends GuiElement implements GuiFocusable {
-	private String text;
+	private String text = "";
 	private boolean focused = false;
 	private int counter;
+	private String shadowtext = "";
 
 	public GuiInputField(Position start, Position end, String text) {
 		super(start, end);
@@ -77,6 +78,11 @@ public class GuiInputField extends GuiElement implements GuiFocusable {
 		
 		g.drawString(newtext, (int)(getStart().getX() + 20), (int)(getStart().getY() + getHeight() / 2));
 		
+		if ( (!focused) && !shadowtext.equals("")  && text.equals("")) {
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawString(shadowtext, (int)(getStart().getX() + 500), (int)(getStart().getY() + getHeight() / 2));
+		}
+		
 	}
 
 	public String getText() {
@@ -101,6 +107,14 @@ public class GuiInputField extends GuiElement implements GuiFocusable {
 		if (counter == 20) {
 			counter = 0;
 		}
+	}
+
+	public String getShadowtext() {
+		return shadowtext;
+	}
+
+	public void setShadowtext(String shadowtext) {
+		this.shadowtext = shadowtext;
 	}
 
 }

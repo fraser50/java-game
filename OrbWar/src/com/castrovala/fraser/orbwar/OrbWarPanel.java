@@ -907,15 +907,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			@Override
 			public void run() {
 				activegui = getMultiplayerScreen();
-				/*Scanner scan = new Scanner(System.in);
-				System.out.println("Host");
-				String host = scan.nextLine();
-				System.out.println("Port");
-				int port = new Integer(scan.nextLine());
-				scan.close();
-				joinServer(host, port);
-				activegui = null;
-				state = GameState.PLAYING;*/
 				
 			}
 		}, Color.LIGHT_GRAY).setText(Color.BLACK));
@@ -928,8 +919,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				
 			}
 		}, Color.LIGHT_GRAY).setText(Color.BLACK));
-		
-		menuscreen.addElement(new GuiInputField(new Position(1, 180), new Position(OrbWarPanel.PWIDTH, 230)));
 		
 		return menuscreen;
 	}
@@ -994,6 +983,11 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		GuiScreen screen = new GuiScreen();
 		final GuiInputField ipfield = new GuiInputField(new Position(0, 0), new Position(PWIDTH, 80));
 		final GuiInputField portfield = new GuiInputField(new Position(0, 90), new Position(PWIDTH, 170));
+		final GuiInputField namefield = new GuiInputField(new Position(0, 180), new Position(PWIDTH, 260));
+		
+		ipfield.setShadowtext("IP Address");
+		portfield.setShadowtext("Port");
+		namefield.setShadowtext("Username");
 		
 		
 		GuiButton connectbutton = new GuiButton(new Position(4, PHEIGHT - 200), new Position(PWIDTH - 2, PHEIGHT - 120), "Connect", new Runnable() {
@@ -1041,6 +1035,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		screen.addElement(ipfield);
 		screen.addElement(portfield);
+		screen.addElement(namefield);
 		
 		screen.addElement(connectbutton);
 		screen.addElement(backbutton);
