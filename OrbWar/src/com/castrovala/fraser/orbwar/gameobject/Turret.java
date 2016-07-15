@@ -27,7 +27,6 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	private static BufferedImage renderimage;
 	private GameObject target;
 	private Weapon primary;
-	private Position targetlpos;
 	
 	public Turret(Position pos, WorldProvider controller) {
 		super(pos, controller, 10); // 100

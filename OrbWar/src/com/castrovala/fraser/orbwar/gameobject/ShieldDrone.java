@@ -16,7 +16,6 @@ import com.castrovala.fraser.orbwar.util.WorldProvider;
 public class ShieldDrone extends GameObject implements CollisionHandler {
 	private OrbitControl control;
 	private static BufferedImage renderimage;
-	private long life = 0;
 
 	public ShieldDrone(Position pos, WorldProvider controller, OrbitControl control) {
 		super(pos, controller, 100);
