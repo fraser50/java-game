@@ -8,12 +8,16 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.server.NetworkPlayer;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
+import com.castrovala.fraser.orbwar.util.WorldController;
+import com.castrovala.fraser.orbwar.util.WorldNetController;
 import com.castrovala.fraser.orbwar.util.WorldProvider;
 
 import net.minidev.json.JSONObject;
@@ -23,7 +27,10 @@ public class RespawnLaser extends GameObject {
 	private static BufferedImage renderimage;
 	
 	public OrbitControl control;
-	public boolean firing;
+	private boolean firing;
+	
+	protected String clientbodyid;
+	private GameObject clientbody;
 
 	public RespawnLaser(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -47,9 +54,13 @@ public class RespawnLaser extends GameObject {
 		g2d.drawImage(renderimage, rel_x, rel_y, null);
 		rd.onRender();
 		
+		if (clientbody == null) {
+			return;
+		}
+		
 		if (firing) {
 			Position spos = rd.getRenderloc();
-			Position bodypos = control.getBody().getPosition();
+			Position bodypos = clientbody.getPosition();
 			g2d.setColor(Color.WHITE);
 			
 			// Position start = Util.coordToScreen(new Position(centre_x, centre_y), spos);
@@ -93,12 +104,16 @@ public class RespawnLaser extends GameObject {
 				jobj.put("x", laser.getPosition().getX());
 				
 				jobj.put("y", laser.getPosition().getY());
+				
+				jobj.put("point", laser.getControl().getBody().getUuid());
+				
 				return jobj;
 			}
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				RespawnLaser laser = new RespawnLaser(null, null);
+				laser.clientbodyid = obj.getAsString("point");
 				return laser;
 			}
 		};
@@ -109,6 +124,35 @@ public class RespawnLaser extends GameObject {
 	@Override
 	public String getType() {
 		return "rlaser";
+	}
+	
+	public OrbitControl getControl() {
+		return control;
+	}
+	
+	public void setFiring(boolean firing) {
+		this.firing = firing;
+		
+		if (getController() instanceof WorldNetController) {
+			return;
+		}
+		
+		ShieldUpdatePacket p = new ShieldUpdatePacket(getUuid(), firing);
+		WorldController c = (WorldController) getController();
+		for (NetworkPlayer pl : c.getServer().getPlayers()) {
+			pl.sendPacket(p);
+		}
+	}
+	
+	public boolean isFiring() {
+		return firing;
+	}
+	
+	@Override
+	public void clientUpdate() {
+		if (clientbody == null) {
+			clientbody = getController().getGameObject(clientbodyid);
+		}
 	}
 
 }

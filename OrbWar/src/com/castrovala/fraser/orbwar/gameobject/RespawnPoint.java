@@ -53,7 +53,7 @@ public class RespawnPoint extends GameObject {
 		
 		if (timealive == 500 && speed == 100) {
 			for (RespawnLaser laser : lasers) {
-				laser.firing = true;
+				laser.setFiring(true);
 			}
 		}
 		
@@ -75,7 +75,7 @@ public class RespawnPoint extends GameObject {
 		
 		if (timealive == 600) {
 			for (RespawnLaser laser : lasers) {
-				laser.firing = false;
+				laser.setFiring(false);
 			}
 		}
 		

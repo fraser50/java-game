@@ -13,6 +13,7 @@ import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
+import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
@@ -267,9 +268,15 @@ public class WorldNetController implements WorldProvider {
 			
 			if (pack instanceof ShieldUpdatePacket) {
 				ShieldUpdatePacket p = (ShieldUpdatePacket) pack;
-				OliverMothership obj = (OliverMothership) getGameObject(p.getShipid());
-				if (obj != null) {
-					obj.setShield(p.isShieldActive());
+				GameObject obj = getGameObject(p.getShipid());
+				if (obj != null && obj instanceof OliverMothership) {
+					OliverMothership mship = (OliverMothership) obj;
+					mship.setShield(p.isShieldActive());
+				}
+				
+				if (obj != null && obj instanceof RespawnLaser) {
+					RespawnLaser laser = (RespawnLaser) obj;
+					laser.setFiring(p.isShieldActive());
 				}
 			}
 			
