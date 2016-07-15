@@ -7,8 +7,8 @@ import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.ControlUser;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
-import com.castrovala.fraser.orbwar.util.Position;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 import net.minidev.json.JSONObject;
 

@@ -14,10 +14,10 @@ import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.OpenSimplexNoise;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 import net.minidev.json.JSONObject;
 

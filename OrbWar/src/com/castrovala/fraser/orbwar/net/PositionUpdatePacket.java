@@ -1,6 +1,6 @@
 package com.castrovala.fraser.orbwar.net;
 
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 import net.minidev.json.JSONObject;
 

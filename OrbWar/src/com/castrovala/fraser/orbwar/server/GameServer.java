@@ -19,7 +19,7 @@ import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Controllable;
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;

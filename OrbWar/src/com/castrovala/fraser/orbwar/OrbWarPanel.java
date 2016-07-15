@@ -66,13 +66,13 @@ import com.castrovala.fraser.orbwar.server.ServerState;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.GameState;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldNetController;
-import com.castrovala.fraser.orbwar.util.WorldZone;
 import com.castrovala.fraser.orbwar.weapons.RechargeWeapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldNetController;
+import com.castrovala.fraser.orbwar.world.WorldZone;
 
 @SuppressWarnings("serial")
 public class OrbWarPanel extends JPanel implements Runnable {

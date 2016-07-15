@@ -3,7 +3,7 @@ package com.castrovala.fraser.orbwar.weapons;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.ShieldDrone;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class Forcefield implements RechargeWeapon {
 	private int maxcharge = 20;

@@ -1,7 +1,7 @@
 package com.castrovala.fraser.orbwar.editor;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public abstract class Editor {
 	private String name;

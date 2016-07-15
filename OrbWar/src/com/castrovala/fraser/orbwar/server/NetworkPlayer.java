@@ -12,8 +12,8 @@ import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.util.Controllable;
-import com.castrovala.fraser.orbwar.util.Position;
-import com.castrovala.fraser.orbwar.util.WorldZone;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public class NetworkPlayer implements ControlUser {
 	private UUID id = UUID.randomUUID();

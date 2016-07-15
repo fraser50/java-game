@@ -3,7 +3,7 @@ package com.castrovala.fraser.orbwar.gui;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public abstract class GuiElement {
 	private Position start;

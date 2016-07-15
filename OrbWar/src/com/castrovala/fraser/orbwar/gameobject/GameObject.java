@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.castrovala.fraser.orbwar.gui.RenderStage;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
-import com.castrovala.fraser.orbwar.util.WorldZone;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
+import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public abstract class GameObject {
 	private Position pos;

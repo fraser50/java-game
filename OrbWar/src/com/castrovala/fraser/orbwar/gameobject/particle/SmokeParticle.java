@@ -6,9 +6,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class SmokeParticle extends GameObject {
 	private static BufferedImage renderimage;

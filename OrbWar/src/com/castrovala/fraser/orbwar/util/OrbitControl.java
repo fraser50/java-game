@@ -1,6 +1,7 @@
 package com.castrovala.fraser.orbwar.util;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class OrbitControl {
 	private GameObject body;

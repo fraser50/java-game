@@ -3,7 +3,7 @@ package com.castrovala.fraser.orbwar.gui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class GuiButton extends GuiElement implements GuiClickable {
 	private String label;

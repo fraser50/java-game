@@ -1,4 +1,4 @@
-package com.castrovala.fraser.orbwar.util;
+package com.castrovala.fraser.orbwar.world;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class WorldZone {
 	private List<GameObject> gameobjects = new ArrayList<>();

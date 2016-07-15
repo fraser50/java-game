@@ -1,4 +1,6 @@
-package com.castrovala.fraser.orbwar.util;
+package com.castrovala.fraser.orbwar.world;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class Position {
 	protected double x;

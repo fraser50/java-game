@@ -7,10 +7,10 @@ import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldController;
-import com.castrovala.fraser.orbwar.util.WorldZone;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldController;
+import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public class GameThread extends Thread {
 	private volatile GameServer server;

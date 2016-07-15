@@ -1,5 +1,7 @@
 package com.castrovala.fraser.orbwar.util;
 
+import com.castrovala.fraser.orbwar.world.Position;
+
 public class RenderDebug {
 	private int rendereditems;
 	private long start;

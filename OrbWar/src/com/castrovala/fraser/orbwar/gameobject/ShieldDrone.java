@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class ShieldDrone extends GameObject implements CollisionHandler {
 	private OrbitControl control;

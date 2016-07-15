@@ -4,8 +4,8 @@ import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.Util;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class BulletGun implements RechargeWeapon {
 	private int charge;

@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public class Util {
 	public static long randomRange(long min, long max) {
@@ -22,8 +24,8 @@ public class Util {
 	}
 	
 	public static Position toZoneCoords(Position pos) {
-		long x = (long) pos.x / WorldZone.len_x;
-		long y = (long) pos.y / WorldZone.len_y;
+		long x = (long) pos.getX() / WorldZone.len_x;
+		long y = (long) pos.getY() / WorldZone.len_y;
 		Position zonepos = new Position(x, y);
 		return zonepos;
 	}
@@ -121,7 +123,7 @@ public class Util {
 			
 			float randomangle = lineangle + r.nextInt(360) + 1;
 			Position v = Util.angleToVel(randomangle, r.nextInt(7));
-			Position newpointinline = new Position(pointinline.x, pointinline.y).add(v);
+			Position newpointinline = new Position(pointinline.getX(), pointinline.getY()).add(v);
 			prev = newpointinline;
 			g2d.drawLine((int)pointinline.getX(), (int)pointinline.getY(), (int)newpointinline.getX(), (int)newpointinline.getY());
 		}

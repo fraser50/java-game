@@ -1,4 +1,4 @@
-package com.castrovala.fraser.orbwar.util;
+package com.castrovala.fraser.orbwar.world;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -7,6 +7,8 @@ import java.util.List;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.server.GameServer;
+import com.castrovala.fraser.orbwar.util.CollisionHandler;
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();

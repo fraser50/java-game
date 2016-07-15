@@ -13,12 +13,12 @@ import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.NetworkPlayer;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldController;
-import com.castrovala.fraser.orbwar.util.WorldNetController;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldController;
+import com.castrovala.fraser.orbwar.world.WorldNetController;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 import net.minidev.json.JSONObject;
 

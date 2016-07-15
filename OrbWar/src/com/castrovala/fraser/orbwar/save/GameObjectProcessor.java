@@ -5,7 +5,7 @@ import java.util.HashMap;
 import net.minidev.json.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
-import com.castrovala.fraser.orbwar.util.Position;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class GameObjectProcessor {
 	private static HashMap<String, GameObjParser> parsers = new HashMap<>();

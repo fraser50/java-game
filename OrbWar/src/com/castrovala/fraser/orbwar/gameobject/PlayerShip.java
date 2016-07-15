@@ -17,14 +17,14 @@ import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.ControlUser;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
 import com.castrovala.fraser.orbwar.weapons.BulletGun;
 import com.castrovala.fraser.orbwar.weapons.Forcefield;
 import com.castrovala.fraser.orbwar.weapons.Weapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class PlayerShip extends GameObject implements Controllable, WeaponOwner, CollisionHandler {
 	private boolean tofly = false;

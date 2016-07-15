@@ -1,4 +1,4 @@
-package com.castrovala.fraser.orbwar.util;
+package com.castrovala.fraser.orbwar.world;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -26,6 +26,7 @@ import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.util.Util;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;

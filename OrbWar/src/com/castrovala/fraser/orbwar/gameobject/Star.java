@@ -10,10 +10,10 @@ import javax.imageio.ImageIO;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
-import com.castrovala.fraser.orbwar.util.Position;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
-import com.castrovala.fraser.orbwar.util.WorldProvider;
+import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class Star extends GameObject {
 	private OrbitControl orbit;
