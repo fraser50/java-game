@@ -18,6 +18,7 @@ import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
+import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
@@ -42,8 +43,18 @@ public class WorldNetController implements WorldProvider {
 	private Position pos;
 	private HashMap<String, ClientPlayer> clients = new HashMap<>();
 	private List<ServerMessage> messages = new ArrayList<>();
+	public boolean readytoplay = false;
+	public boolean namegood = false;
+	public String namereason = "";
+	public boolean didgetncp = false;
+	
+	public String host;
+	public int port;
 	
 	public WorldNetController(String host, int port, Position pos) throws IOException {
+		this.host = host;
+		this.port = port;
+		
 		//super();
 		channel = SocketChannel.open();
 		channel.configureBlocking(false);
@@ -196,6 +207,15 @@ public class WorldNetController implements WorldProvider {
 		//System.out.println("Finished data parsing in " + delay + "ms");
 		
 		for (AbstractPacket pack : packets) {
+			
+			if (pack instanceof NameCheckPacket) {
+				didgetncp = true;
+				System.out.println("Processing packet for ncp");
+				NameCheckPacket ncp = (NameCheckPacket) pack;
+				namegood = ncp.isLogin();
+				namereason = ncp.getName();
+			}
+			
 			if (pack instanceof ObjectTransmitPacket) {
 				if (pack.getType() != "obj_transmit") {
 					System.out.println("Not an OTP!");
@@ -365,6 +385,10 @@ public class WorldNetController implements WorldProvider {
 
 	public List<ServerMessage> getMessages() {
 		return messages;
+	}
+	
+	public SocketChannel getChannel() {
+		return channel;
 	}
 
 }

@@ -3,11 +3,14 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.ControlUser;
+import com.castrovala.fraser.orbwar.server.NetworkPlayer;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 import net.minidev.json.JSONObject;
@@ -65,6 +68,13 @@ public class RespawnPoint extends GameObject {
 			if (user != null) {
 				user.setControl(ship);
 				ship.setControl(user);
+				
+				WorldController c = (WorldController) getController();
+				
+				for (NetworkPlayer p : c.getServer().getPlayers()) {
+					p.sendPacket(new ShipDataPacket(((NetworkPlayer)user).getName(), ship.getUuid()));
+				}
+				
 			} else {
 				System.out.println("ControlUser is NULL!");
 			}

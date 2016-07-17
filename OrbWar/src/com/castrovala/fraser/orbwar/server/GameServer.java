@@ -15,6 +15,7 @@ import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
+import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -32,6 +33,7 @@ public class GameServer extends Thread {
 	private volatile boolean active = true;
 	private ServerSocketChannel serversock;
 	private volatile List<NetworkPlayer> players = new ArrayList<>();
+	private volatile List<NetworkPlayer> readyplayers = new ArrayList<>();
 	private ServerState state = ServerState.STARTING;
 	
 	public GameServer(boolean localserver) {
@@ -99,53 +101,11 @@ public class GameServer extends Thread {
 				
 				if (channel != null) {
 					NetworkPlayer p = new NetworkPlayer(this, channel);
-					p.setName("Test");
 					channel.configureBlocking(false);
 					System.out.println("Pending Connection");
 					channel.finishConnect();
 					System.out.println("Player Connected");
 					players.add(p);
-					synchronized (gamelogic.getController()) {
-						PlayerShip ship = new PlayerShip(new Position(300, 300), gamelogic.getController());
-						ship.setControl(p);
-						p.setControl(ship);
-						
-						
-						gamelogic.getController().addObject(ship);
-						System.out.println("Added Player Ship");
-						
-						for (GameObject obj : gamelogic.getController().allObjects()) {
-							if (obj == ship) {
-								continue;
-							}
-							
-							if (!(obj instanceof Controllable)) {
-								continue;
-							}
-							
-							Controllable c = (Controllable) obj;
-							
-							NetworkPlayer tp = (NetworkPlayer) c.getControl();
-							
-							ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid());
-							p.sendPacket(supp);
-						}
-						
-						ShipDataPacket sdp = new ShipDataPacket(null, null);
-						for (NetworkPlayer pl : getPlayers()) {
-							if (pl == p) {
-								continue;
-							}
-							
-							if (pl.getControl() != null) {
-								sdp.setName(pl.getName());
-								sdp.setShipid(((GameObject)pl.getControl()).getUuid());
-								p.sendPacket(sdp);
-							}
-						}
-						
-					}
-					
 					
 				}
 				
@@ -153,27 +113,20 @@ public class GameServer extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			//System.out.println("No longer checking for connections");
 			
-			for (NetworkPlayer p : getPlayers().toArray(new NetworkPlayer[getPlayers().size()])) {
-				//System.out.println("Iterating over players");
+			for (NetworkPlayer p : players.toArray(new NetworkPlayer[players.size()])) {
 				try {
 					SocketChannel channel = p.getConn();
 					//System.out.println("Acquiring packet queue lock...");
 					synchronized (p.getPacketQueue()) {
-						//System.out.println("Lock acquired");
-						//System.out.println(p.getPacketQueue().size() + " packets in queue");
 						for (AbstractPacket pa : p.getPacketQueue()
 								.toArray(new AbstractPacket[p.getPacketQueue().size()])) {
 
-						//for (AbstractPacket pa : p.getPacketQueue()) {
-							//System.out.println("Preparing to send packet");
 							if (pa == null) {
 								System.out.println("Packet is null");
 								continue;
 							}
 
-							//System.out.println("Packet to transmit class: " + pa.getClass().getName());
 							long start = System.currentTimeMillis();
 							long json_start = start;
 							long start_convert_obj = System.currentTimeMillis();
@@ -203,12 +156,8 @@ public class GameServer extends Thread {
 
 							buf.put(len_bytes);
 
-							//int l = ByteBuffer.wrap(len_bytes).getInt();
-							//System.out.println("Byte length: " + l);
-
 							buf.put(raw_message.getBytes());
 
-							//buf.flip();
 							buf.position(0);
 							long end = System.currentTimeMillis();
 							long delay = end - start;
@@ -222,7 +171,6 @@ public class GameServer extends Thread {
 					}
 					
 					List<AbstractPacket> packets = new ArrayList<>();
-					//long start = System.currentTimeMillis();
 					
 					if (p.getRecievedLen() == null) {
 						p.setRecievedLen(ByteBuffer.allocate(4));
@@ -274,6 +222,47 @@ public class GameServer extends Thread {
 					boolean gotcontrol = false;
 					for (AbstractPacket pa : packets) {
 						//System.out.println("Server found packet: " + pa.getClass().getName());
+						
+						if (pa instanceof NameCheckPacket && !readyplayers.contains(p)) {
+							NameCheckPacket ncp = (NameCheckPacket) pa;
+							
+							NameCheckPacket response = new NameCheckPacket(false, "An login error occurred");
+							for (char c : ncp.getName().toCharArray()) {
+								if (Character.isLetterOrDigit(c) || c == '_') {
+									response.setLogin(true);
+								} else {
+									response.setLogin(false);
+									response.setName("Invalid characters");
+									break;
+								}
+							}
+							
+							if (ncp.getName().length() >= 1 && ncp.getName().length() > 10) {
+								response.setLogin(false);
+								response.setName("Incorrect Size! (between 1 and 10");
+							}
+							
+							for (NetworkPlayer pl : getPlayers().toArray(new NetworkPlayer[getPlayers().size()])) {
+								if (pl.getName().equalsIgnoreCase(ncp.getName())) {
+									response.setLogin(false);
+									response.setName("That name is taken!");
+								}
+							}
+							
+							p.sendPacket(response);
+							
+							if (ncp.isLogin() && response.isLogin()) {
+								System.out.println("Setting name");
+								p.setName(ncp.getName());
+								finishLogin(p);
+							}
+							
+							if (!readyplayers.contains(p)) {
+								continue;
+							}
+							
+						}
+						
 						if (pa instanceof KeyPressPacket) {
 							if (gotcontrol) {
 								continue;
@@ -368,7 +357,7 @@ public class GameServer extends Thread {
 					p.setRecievedLen(null);
 					p.setReceived(buff);
 					
-				} catch (IOException e) {
+				} catch (IOException | IllegalArgumentException e) {
 					e.printStackTrace();
 					try {
 						p.getConn().close();
@@ -377,6 +366,7 @@ public class GameServer extends Thread {
 						e1.printStackTrace();
 					}
 					players.remove(p);
+					readyplayers.remove(p);
 					if (p.getControl() != null) {
 						((GameObject)p.getControl()).delete();
 					}
@@ -418,7 +408,7 @@ public class GameServer extends Thread {
 	}
 
 	public List<NetworkPlayer> getPlayers() {
-		return players;
+		return readyplayers;
 	}
 
 	public synchronized ServerState getServerState() {
@@ -427,6 +417,59 @@ public class GameServer extends Thread {
 
 	public synchronized void setServerState(ServerState state) {
 		this.state = state;
+	}
+	
+	private void finishLogin(NetworkPlayer p) {
+		System.out.println("finishlogin called for " + p.getName());
+		
+		readyplayers.add(p);
+		
+		synchronized (gamelogic.getController()) {
+			PlayerShip ship = new PlayerShip(new Position(300, 300), gamelogic.getController());
+			ship.setControl(p);
+			p.setControl(ship);
+			
+			
+			gamelogic.getController().addObject(ship);
+			System.out.println("Added Player Ship");
+			
+			for (GameObject obj : gamelogic.getController().allObjects()) {
+				if (obj == ship) {
+					continue;
+				}
+				
+				if (!(obj instanceof Controllable)) {
+					continue;
+				}
+				
+				Controllable c = (Controllable) obj;
+				
+				NetworkPlayer tp = (NetworkPlayer) c.getControl();
+				
+				ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid());
+				p.sendPacket(supp);
+			}
+			
+			ShipDataPacket sdp = new ShipDataPacket(null, null);
+			for (NetworkPlayer pl : getPlayers()) {
+				if (pl == p) {
+					continue;
+				}
+				
+				if (p.getControl() != null) {
+					sdp.setName(p.getName());
+					sdp.setShipid(((GameObject)p.getControl()).getUuid());
+					pl.sendPacket(sdp);
+				}
+				
+				/*if (pl.getControl() != null) {
+					sdp.setName(pl.getName());
+					sdp.setShipid(((GameObject)pl.getControl()).getUuid());
+					p.sendPacket(sdp);
+				}*/
+			}
+			
+		}
 	}
 
 }

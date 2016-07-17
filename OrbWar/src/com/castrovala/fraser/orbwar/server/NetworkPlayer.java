@@ -20,7 +20,7 @@ public class NetworkPlayer implements ControlUser {
 	private GameServer server;
 	private volatile List<AbstractPacket> packetQueue = Collections.synchronizedList(new ArrayList<AbstractPacket>());
 	private SocketChannel conn;
-	private String name;
+	private String name = "";
 	private Controllable ship;
 	private List<WorldZone> seenZones = new ArrayList<>();
 	private Position currentpos = new Position(0, 0);

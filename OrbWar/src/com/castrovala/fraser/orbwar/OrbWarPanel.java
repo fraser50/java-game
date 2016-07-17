@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -53,6 +54,7 @@ import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
+import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
@@ -103,6 +105,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private GuiFocusable focused;
 	private boolean chatgui;
 	private String currentmsg = "";
+	private volatile int turntime = 0;
+	private volatile int turnamount = 0;
 	
 	public OrbWarPanel() {
 		
@@ -137,8 +141,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
 		}
 		
-		addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
+		addKeyListener(new KeyListener() {
+			public void keyTyped(KeyEvent e) {
 				
 				int keyCode = e.getKeyCode();
 				
@@ -161,7 +165,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					}
 				}
 				
-				if (!chatgui && keyCode == KeyEvent.VK_C) {
+				if (!chatgui && keyCode == KeyEvent.VK_C && state == GameState.PLAYING) {
 					chatgui = true;
 					return;
 				}
@@ -192,6 +196,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
 					System.out.println("Terminating game");
+					try {
+						controller.getChannel().close();
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
 					controller = null;
 					state = GameState.MENU;
 					System.out.println("Trying to stop internal server");
@@ -218,14 +228,35 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					//return;
 				}
 				
-				if (keyCode == KeyEvent.VK_LEFT) {
-					activecontrol = "left";
+				/*if (keyCode == KeyEvent.VK_LEFT) {
+					
+					if (turntime > 0) {
+						turntime = 0;
+					}
+					
+					turntime--;
+					if (turntime <= -3) {
+						activecontrol = "left";
+						turntime = 0;
+					}
+					
 					//myship.left();
 				}
 				if (keyCode == KeyEvent.VK_RIGHT) {
-					activecontrol = "right";
+					
+					if (turntime < 0) {
+						turntime = 0;
+					}
+					
+					turntime++;
+					if (turntime >= 3) {
+						activecontrol = "right";
+						turntime = 0;
+					}
+					
 					//myship.right();
-				}
+				}*/
+				
 				if (keyCode == KeyEvent.VK_UP) {
 					activecontrol = "up";
 					//myship.fly();
@@ -280,6 +311,205 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 					
 						
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				
+				if (keyCode == KeyEvent.VK_LEFT) {
+					turnamount = -1;
+				}
+				
+				if (keyCode == KeyEvent.VK_RIGHT) {
+					turnamount = 1;
+				}
+				
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				
+				if (keyCode == KeyEvent.VK_LEFT) {
+					turnamount = 0;
+				}
+				
+				if (keyCode == KeyEvent.VK_RIGHT) {
+					turnamount = 0;
+				}
+				
+			}
+		});
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				
+				if (activegui != null) {
+					for (GuiElement el : activegui.getElements()) {
+						if (!(el instanceof GuiFocusable)) {
+							continue;
+						}
+						
+						GuiFocusable focus = (GuiFocusable) el;
+						if (focus == focused) {
+							char key = e.getKeyChar();
+							if (Character.isDefined(key)) {
+								focus.onCharEnter(key);
+								focus.onKeyPress(e);
+							}
+							break;
+						}
+						
+					}
+				}
+				
+				if (!chatgui && keyCode == KeyEvent.VK_C && state == GameState.PLAYING) {
+					chatgui = true;
+					return;
+				}
+				
+				if (chatgui) {
+					
+					if (keyCode == KeyEvent.VK_ENTER) {
+						ChatEnterPacket cep = new ChatEnterPacket(currentmsg);
+						currentmsg = "";
+						chatgui = false;
+						controller.sendPacket(cep);
+						return;
+					}
+					
+					if (keyCode == KeyEvent.VK_BACK_SPACE && currentmsg.length() != 0) {
+						currentmsg = currentmsg.substring(0, currentmsg.length() - 1);
+					} else {
+						char key = e.getKeyChar();
+						if (Character.isDefined(key)) {
+							currentmsg = currentmsg + key;
+						}
+					}
+					return;
+				}
+				
+				if (keyCode == KeyEvent.VK_ENTER && state == GameState.MENU) {
+					init_game = true;
+				}
+				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
+					System.out.println("Terminating game");
+					try {
+						controller.getChannel().close();
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					controller = null;
+					state = GameState.MENU;
+					System.out.println("Trying to stop internal server");
+					internalserver.stopServer();
+					System.out.println("Server stop called");
+					try {
+						internalserver.join();
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					System.out.println("Internal Server died");
+					internalserver = null;
+					mylocation = new Position(0, 0);
+					activegui = getMainMenu();
+					editorObj = null;
+				}
+				
+				if (state == GameState.MENU) {
+					return;
+				}
+				
+				if (myship == null) {
+					//return;
+				}
+				
+				/*if (keyCode == KeyEvent.VK_LEFT) {
+					
+					if (turntime > 0) {
+						turntime = 0;
+					}
+					
+					turntime--;
+					if (turntime <= -3) {
+						activecontrol = "left";
+						turntime = 0;
+					}
+					
+					//myship.left();
+				}
+				if (keyCode == KeyEvent.VK_RIGHT) {
+					
+					if (turntime < 0) {
+						turntime = 0;
+					}
+					
+					turntime++;
+					if (turntime >= 3) {
+						activecontrol = "right";
+						turntime = 0;
+					}
+					
+					//myship.right();
+				}*/
+				
+				if (keyCode == KeyEvent.VK_UP) {
+					activecontrol = "up";
+					//myship.fly();
+				}
+				if (keyCode == KeyEvent.VK_DOWN) {
+					activecontrol = "fire";
+					//myship.fire();
+				}
+				if (keyCode == KeyEvent.VK_F) {
+					//myship.shield();
+				}
+				if (keyCode == KeyEvent.VK_H) {
+					//myship.toggleBrake();
+				}
+				if (keyCode == KeyEvent.VK_BACK_SPACE) {
+					//myship.suicide();
+				}
+				if (keyCode == KeyEvent.VK_Q) {
+					if (state == GameState.PAUSED || state == GameState.PLAYING) {
+						if (state == GameState.PLAYING) {
+							state = GameState.PAUSED;
+						} else {
+							state = GameState.PLAYING;
+						}
+					}
+				}
+				if (keyCode == KeyEvent.VK_M) {
+					editorObj = null;
+					activecontrol = "menu";
+				}
+				
+				if (keyCode == KeyEvent.VK_NUMPAD4 && editorObj != null) {
+					editorObj.setRotation(editorObj.getRotation() - 10);
+					if (editorObj.getRotation() < 0) {
+						editorObj.setRotation(360);
+					}
+					
+					if (editorObj.getRotation() > 360) {
+						editorObj.setRotation(0);
+					}
+				}
+				
+				if (keyCode == KeyEvent.VK_NUMPAD6 && editorObj != null) {
+					editorObj.setRotation(editorObj.getRotation() + 10);
+					if (editorObj.getRotation() < 0) {
+						editorObj.setRotation(360);
+					}
+					
+					if (editorObj.getRotation() > 360) {
+						editorObj.setRotation(0);
+					}
+				}
+					
 			}
 		});
 		
@@ -399,6 +629,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ShipRemovePacket.registerPacket();
 		ChatEnterPacket.registerPacket();
 		ShieldUpdatePacket.registerPacket();
+		NameCheckPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -411,11 +642,31 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ShieldGenerator.registerGameObj();
 		Planet.registerGameObj();
 		
+		if (args.length > 0) {
+			if (args[0].equals("server")) {
+				System.out.println("Running headless server");
+				System.out.println("");
+				GameServer server = new GameServer(false);
+				server.start();
+				try {
+					server.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				System.out.println("Server shutdown, exiting");
+				return;
+				
+			}
+		}
+		
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
 		frame.add(panel);
 		frame.setSize(PWIDTH, PHEIGHT);
 		frame.setVisible(true);
+		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel.addNotify();
 	}
@@ -563,6 +814,16 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			e.printStackTrace();
 		}
 		
+		turntime += turnamount;
+		if (turntime <= -3) {
+			turntime = 0;
+			activecontrol = "left";
+		}
+		
+		if (turntime >= 3) {
+			turntime = 0;
+			activecontrol = "right";
+		}
 		
 		if (activecontrol != null) {
 			if (activecontrol.equals("menu")) {
@@ -873,7 +1134,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}
 		
-		joinServer("127.0.0.1", 5555);
+		joinServer("127.0.0.1", 5555, "SP");
+		controller.readytoplay = true;
 		
 		//controller = new WorldController();
 		/*
@@ -902,14 +1164,14 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}, Color.CYAN).setText(Color.BLACK));
 		
-		menuscreen.addElement(new GuiButton(new Position(1, 60), new Position(OrbWarPanel.PWIDTH - 1, 110), "M U L T I P L A Y E R", new Runnable() {
+		/*menuscreen.addElement(new GuiButton(new Position(1, 60), new Position(OrbWarPanel.PWIDTH - 1, 110), "M U L T I P L A Y E R", new Runnable() {
 			
 			@Override
 			public void run() {
 				activegui = getMultiplayerScreen();
 				
 			}
-		}, Color.LIGHT_GRAY).setText(Color.BLACK));
+		}, Color.LIGHT_GRAY).setText(Color.BLACK));*/
 		
 		menuscreen.addElement(new GuiButton(new Position(1, 120), new Position(OrbWarPanel.PWIDTH - 1, 170), "C O N N E C T", new Runnable() {
 			
@@ -1007,9 +1269,15 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				host = ipfield.getText();
 				
 				try {
-					joinServer(host, port);
-					activegui = null;
-					state = GameState.PLAYING;
+					
+					
+					if(joinServer(host, port, namefield.getText())) {
+						controller.readytoplay = true;
+						activegui = null;
+						state = GameState.PLAYING;
+					}
+					
+					
 				} catch (IOException e) {
 					
 				}
@@ -1042,9 +1310,27 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		return screen;
 	}
 	
-	public void joinServer(String host, int port) throws IOException {
-		WorldNetController c = new WorldNetController(host, port, mylocation);
-		controller = c;
+	public boolean joinServer(String host, int port, String name) throws IOException {
+		
+		if (controller != null) {
+			if (!controller.host.equals(host) && controller.port != port) {
+				controller.getChannel().close();
+				WorldNetController c = new WorldNetController(host, port, mylocation);
+				controller = c;
+			}
+		} else {
+			WorldNetController c = new WorldNetController(host, port, mylocation);
+			controller = c;
+		}
+		
+		controller.sendPacket(new NameCheckPacket(true, name));
+		while (!controller.didgetncp) {
+			controller.processPackets();
+		}
+		
+		System.out.println("namegood: " + controller.namegood);
+		return controller.namegood;
+		
 	}
 
 }
