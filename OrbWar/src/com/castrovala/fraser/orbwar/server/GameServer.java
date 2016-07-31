@@ -158,13 +158,19 @@ public class GameServer extends Thread {
 
 							buf.put(raw_message.getBytes());
 
-							buf.position(0);
+							buf.flip();
 							long end = System.currentTimeMillis();
 							long delay = end - start;
 							if (delay >= 10) {
 							}
-
-							channel.write(buf);
+							
+							//System.out.println("msg size: " + msgsize + " bytes");
+							while (buf.array().length != buf.position()) {
+								channel.write(buf);
+								//System.out.println("Amount written: " + amountwritten);
+								
+							}
+							
 							p.getPacketQueue().remove(pa);
 
 						}
@@ -462,11 +468,6 @@ public class GameServer extends Thread {
 					pl.sendPacket(sdp);
 				}
 				
-				/*if (pl.getControl() != null) {
-					sdp.setName(pl.getName());
-					sdp.setShipid(((GameObject)pl.getControl()).getUuid());
-					p.sendPacket(sdp);
-				}*/
 			}
 			
 		}

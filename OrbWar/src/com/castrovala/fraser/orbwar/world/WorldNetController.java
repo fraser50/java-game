@@ -199,6 +199,11 @@ public class WorldNetController implements WorldProvider {
 			
 			packets.add(packet);
 		} catch (ParseException e) {
+			System.out.println("Error with parsing " + value);
+			System.out.println("Len of string: " + value.length());
+			receiveBufferLen.position(0);
+			System.out.println("Len of buff: " + receiveBufferLen.getInt());
+			System.out.println("ASCII data: " + new String(receiveBufferLen.array()));
 			e.printStackTrace();
 		}
 		
@@ -357,7 +362,7 @@ public class WorldNetController implements WorldProvider {
 		buf.put(len_bytes);
 		buf.put(raw_message.getBytes());
 		
-		buf.position(0);
+		buf.flip();
 		long end = System.currentTimeMillis();
 		long delay = end - start;
 		if (delay >= 10) {
@@ -366,7 +371,10 @@ public class WorldNetController implements WorldProvider {
 		}
 		
 		try {
-			channel.write(buf);
+			while (buf.position() != buf.array().length) {
+				channel.write(buf);
+			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
