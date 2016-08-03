@@ -1,17 +1,21 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
+import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
@@ -20,6 +24,16 @@ import net.minidev.json.JSONObject;
 public class ShieldGenerator extends GameObject implements CollisionHandler {
 	private OrbitControl control;
 	private static BufferedImage renderimage;
+	private String bossid;
+	public String getBossid() {
+		return bossid;
+	}
+
+	public void setBossid(String bossid) {
+		this.bossid = bossid;
+	}
+
+	private GameObject boss;
 
 	public ShieldGenerator(Position pos, WorldProvider controller) {
 		super(pos, controller, 20);
@@ -50,6 +64,7 @@ public class ShieldGenerator extends GameObject implements CollisionHandler {
 			getPosition().setX(pos.getX());
 			getPosition().setY(pos.getY());
 		}
+		
 	}
 	
 	public static void registerGameObj() {
@@ -63,12 +78,16 @@ public class ShieldGenerator extends GameObject implements CollisionHandler {
 				jobj.put("x", gen.getPosition().getX());
 				
 				jobj.put("y", gen.getPosition().getY());
+				
+				jobj.put("boss", gen.getBossid());
 				return jobj;
 			}
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				return new ShieldGenerator(null, null);
+				ShieldGenerator sg = new ShieldGenerator(null, null);
+				sg.setBossid(obj.getAsString("boss"));
+				return sg;
 			}
 		};
 		
@@ -87,6 +106,17 @@ public class ShieldGenerator extends GameObject implements CollisionHandler {
 		g2d.setColor(Color.RED);
 		g2d.fillRect(rel_x + green, rel_y - 20, getWidth() - green, 5);
 		rd.onRender(4);
+		
+		if (boss != null) {
+			Position spos = Util.coordToScreen(boss.getPosition().copy().add(new Position(boss.getWidth() / 2, boss.getHeight() / 2)), rd.getRenderloc());
+			spos.add(new Position(3, -6));
+			g2d.setColor(Color.BLUE);
+			Stroke s = g2d.getStroke();
+			g2d.setStroke(new BasicStroke(1.5f));
+			g2d.drawLine(centre_x, centre_y, (int)spos.getX(), (int)spos.getY());
+			g2d.setStroke(s);
+		}
+		
 	}
 	
 	public static void loadResources() {
@@ -119,6 +149,18 @@ public class ShieldGenerator extends GameObject implements CollisionHandler {
 			OliverMothership ms = (OliverMothership) control.getBody();
 			ms.getDrones().remove(this);
 		}
+	}
+	
+	@Override
+	public void clientUpdate() {
+		if (boss == null) {
+			boss = getController().getGameObject(bossid);
+		}
+	}
+	
+	@Override
+	public RenderStage getRenderStage() {
+		return RenderStage.SHIPS;
 	}
 
 }

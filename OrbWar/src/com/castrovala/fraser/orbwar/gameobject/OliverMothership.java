@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
+import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -202,6 +203,7 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			oc.setRotation(i);
 			oc.setTarget(gen);
 			gen.setControl(oc);
+			gen.setBossid(getUuid());
 			getController().addObject(gen);
 			drones.add(gen);
 		}
@@ -209,5 +211,10 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	
 	public List<ShieldGenerator> getDrones() {
 		return drones;
+	}
+	
+	@Override
+	public RenderStage getRenderStage() {
+		return RenderStage.SPACEOBJECTS;
 	}
 }
