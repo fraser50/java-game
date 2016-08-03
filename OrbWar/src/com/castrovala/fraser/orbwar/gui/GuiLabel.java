@@ -30,4 +30,12 @@ public class GuiLabel extends GuiElement {
 		this.colour = colour;
 	}
 
+	public String getNotice() {
+		return notice;
+	}
+
+	public void setNotice(String notice) {
+		this.notice = notice;
+	}
+
 }

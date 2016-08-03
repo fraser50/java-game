@@ -47,6 +47,7 @@ import com.castrovala.fraser.orbwar.gui.GuiClickable;
 import com.castrovala.fraser.orbwar.gui.GuiElement;
 import com.castrovala.fraser.orbwar.gui.GuiFocusable;
 import com.castrovala.fraser.orbwar.gui.GuiInputField;
+import com.castrovala.fraser.orbwar.gui.GuiLabel;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
@@ -1086,6 +1087,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		portfield.setShadowtext("Port");
 		namefield.setShadowtext("Username");
 		
+		portfield.setText("5555");
+		
+		final GuiLabel label = new GuiLabel(new Position(4, 280), new Position(4, 280));
+		label.setColour(Color.RED);
 		
 		GuiButton connectbutton = new GuiButton(new Position(4, PHEIGHT - 200), new Position(PWIDTH - 2, PHEIGHT - 120), "Connect", new Runnable() {
 			
@@ -1098,6 +1103,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					port = Integer.parseInt(portfield.getText());
 					
 				} catch (NumberFormatException e) {
+					label.setNotice("You didn't enter a number for the port!");
 					return;
 				}
 				
@@ -1110,11 +1116,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						controller.readytoplay = true;
 						activegui = null;
 						state = GameState.PLAYING;
+					} else {
+						label.setNotice(controller.namereason);
 					}
 					
 					
 				} catch (IOException e) {
-					
+					label.setNotice("There was an error connecting to that server.");
 				}
 				
 			}
@@ -1142,6 +1150,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		screen.addElement(connectbutton);
 		screen.addElement(backbutton);
+		
+		screen.addElement(label);
 		return screen;
 	}
 	
