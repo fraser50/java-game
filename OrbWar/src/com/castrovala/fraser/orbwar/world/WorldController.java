@@ -9,6 +9,7 @@ import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Util;
+import com.castrovala.fraser.orbwar.util.WormHoleData;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
@@ -17,6 +18,10 @@ public class WorldController implements WorldProvider {
 	private HashMap<String, GameObject> objectuuid = new HashMap<>();
 	private List<GameObject> newObjects = new ArrayList<>();
 	private List<GameObject> deadObjects = new ArrayList<>();
+	
+	private List<WormHoleData> wormHoleDataList = new ArrayList<>();
+	private HashMap<String, WormHoleData> wormHoleDataMap = new HashMap<>();
+	
 	private GameServer server;
 	
 	public WorldController(GameServer server) {
@@ -205,6 +210,14 @@ public class WorldController implements WorldProvider {
 	public synchronized GameServer getServer() {
 		return server;
 		
+	}
+
+	public List<WormHoleData> getWormHoleDataList() {
+		return wormHoleDataList;
+	}
+
+	public HashMap<String, WormHoleData> getWormHoleDataMap() {
+		return wormHoleDataMap;
 	}
 
 }

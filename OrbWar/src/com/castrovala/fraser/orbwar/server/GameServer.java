@@ -7,7 +7,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
@@ -306,8 +305,8 @@ public class GameServer extends Thread {
 							
 							synchronized (gamelogic.getController()) {
 								obj.setController(gamelogic.getController());
-								obj.setUuid(UUID.randomUUID().toString());
 								gamelogic.getController().addObject(obj);
+								obj.afterBirth();
 							}
 							
 						}

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -40,6 +41,7 @@ import com.castrovala.fraser.orbwar.gameobject.ShieldDrone;
 import com.castrovala.fraser.orbwar.gameobject.ShieldGenerator;
 import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
+import com.castrovala.fraser.orbwar.gameobject.WormHole;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.GuiButton;
@@ -132,11 +134,13 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ShieldDrone.loadResources();
 		OliverMothership.loadResources();
 		ShieldGenerator.loadResources();
+		WormHole.loadResources();
 		
 		Asteroid.registerEditor();
 		Turret.registerEditor();
 		OliverMothership.registerEditor();
 		Planet.registerEditor();
+		WormHole.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -477,6 +481,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		OliverMothership.registerGameObj();
 		ShieldGenerator.registerGameObj();
 		Planet.registerGameObj();
+		WormHole.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {
@@ -635,6 +640,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				EditorTransmitPacket etp = new EditorTransmitPacket(GameObjectProcessor.toJSON(editorObj));
 				controller.sendPacket(etp);
 				clicked = false;
+				editorObj.setUuid(UUID.randomUUID().toString());
 			}
 			
 			if (editorObj != null) {

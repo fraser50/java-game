@@ -63,6 +63,9 @@ public abstract class GameObject {
 	
 	public void setPosition(Position pos) {
 		this.pos = pos;
+		
+		if (pos != null)
+			pos.setEdited(true);
 	}
 	
 	public void delete() {
@@ -90,7 +93,7 @@ public abstract class GameObject {
 		this.velocity = velocity;
 	}
 
-	public WorldProvider getController() {
+	public synchronized WorldProvider getController() {
 		return controller;
 	}
 
@@ -207,5 +210,11 @@ public abstract class GameObject {
 	public boolean shouldRotate() {
 		return false;
 	}
+	
+	public WorldZone getZone() {
+		return getController().getZone(Util.toZoneCoords(getPosition()));
+	}
+	
+	public void afterBirth() {};
 	
 }
