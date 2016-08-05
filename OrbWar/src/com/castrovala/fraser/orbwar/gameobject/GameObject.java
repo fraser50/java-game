@@ -28,6 +28,7 @@ public abstract class GameObject {
 	private List<GameObject> nearby = new ArrayList<>();
 	private String uuid;
 	private volatile boolean changed = false;
+	private volatile boolean sizechanged = false;
 	
 	public GameObject(Position pos, WorldProvider controller) {
 		uuid = UUID.randomUUID().toString();
@@ -106,6 +107,7 @@ public abstract class GameObject {
 	}
 
 	public void setWidth(int width) {
+		sizechanged = true;
 		this.width = width;
 	}
 
@@ -114,6 +116,7 @@ public abstract class GameObject {
 	}
 
 	public void setHeight(int height) {
+		sizechanged = true;
 		this.height = height;
 	}
 	
@@ -215,6 +218,14 @@ public abstract class GameObject {
 		return getController().getZone(Util.toZoneCoords(getPosition()));
 	}
 	
-	public void afterBirth() {};
+	public void afterBirth() {}
+
+	public boolean isSizechanged() {
+		return sizechanged;
+	}
+
+	public void setSizechanged(boolean sizechanged) {
+		this.sizechanged = sizechanged;
+	};
 	
 }

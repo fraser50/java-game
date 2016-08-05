@@ -39,9 +39,15 @@ public class Bullet extends GameObject implements CollisionHandler {
 	@Override
 	public void onCollision(GameObject[] objects) {
 		for (GameObject obj : objects) {
-			if (obj == parent || (obj instanceof ShieldDrone && parent instanceof PlayerShip) || obj instanceof WormHole ) {
+			if (obj == parent || (obj instanceof ShieldDrone && parent instanceof PlayerShip)) {
 				// continue;
 			} else {
+				
+				if (obj instanceof WormHole) {
+					obj.setWidth(obj.getWidth() + 10);
+					obj.setHeight(obj.getHeight() + 10);
+				}
+				
 				obj.hurt();
 				delete();
 			}

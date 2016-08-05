@@ -75,6 +75,10 @@ public class WormHole extends GameObject implements CollisionHandler {
 		
 		List<WormHole> usedHoles = new ArrayList<>();
 		for (GameObject obj : objects) {
+			
+			if (obj instanceof Bullet)
+				continue;
+			
 			WormHole dest;
 			while (true) {
 				String uuid = wc.getWormHoleDataList().get(rand.nextInt(wc.getWormHoleDataList().size())).getWormholeID();
@@ -99,7 +103,7 @@ public class WormHole extends GameObject implements CollisionHandler {
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		AffineTransform orig = g2d.getTransform();
 		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
-		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
+		g2d.drawImage(getRenderimage(), rel_x, rel_y, getWidth(), getHeight(), null);
 		g2d.setTransform(orig);
 	}
 	

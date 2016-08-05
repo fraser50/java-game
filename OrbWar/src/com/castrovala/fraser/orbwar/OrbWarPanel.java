@@ -64,6 +64,7 @@ import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
+import com.castrovala.fraser.orbwar.net.SizeUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.server.MPGameInfo;
@@ -470,6 +471,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ChatEnterPacket.registerPacket();
 		ShieldUpdatePacket.registerPacket();
 		NameCheckPacket.registerPacket();
+		SizeUpdatePacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();

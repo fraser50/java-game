@@ -26,6 +26,7 @@ import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
+import com.castrovala.fraser.orbwar.net.SizeUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Util;
 
@@ -259,6 +260,15 @@ public class WorldNetController implements WorldProvider {
 						obj.setRotation(hup.getRotation());
 					}
 					
+				}
+			}
+			
+			if (pack instanceof SizeUpdatePacket) {
+				SizeUpdatePacket siup = (SizeUpdatePacket) pack;
+				if (getGameObject(siup.getUuid()) != null) {
+					GameObject obj = getGameObject(siup.getUuid());
+					obj.setWidth(siup.getWidth());
+					obj.setHeight(siup.getHeight());
 				}
 			}
 			

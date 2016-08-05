@@ -6,6 +6,7 @@ import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.SizeUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
@@ -56,6 +57,17 @@ public class GameThread extends Thread {
 							}
 						}
 					}
+					
+					if (obj.isSizechanged()) {
+						obj.setSizechanged(false);
+						SizeUpdatePacket siup = new SizeUpdatePacket(obj.getUuid(), obj.getWidth(), obj.getHeight());
+						for (NetworkPlayer player : getServer().getPlayers()) {
+							synchronized (player) {
+								player.sendPacket(siup);
+							}
+						}
+					}
+					
 				}
 			}
 			
