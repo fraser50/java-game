@@ -142,6 +142,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		OliverMothership.registerEditor();
 		Planet.registerEditor();
 		WormHole.registerEditor();
+		Star.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -484,6 +485,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		ShieldGenerator.registerGameObj();
 		Planet.registerGameObj();
 		WormHole.registerGameObj();
+		Star.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {
@@ -686,8 +688,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	
 	public void gameRender() {
 		RenderDebug rd = new RenderDebug(mylocation);
-		//start
-//		System.out.println("renderer called");
+		// start
 		if (dbImage == null) {
 			dbImage = createImage(PWIDTH, PHEIGHT);
 			Graphics2D g2d = (Graphics2D) dbImage.getGraphics();
@@ -753,9 +754,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		if (state == GameState.MENU) {
-			//g2d.setColor(Color.WHITE);
-			//g2d.drawRect(200, 50, (PWIDTH - 200) - 200, (PHEIGHT - 800));
-			//g2d.drawString("S I N G L E P L A Y E R", 400, 150);
 			repaint();
 			return;
 		}

@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.gameobject.particle;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -17,25 +19,19 @@ public class HydrogenParticle extends GameObject {
 	private static BufferedImage renderimage;
 	
 	public HydrogenParticle(Position pos, WorldProvider controller, Position vel) {
-		super(pos, controller, 100);
+		super(pos, controller, 50);
 		setVelocity(vel);
-	}
-	
-	@Override
-	public void update() {
-		super.update();
-		
-		getPosition().add(getVelocity());
-		hurt(1);
-		if (getHealth() < 1) {
-			delete();
-		}
 	}
 	
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		g2d.setColor(Color.RED);
-		g2d.drawOval(rel_x, rel_y, 5, 5);
+		Composite c = g2d.getComposite();
+		
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f ));
+		
+		g2d.fillOval(rel_x, rel_y, 7, 7);
+		g2d.setComposite(c);
 		rd.onRender();
 	}
 	
@@ -60,6 +56,15 @@ public class HydrogenParticle extends GameObject {
 	@Override
 	public String getType() {
 		return "hydrogen";
+	}
+	
+	@Override
+	public void clientUpdate() {
+		getPosition().add(getVelocity());
+		hurt(1);
+		if (getHealth() < 1) {
+			delete();
+		}
 	}
 
 }
