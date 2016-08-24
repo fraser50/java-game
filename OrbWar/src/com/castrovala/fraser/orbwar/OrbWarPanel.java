@@ -773,7 +773,11 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				long py = (long) mylocation.getY() + y;
 				Position pos = new Position(px, py);
 				WorldZone zone = controller.getZone(Util.toZoneCoords(pos));
-				chosenzones.add(zone);
+				
+				if (!chosenzones.contains(zone)) {
+					chosenzones.add(zone);
+				}
+				
 			}
 		}
 		long end = System.currentTimeMillis();
