@@ -77,7 +77,6 @@ public class Planet extends GameObject {
 				
 			}
 			
-			long start_time = System.currentTimeMillis();
 			Graphics2D g2dimg = (Graphics2D) img.getGraphics();
 			g2dimg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2dimg.setComposite(AlphaComposite.Clear);
@@ -89,10 +88,6 @@ public class Planet extends GameObject {
 			}
 			
 			g2dimg.setComposite(AlphaComposite.SrcOver);
-			
-			long end_time = System.currentTimeMillis();
-			long total_time = end_time - start_time;
-			//System.out.println("Made the planet circular in " + total_time + "ms");
 			
 			planetimages.put(getUuid(), img);
 		}

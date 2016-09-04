@@ -231,7 +231,7 @@ public class GameServer extends Thread {
 						if (pa instanceof NameCheckPacket && !readyplayers.contains(p)) {
 							NameCheckPacket ncp = (NameCheckPacket) pa;
 							
-							NameCheckPacket response = new NameCheckPacket(false, "An login error occurred");
+							NameCheckPacket response = new NameCheckPacket(false, "A login error occurred");
 							for (char c : ncp.getName().toCharArray()) {
 								if (Character.isLetterOrDigit(c) || c == '_') {
 									response.setLogin(true);
@@ -244,7 +244,7 @@ public class GameServer extends Thread {
 							
 							if (ncp.getName().length() >= 1 && ncp.getName().length() > 10) {
 								response.setLogin(false);
-								response.setName("Incorrect Size! (between 1 and 10");
+								response.setName("Incorrect Size! (between 1 and 10)");
 							}
 							
 							for (NetworkPlayer pl : getPlayers().toArray(new NetworkPlayer[getPlayers().size()])) {

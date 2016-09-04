@@ -1128,6 +1128,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						state = GameState.PLAYING;
 					} else {
 						label.setNotice(controller.namereason);
+						controller.didgetncp = false;
 					}
 					
 					
@@ -1183,7 +1184,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			controller.processPackets();
 		}
 		
-		System.out.println("namegood: " + controller.namegood);
 		return controller.namegood;
 		
 	}
