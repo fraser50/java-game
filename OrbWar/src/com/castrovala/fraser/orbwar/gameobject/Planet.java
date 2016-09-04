@@ -48,12 +48,13 @@ public class Planet extends GameObject {
 		if (img == null) {
 			img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 			
+			OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
+			
 			for (int x = 1; x < getWidth() + 1; x++) {
 				for (int y = 1; y < getHeight() + 1; y++) {
-					OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
-					double value = noise.eval(x / 14.5, y / 14.5, 0, 0.5);
+					double value = noise.eval(x / 16.5, y / 16.5);
 					//System.out.println("Noise value: " + value);
-					if (value > 0) {
+					if (value > 0.2) {
 						//System.out.println("Land");
 						
 						int r = 0;
@@ -76,16 +77,22 @@ public class Planet extends GameObject {
 				
 			}
 			
+			long start_time = System.currentTimeMillis();
 			Graphics2D g2dimg = (Graphics2D) img.getGraphics();
 			g2dimg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2dimg.setComposite(AlphaComposite.Clear);
 			g2dimg.setStroke(new BasicStroke(5));
+			
 			for (int i = 0; i < 361; i++) {
 				Position vel = Util.angleToVel(i, (getWidth() / 2) + 2);
-				g2dimg.drawLine((int)vel.getX() + (getWidth() / 2), (int)vel.getY() + (getHeight() / 2), (int)(vel.getX() * 8) + (getWidth() / 2), (int)(vel.getY() * 8) + (getHeight() / 2));
+				g2dimg.drawLine((int)vel.getX() + (getWidth() / 2) - 2, (int)vel.getY() + (getHeight() / 2) - 2, (int)(vel.getX() * 8) + (getWidth() / 2), (int)(vel.getY() * 8) + (getHeight() / 2));
 			}
 			
 			g2dimg.setComposite(AlphaComposite.SrcOver);
+			
+			long end_time = System.currentTimeMillis();
+			long total_time = end_time - start_time;
+			//System.out.println("Made the planet circular in " + total_time + "ms");
 			
 			planetimages.put(getUuid(), img);
 		}
