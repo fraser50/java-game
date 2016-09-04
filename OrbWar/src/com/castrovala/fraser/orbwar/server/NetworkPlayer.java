@@ -26,6 +26,7 @@ public class NetworkPlayer implements ControlUser {
 	private Position currentpos = new Position(0, 0);
 	private volatile ByteBuffer received;
 	private volatile ByteBuffer recievedLen;
+	private boolean admin;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -90,7 +91,7 @@ public class NetworkPlayer implements ControlUser {
 		ship = c;
 		
 		if (ship != null) {
-			ShipDataPacket supp = new ShipDataPacket(name, ((GameObject)ship).getUuid());
+			ShipDataPacket supp = new ShipDataPacket(name, ((GameObject)ship).getUuid(), admin);
 			sendPacket(supp);
 		}
 		
@@ -138,6 +139,14 @@ public class NetworkPlayer implements ControlUser {
 
 	public void setRecievedLen(ByteBuffer recievedLen) {
 		this.recievedLen = recievedLen;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
 	}
 
 }

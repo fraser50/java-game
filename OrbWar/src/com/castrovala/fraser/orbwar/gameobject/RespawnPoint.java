@@ -72,7 +72,7 @@ public class RespawnPoint extends GameObject {
 				WorldController c = (WorldController) getController();
 				
 				for (NetworkPlayer p : c.getServer().getPlayers()) {
-					p.sendPacket(new ShipDataPacket(((NetworkPlayer)user).getName(), ship.getUuid()));
+					p.sendPacket(new ShipDataPacket(((NetworkPlayer)user).getName(), ship.getUuid(), ((NetworkPlayer)user).isAdmin()));
 				}
 				
 			} else {

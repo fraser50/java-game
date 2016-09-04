@@ -842,7 +842,47 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				if (controller.getClients().containsKey(obj.getUuid())) {
 					ClientPlayer p = controller.getClients().get(obj.getUuid());
 					g2d.setColor(Color.WHITE);
+					
+					/*BufferedImage img = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
+					Graphics2D g2di = (Graphics2D) img.getGraphics();
+					g2di.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					int[] xp = new int[360 / 60];
+					int[] yp = new int[360 / 60];
+					
+					int in = 0;
+					for (int i = 0; i < 360; i+=60) {
+						
+						Position pos = Util.angleToVel(i, 8);
+						
+						xp[in] = (int) (pos.getX()) + (img.getWidth() / 2);
+						yp[in] = (int) (pos.getY()) + (img.getHeight() / 2);
+						
+						in++;
+						
+					}
+					
+					if (p.isAdmin()) {
+						g2di.setColor(Color.CYAN);
+					} else {
+						g2di.setColor(Color.LIGHT_GRAY);
+					}
+					
+					g2di.fillPolygon(xp, yp, xp.length);
+					g2di.dispose();
+					
+					g2d.drawImage(img, rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ) - 30, rel_y - 32, null);*/
+					
+					if (p.isAdmin()) {
+						g2d.setColor(Color.CYAN);
+					} else {
+						g2d.setColor(Color.GRAY);
+					}
+					
+					g2d.fillOval(rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ) - 20, rel_y - 31, 10, 10);
+					
+					g2d.setColor(Color.WHITE);
 					g2d.drawString(p.getName(), rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ), rel_y - 20);
+					//int crash = 0/0;
 				}
 				
 				long objrenderend = System.currentTimeMillis();

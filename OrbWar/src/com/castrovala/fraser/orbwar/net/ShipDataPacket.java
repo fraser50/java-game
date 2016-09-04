@@ -5,11 +5,12 @@ import net.minidev.json.JSONObject;
 public class ShipDataPacket implements AbstractPacket {
 	private String shipid;
 	private String name;
-	private boolean admin = true;
+	private boolean admin;
 	
-	public ShipDataPacket(String name, String shipid) {
+	public ShipDataPacket(String name, String shipid, boolean admin) {
 		this.name = name;
 		this.shipid = shipid;
+		this.admin = admin;
 	}
 
 	@Override
@@ -51,12 +52,13 @@ public class ShipDataPacket implements AbstractPacket {
 				obj.put("type", "supp");
 				obj.put("uuid", supp.getShipid());
 				obj.put("name", supp.getName());
+				obj.put("admin", supp.isAdmin());
 				return obj;
 			}
 			
 			@Override
 			public AbstractPacket fromJSON(JSONObject obj) {
-				ShipDataPacket supp = new ShipDataPacket(obj.getAsString("uuid"), obj.getAsString("uuid"));
+				ShipDataPacket supp = new ShipDataPacket(obj.getAsString("uuid"), obj.getAsString("uuid"), (boolean)obj.get("admin"));
 				supp.setName(obj.getAsString("name"));
 				return supp;
 			}

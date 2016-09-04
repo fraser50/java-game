@@ -257,7 +257,6 @@ public class GameServer extends Thread {
 							p.sendPacket(response);
 							
 							if (ncp.isLogin() && response.isLogin()) {
-								System.out.println("Setting name");
 								p.setName(ncp.getName());
 								finishLogin(p);
 							}
@@ -316,35 +315,6 @@ public class GameServer extends Thread {
 							if (cep.getMessage().length() > 0) {
 								String message = "[" + p.getName() + "] " + cep.getMessage();
 								ChatEnterPacket cepp = new ChatEnterPacket(message);
-								
-								if (cep.getMessage().startsWith("/name")) {
-									if (cep.getMessage().length() <= 6) {
-										message = "You need to enter a name to use this!";
-										cepp.setMessage(message);
-										p.sendPacket(cepp);
-										message = "";
-									} else {
-										String name = cep.getMessage().substring(6);
-										if (name.trim().length() == 0) {
-											message = "That name is not suitable";
-											p.sendPacket(new ChatEnterPacket(message));
-										} else {
-											message = "'" + p.getName() + "' changed their name to '" + name + "'";
-											cepp.setMessage(message);
-											p.setName(name);
-											synchronized (gamelogic.getController()) {
-												if (p.getControl() != null) {
-													ShipDataPacket sdp = new ShipDataPacket(name,
-															((GameObject) p.getControl()).getUuid());
-													for (NetworkPlayer np : getPlayers()) {
-														np.sendPacket(sdp);
-													} 
-												}
-											}
-										}
-										
-									}
-								}
 								
 								for (NetworkPlayer pl : getPlayers()) {
 									
@@ -425,9 +395,15 @@ public class GameServer extends Thread {
 	}
 	
 	private void finishLogin(NetworkPlayer p) {
-		System.out.println("finishlogin called for " + p.getName());
-		
 		readyplayers.add(p);
+		try {
+			p.setAdmin(p.getConn().getRemoteAddress().toString().startsWith("/127.0.0.1:"));
+			System.out.println("Showing IP");
+			System.out.println(p.getConn().getRemoteAddress().toString().startsWith("/127.0.0.1:"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		synchronized (gamelogic.getController()) {
 			PlayerShip ship = new PlayerShip(new Position(300, 300), gamelogic.getController());
@@ -449,13 +425,16 @@ public class GameServer extends Thread {
 				
 				Controllable c = (Controllable) obj;
 				
+				if (c.getControl() == null)
+					continue;
+				
 				NetworkPlayer tp = (NetworkPlayer) c.getControl();
 				
-				ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid());
+				ShipDataPacket supp = new ShipDataPacket(tp.getName(), obj.getUuid(), tp.isAdmin());
 				p.sendPacket(supp);
 			}
 			
-			ShipDataPacket sdp = new ShipDataPacket(null, null);
+			ShipDataPacket sdp = new ShipDataPacket(null, null, false);
 			for (NetworkPlayer pl : getPlayers()) {
 				if (pl == p) {
 					continue;
@@ -464,6 +443,7 @@ public class GameServer extends Thread {
 				if (p.getControl() != null) {
 					sdp.setName(p.getName());
 					sdp.setShipid(((GameObject)p.getControl()).getUuid());
+					sdp.setAdmin(p.isAdmin());
 					pl.sendPacket(sdp);
 				}
 				
