@@ -7,10 +7,12 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
+import com.castrovala.fraser.orbwar.planet.PlanetType;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.OpenSimplexNoise;
@@ -48,6 +50,12 @@ public class Planet extends GameObject {
 		if (img == null) {
 			img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 			
+			PlanetType type = PlanetType.values()[(new Random(UUID.fromString(getUuid()).getMostSignificantBits())).nextInt(PlanetType.values().length)];
+			
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			
 			OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
 			
 			for (int x = 1; x < getWidth() + 1; x++) {
@@ -57,17 +65,43 @@ public class Planet extends GameObject {
 					if (value > 0.2) {
 						//System.out.println("Land");
 						
-						int r = 0;
-						int g = 50 + (int)(value * 100);
-						int b = 0;
+						//int r = 0;
+						//int g = 50 + (int)(value * 100);
+						//int b = 0;
+						
+						switch (type) {
+							case EARTH:
+								r = 0;
+								g = 50 + (int)(value * 100);
+								b = 0;
+								break;
+							case ALIEN:
+								r = 50 + (int)(value * 100);
+								g = 60;
+								b = 60;
+						}
+						
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
 						img.setRGB(x - 1, y - 1, rgb);
-					} else {
+					} else { //int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
 						//System.out.println("Water");
-						int r = 0;
-						int g = 0;
-						//int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
-						int b = (int) (100 - (value * 100) );
+						r = 0;
+						g = 0;
+						
+						b = (int) (100 - (value * 100) );
+						
+						switch (type) {
+							case EARTH:
+								r = 0;
+								g = 0;
+								b = (int) (100 - (value * 100) );
+								break;
+							case ALIEN:
+								r = 255;
+								g = (int) (100 - (value * 100) );
+								b = 40;
+						}
+						
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
 						img.setRGB(x - 1, y - 1, rgb);
 					}
@@ -89,7 +123,7 @@ public class Planet extends GameObject {
 			
 			g2dimg.setComposite(AlphaComposite.SrcOver);
 			
-			planetimages.put(getUuid(), img);
+			//planetimages.put(getUuid(), img);
 		}
 		
 		g2d.drawImage(img, rel_x, rel_y, null);
