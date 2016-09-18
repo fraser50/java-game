@@ -82,7 +82,7 @@ public abstract class GameObject {
 	}
 	
 	public void setRotation(float rotation) {
-		this.rotation = rotation;
+		this.rotation = (float) Util.fixAngle(rotation);
 		changed = true;
 	}
 

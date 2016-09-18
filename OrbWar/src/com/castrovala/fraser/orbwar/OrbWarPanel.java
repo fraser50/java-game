@@ -42,6 +42,7 @@ import com.castrovala.fraser.orbwar.gameobject.ShieldGenerator;
 import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
 import com.castrovala.fraser.orbwar.gameobject.WormHole;
+import com.castrovala.fraser.orbwar.gameobject.npc.EnemyDrone;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.GuiButton;
@@ -143,6 +144,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		Planet.registerEditor();
 		WormHole.registerEditor();
 		Star.registerEditor();
+		EnemyDrone.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -486,6 +488,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		Planet.registerGameObj();
 		WormHole.registerGameObj();
 		Star.registerGameObj();
+		EnemyDrone.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {

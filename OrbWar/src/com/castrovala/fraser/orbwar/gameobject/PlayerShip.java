@@ -294,7 +294,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	
 	@Override
 	public RenderStage getRenderStage() {
-		return RenderStage.SHIPS;
+		return RenderStage.CONTROL;
 	}
 
 	public Weapon getShield() {
