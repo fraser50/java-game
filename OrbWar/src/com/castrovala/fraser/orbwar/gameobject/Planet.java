@@ -123,7 +123,7 @@ public class Planet extends GameObject {
 			
 			g2dimg.setComposite(AlphaComposite.SrcOver);
 			
-			//planetimages.put(getUuid(), img);
+			planetimages.put(getUuid(), img);
 		}
 		
 		g2d.drawImage(img, rel_x, rel_y, null);

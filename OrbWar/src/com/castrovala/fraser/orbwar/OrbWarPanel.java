@@ -359,14 +359,20 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		addMouseListener(new MouseListener() {
 			
+			private boolean in = false;
+			
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+				if (in) {
+					in = false;
+					hackymouseClicked(e);
+				}
 				
 			}
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
+				in = true;
 				if (state == GameState.PLAYING && editorObj != null) {
 					clicked = true;
 				}
@@ -386,7 +392,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 			
 			@Override
-			public void mouseClicked(MouseEvent ev) {
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void hackymouseClicked(MouseEvent ev) {
 				if (activegui != null) {
 					boolean wipefocused = true;
 					for (GuiElement e : activegui.getElements()) {
