@@ -32,6 +32,7 @@ import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.gameobject.OliverGuider;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.gameobject.Planet;
 import com.castrovala.fraser.orbwar.gameobject.PlayerShip;
@@ -500,6 +501,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		WormHole.registerGameObj();
 		Star.registerGameObj();
 		EnemyDrone.registerGameObj();
+		OliverGuider.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {

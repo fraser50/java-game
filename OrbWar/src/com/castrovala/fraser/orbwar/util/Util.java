@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.world.Position;
@@ -13,7 +14,7 @@ import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public class Util {
 	public static long randomRange(long min, long max) {
-		Random rand = new Random();
+		Random rand = ThreadLocalRandom.current();
 		long number = min + (long) (rand.nextDouble() * (max - min));
 		return number;
 		//return rand.n(max - min) + 1) + min;
@@ -56,7 +57,6 @@ public class Util {
 	public static double distance(Position a, Position b) {
 		double x = b.getX() - a.getX();
 		double y = b.getY() - a.getY();
-		//System.out.println("Pythagoras x: " + x + " || y: " + y);
 		double hyp = Math.sqrt((x * x) + (y * y));
 		return hyp;
 	}

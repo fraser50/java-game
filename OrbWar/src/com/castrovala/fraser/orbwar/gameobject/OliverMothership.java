@@ -34,6 +34,7 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	private List<ShieldGenerator> drones = new ArrayList<>();
 	private boolean firstrun = true;
 	private final float distanceaway = 200;
+	private int timer = 0;
 
 	public OliverMothership(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -75,6 +76,14 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	@Override
 	public void update() {
 		super.update();
+		
+		timer++;
+		if (timer >= 500) {
+			OliverGuider g = new OliverGuider(getPosition().copy().add(new Position(128, 128)), getController());
+			g.setParent(this);
+			getController().addObject(g);
+			timer = 0;
+		}
 		
 		if (firstrun) {
 			addGenerators();
