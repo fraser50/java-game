@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -84,8 +85,8 @@ import com.castrovala.fraser.orbwar.world.WorldZone;
 
 @SuppressWarnings("serial")
 public class OrbWarPanel extends JPanel implements Runnable {
-	private static final int PWIDTH  = 1024;
-	private static final int PHEIGHT = 1024;
+	private static int PWIDTH  = 1024;
+	private static int PHEIGHT = 1024;
 	
 	private Thread game;
 	private volatile boolean running = false;
@@ -272,35 +273,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				if (myship == null) {
 					//return;
 				}
-				
-				/*if (keyCode == KeyEvent.VK_LEFT) {
-					
-					if (turntime > 0) {
-						turntime = 0;
-					}
-					
-					turntime--;
-					if (turntime <= -3) {
-						activecontrol = "left";
-						turntime = 0;
-					}
-					
-					//myship.left();
-				}
-				if (keyCode == KeyEvent.VK_RIGHT) {
-					
-					if (turntime < 0) {
-						turntime = 0;
-					}
-					
-					turntime++;
-					if (turntime >= 3) {
-						activecontrol = "right";
-						turntime = 0;
-					}
-					
-					//myship.right();
-				}*/
 				
 				if (keyCode == KeyEvent.VK_UP) {
 					activecontrol = "up";
@@ -525,6 +497,11 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		JFrame frame = new JFrame("OrbWar");
 		OrbWarPanel panel = new OrbWarPanel();
 		frame.add(panel);
+		
+		Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
+		PWIDTH = (int) (screensize.getWidth() >= PWIDTH ? PWIDTH : screensize.getHeight());
+		PHEIGHT = (int) (screensize.getWidth() >= PHEIGHT ? PHEIGHT : screensize.getHeight());
+		
 		frame.setSize(PWIDTH, PHEIGHT);
 		frame.setVisible(true);
 		frame.setResizable(false);
@@ -552,7 +529,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	public void run() {
 		running = true;
 		while (running) {
-			int updatespeed = 20;//1000 / 60;
+			int updatespeed = 20; // 1000 / 60;
 			if (state == GameState.MENU) {
 				if (init_game) {
 					long start = System.currentTimeMillis();
