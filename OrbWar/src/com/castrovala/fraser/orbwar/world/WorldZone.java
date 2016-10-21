@@ -7,14 +7,18 @@ import java.util.Random;
 
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Util;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 public class WorldZone {
 	private List<GameObject> gameobjects = new ArrayList<>();
 	public static final int len_x = 500;
 	public static final int len_y = 500;
-	protected long x;
-	protected long y;
+	private final long x;
+	private final long y;
 	private WorldProvider controller;
 	
 	public WorldZone(long x, long y, WorldProvider controller) {
@@ -84,6 +88,28 @@ public class WorldZone {
 
 	public void setController(WorldProvider controller) {
 		this.controller = controller;
+	}
+	
+	public JSONObject saveAsJSON() {
+		JSONObject jobj = new JSONObject();
+		
+		JSONArray array = new JSONArray();
+		for (GameObject obj : gameobjects) {
+			array.add(GameObjectProcessor.toJSON(obj));
+		}
+		
+		jobj.put("objects", array);
+		
+		return jobj;
+		
+	}
+
+	public long getX() {
+		return x;
+	}
+
+	public long getY() {
+		return y;
 	}
 
 }

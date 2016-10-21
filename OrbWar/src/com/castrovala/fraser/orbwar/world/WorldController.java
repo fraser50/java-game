@@ -1,15 +1,25 @@
 package com.castrovala.fraser.orbwar.world;
 
 import java.awt.Rectangle;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.util.WormHoleData;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
@@ -29,15 +39,17 @@ public class WorldController implements WorldProvider {
 	}
 	
 	@Override
-	public WorldZone getZone(Position pos) {
+	public synchronized WorldZone getZone(Position pos) {
 		for (WorldZone zone : zones) {
-			if (zone.x == pos.x && zone.y == pos.y) {
+			//System.out.println("Checking: X=" + pos.x + " Y=" + pos.y + " = X=" + zone.getX() + " Y=" + zone.getY() + " --> " + (zone.getX() == ((long)pos.x) && zone.getY() == ((long)pos.y)));
+			if (zone.getX() == ((long)pos.x) && zone.getY() == ((long)pos.y)) {
 				return zone;
 			}
 		}
+		
 		WorldZone zone = new WorldZone((long)pos.x, (long)pos.y, this);
-		zone.populate();
 		zones.add(zone);
+		zone.populate();
 		return zone;
 	}
 
@@ -218,6 +230,77 @@ public class WorldController implements WorldProvider {
 
 	public HashMap<String, WormHoleData> getWormHoleDataMap() {
 		return wormHoleDataMap;
+	}
+	
+	public void saveZones(File f) throws IllegalArgumentException {
+		if (!f.isDirectory()) {
+			throw new IllegalArgumentException("You must input a folder");
+		}
+		
+		ScriptEngineManager manager = new ScriptEngineManager();
+		ScriptEngine engine = manager.getEngineByName("js");
+		
+		File zonedir = new File(f, "zones");
+		zonedir.mkdirs();
+		
+		for (WorldZone zone : zones) {
+			File zonefile = new File(zonedir, (int)zone.getX() + "_" + (int)zone.getY() + ".json");
+			
+			try {
+				PrintWriter writer = new PrintWriter(zonefile);
+				JSONObject zonedata = zone.saveAsJSON();
+				
+				engine.put("zonedata", zonedata.toJSONString());
+				engine.eval("result = JSON.stringify(JSON.parse(zonedata), null, 2);");
+				
+				String jsonstr = (String) engine.get("result");
+				//String jsonstr = zonedata.toJSONString();
+				writer.print(jsonstr);
+				writer.close();
+				
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (ScriptException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		JSONObject wormholedata = new JSONObject();
+		JSONArray array = new JSONArray();
+		for (WormHoleData data : wormHoleDataList) {
+			
+			JSONObject jobj = new JSONObject();
+			jobj.put("id", data.getWormholeID());
+			jobj.put("type", data.getType().toString());
+			array.add(jobj);
+			
+		}
+		
+		wormholedata.put("holes", array);
+		File wormfile = new File(f, "wormholes.json");
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(wormfile);
+			engine.put("wormholedata", wormholedata.toJSONString());
+			engine.eval("result = JSON.stringify(JSON.parse(wormholedata), null, 2);");
+		
+			String jsonstr = (String) engine.get("result");
+			//String jsonstr = zonedata.toJSONString();
+			writer.print(jsonstr);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
 	}
 
 }

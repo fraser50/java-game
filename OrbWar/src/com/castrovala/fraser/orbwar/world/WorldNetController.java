@@ -79,7 +79,7 @@ public class WorldNetController implements WorldProvider {
 	@Override
 	public WorldZone getZone(Position pos) {
 		for (WorldZone zone : zones) {
-			if (zone.x == pos.x && zone.y == pos.y) {
+			if (zone.getX() == pos.x && zone.getY() == pos.y) {
 				return zone;
 			}
 		}

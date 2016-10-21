@@ -228,4 +228,8 @@ public abstract class GameObject {
 		this.sizechanged = sizechanged;
 	};
 	
+	public boolean shouldSave() {
+		return true;
+	}
+	
 }

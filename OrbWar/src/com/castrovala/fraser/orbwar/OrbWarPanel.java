@@ -15,6 +15,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +81,7 @@ import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.weapons.RechargeWeapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
 import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldNetController;
 import com.castrovala.fraser.orbwar.world.WorldZone;
 
@@ -260,6 +262,14 @@ public class OrbWarPanel extends JPanel implements Runnable {
 						e1.printStackTrace();
 					}
 					System.out.println("Internal Server died");
+					WorldController c = internalserver.getGameThread().getController();
+					
+					File f = new File("/tmp/testworld");
+					if (!f.exists()) {
+						f.mkdir();
+						c.saveZones(f);
+					}
+					
 					internalserver = null;
 					mylocation = new Position(0, 0);
 					activegui = getMainMenu();
