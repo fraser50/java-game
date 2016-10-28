@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -20,6 +21,7 @@ import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldController;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -34,10 +36,24 @@ public class GameServer extends Thread {
 	private volatile List<NetworkPlayer> players = new ArrayList<>();
 	private volatile List<NetworkPlayer> readyplayers = new ArrayList<>();
 	private ServerState state = ServerState.STARTING;
+	private File savefile = null;
+	
+	public File getSavefile() {
+		return savefile;
+	}
+
+	public void setSavefile(File savefile) {
+		this.savefile = savefile;
+	}
+
+	public GameServer(boolean localserver, File savefile) {
+		this.localserver = localserver;
+		this.savefile = savefile;
+		this.setName("Server Thread");
+	}
 	
 	public GameServer(boolean localserver) {
-		this.localserver = localserver;
-		this.setName("Server Thread");
+		this(localserver, null);
 	}
 
 	public synchronized boolean isLocalserver() {
@@ -205,7 +221,7 @@ public class GameServer extends Thread {
 					String value = new String(buff.array());
 					//System.out.println("value: " + value);
 					
-					JSONParser parser = new JSONParser(NORM_PRIORITY);
+					JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 					JSONObject jobj;
 					try {
 						jobj = (JSONObject) parser.parse(value);
@@ -371,7 +387,16 @@ public class GameServer extends Thread {
 		}
 		System.out.println("Stopping game thread");
 		gamelogic.stopLogic();
+		try {
+			gamelogic.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("Server thread terminated...");
+		
+		saveGame();
+		
 	}
 	
 	public GameThread getGameThread() {
@@ -449,6 +474,16 @@ public class GameServer extends Thread {
 				
 			}
 			
+		}
+	}
+	
+	private void saveGame() {
+		if (savefile != null) {
+			WorldController c = getGameThread().getController();
+			if (!savefile.exists()) {
+				savefile.mkdir();
+				c.saveZones(savefile);
+			} 
 		}
 	}
 

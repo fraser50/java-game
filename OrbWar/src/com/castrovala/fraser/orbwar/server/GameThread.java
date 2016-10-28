@@ -1,5 +1,7 @@
 package com.castrovala.fraser.orbwar.server;
 
+import java.io.FileNotFoundException;
+
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
@@ -13,6 +15,8 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldZone;
 
+import net.minidev.json.parser.ParseException;
+
 public class GameThread extends Thread {
 	private volatile GameServer server;
 	private boolean active = true;
@@ -20,7 +24,18 @@ public class GameThread extends Thread {
 	
 	public GameThread(GameServer server) {
 		this.setServer(server);
-		controller = new WorldController(server);
+		if (server.getSavefile().exists()) {
+			try {
+				controller = WorldController.createFromFile(server.getSavefile());
+			} catch (FileNotFoundException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			controller.setServer(server);
+		} else {
+			controller = new WorldController(server);
+		}
+		
 		this.setName("Game Thread");
 	}
 	

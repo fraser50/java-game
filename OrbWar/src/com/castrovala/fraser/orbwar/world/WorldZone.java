@@ -95,7 +95,10 @@ public class WorldZone {
 		
 		JSONArray array = new JSONArray();
 		for (GameObject obj : gameobjects) {
-			array.add(GameObjectProcessor.toJSON(obj));
+			if (obj.shouldSave()) {
+				array.add(GameObjectProcessor.toJSON(obj));
+			}
+			
 		}
 		
 		jobj.put("objects", array);

@@ -240,8 +240,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 				
 				if (keyCode == KeyEvent.VK_ENTER && state == GameState.MENU) {
-					init_game = true;
+					//init_game = true;
 				}
+				
 				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
 					System.out.println("Terminating game");
 					try {
@@ -544,7 +545,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				if (init_game) {
 					long start = System.currentTimeMillis();
 					try {
-						prepareGame();
+						prepareGame("test");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -1009,9 +1010,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 	}
 	
-	public void prepareGame() throws IOException {
-		
-		internalserver = new GameServer(true);
+	public void prepareGame(String world) throws IOException {
+		new File(System.getProperty("user.home") + "/Documents/orbwarlevels/").mkdirs();
+		internalserver = new GameServer(true, new File(System.getProperty("user.home") + "/Documents/orbwarlevels/" + world));
 		internalserver.start();
 		
 		while (internalserver.getServerState() != ServerState.RUNNING) {
@@ -1048,7 +1049,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			
 			@Override
 			public void run() {
-				init_game = true;
+				activegui = getSingleplayerMenu();
 				
 			}
 		}, Color.CYAN).setText(Color.BLACK));
@@ -1207,6 +1208,59 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		screen.addElement(label);
 		return screen;
+	}
+	
+	public GuiScreen getSingleplayerMenu() {
+		GuiScreen screen = new GuiScreen();
+		
+		final GuiInputField worldfield = new GuiInputField(new Position(0, 0), new Position(PWIDTH, 80));
+		//final GuiInputField portfield = new GuiInputField(new Position(0, 90), new Position(PWIDTH, 170));
+		//final GuiInputField namefield = new GuiInputField(new Position(0, 180), new Position(PWIDTH, 260));
+		
+		GuiButton playbutton = new GuiButton(new Position(4, PHEIGHT - 200), new Position(PWIDTH - 2, PHEIGHT - 120), "Play", new Runnable() {
+
+			@Override
+			public void run() {
+				long start = System.currentTimeMillis();
+				try {
+					prepareGame(worldfield.getText());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				long end = System.currentTimeMillis();
+				long timetaken = end - start;
+				System.out.println("prepareGame() took " + timetaken + " ms");
+				init_game = false;
+				state = GameState.PLAYING;
+				activegui = null;
+			}
+			
+		});
+		
+		GuiButton backbutton = new GuiButton(new Position(4, PHEIGHT - 100), new Position(PWIDTH - 2, PHEIGHT - 30), "Back", new Runnable() {
+			
+			@Override
+			public void run() {
+				activegui = getMainMenu();
+				
+			}
+		});
+		
+		playbutton.setFill(Color.GREEN);
+		backbutton.setFill(Color.CYAN);
+		
+		playbutton.setText(Color.BLACK);
+		backbutton.setText(Color.BLACK);
+		
+		worldfield.setShadowtext("Enter a world name");
+		
+		screen.addElement(worldfield);
+		screen.addElement(playbutton);
+		screen.addElement(backbutton);
+		
+		return screen;
+		
 	}
 	
 	public boolean joinServer(String host, int port, String name) throws IOException {

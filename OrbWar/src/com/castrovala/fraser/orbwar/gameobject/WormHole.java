@@ -198,5 +198,10 @@ public class WormHole extends GameObject implements CollisionHandler {
 		
 		EditorManager.addEditor(e);
 	}
+	
+	@Override
+	public boolean shouldSave() {
+		return false;
+	}
 
 }

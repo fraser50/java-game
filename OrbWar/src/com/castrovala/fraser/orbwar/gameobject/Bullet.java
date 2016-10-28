@@ -182,5 +182,10 @@ public class Bullet extends GameObject implements CollisionHandler {
 	public void setTimeborn(long timeborn) {
 		this.timeborn = timeborn;
 	}
+	
+	@Override
+	public boolean shouldSave() {
+		return false;
+	}
 
 }

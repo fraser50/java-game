@@ -355,5 +355,11 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		super.hurt(damage);
 		timeundamaged = 0;
 	}
+	
+	@Override
+	public boolean shouldSave() {
+		return false;
+		
+	}
 
 }

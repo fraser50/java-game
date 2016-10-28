@@ -7,12 +7,15 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Util;
@@ -20,6 +23,8 @@ import com.castrovala.fraser.orbwar.util.WormHoleData;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
@@ -223,6 +228,10 @@ public class WorldController implements WorldProvider {
 		return server;
 		
 	}
+	
+	public synchronized void setServer(GameServer server) {
+		this.server = server;
+	}
 
 	public List<WormHoleData> getWormHoleDataList() {
 		return wormHoleDataList;
@@ -300,6 +309,43 @@ public class WorldController implements WorldProvider {
 		}
 		
 		
+		
+	}
+	
+	public static WorldController createFromFile(File f) throws FileNotFoundException, ParseException {
+		WorldController c = new WorldController(null);
+		
+		File zonedirfile = new File(f, "zones");
+		File zonefile;
+		for (String s : zonedirfile.list()) {
+			zonefile = new File(zonedirfile, s);
+			s = s.substring(0, s.length() - 5);
+			
+			String[] coords = s.split(Pattern.quote("_"));
+			long x = Long.parseLong(coords[0]);
+			long y = Long.parseLong(coords[0]);
+			
+			WorldZone zone = new WorldZone(x, y, c);
+			
+			Scanner scan = new Scanner(zonefile);
+			scan.useDelimiter("\\Z"); 
+			String zonejson = scan.next();
+			scan.close();
+			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+			JSONObject jsonobj = (JSONObject) parser.parse(zonejson);
+			JSONArray array = (JSONArray) jsonobj.get("objects");
+			
+			for (Object gamejsonraw : array) {
+				JSONObject gamejson = (JSONObject) gamejsonraw;
+				GameObject gobj = GameObjectProcessor.fromJSON(gamejson);
+				zone.getGameobjects().add(gobj);
+			}
+			
+			
+			c.getZones().add(zone);
+		}
+		
+		return c;
 		
 	}
 
