@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
-import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
@@ -137,10 +136,6 @@ public class WorldNetController implements WorldProvider {
 				if (obj.isDeleted() || obj.isCleaned()) {
 					zone.getGameobjects().remove(obj);
 					objids.remove(obj.getUuid());
-				}
-				
-				if (obj instanceof Asteroid) {
-					obj.update();
 				}
 				
 				obj.clientUpdate();

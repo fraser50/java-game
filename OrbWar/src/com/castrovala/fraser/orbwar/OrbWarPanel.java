@@ -81,7 +81,6 @@ import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.weapons.RechargeWeapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
 import com.castrovala.fraser.orbwar.world.Position;
-import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldNetController;
 import com.castrovala.fraser.orbwar.world.WorldZone;
 
@@ -244,37 +243,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				}
 				
 				if (keyCode == KeyEvent.VK_ESCAPE && state == GameState.PLAYING) {
-					System.out.println("Terminating game");
-					try {
-						controller.getChannel().close();
-					} catch (IOException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-					controller = null;
-					state = GameState.MENU;
-					System.out.println("Trying to stop internal server");
-					internalserver.stopServer();
-					System.out.println("Server stop called");
-					try {
-						internalserver.join();
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					System.out.println("Internal Server died");
-					WorldController c = internalserver.getGameThread().getController();
-					
-					File f = new File("/tmp/testworld");
-					if (!f.exists()) {
-						f.mkdir();
-						c.saveZones(f);
-					}
-					
-					internalserver = null;
-					mylocation = new Position(0, 0);
-					activegui = getMainMenu();
-					editorObj = null;
+					activecontrol = "quit";
 				}
 				
 				if (state == GameState.MENU) {
@@ -641,6 +610,12 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		if (running) {
 			if (state == GameState.MENU || state == GameState.PAUSED) {
+				return;
+			}
+			
+			if (activecontrol != null && activecontrol.equals("quit")) {
+				activecontrol = null;
+				quitGame();
 				return;
 			}
 			
@@ -1283,6 +1258,32 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		
 		return controller.namegood;
 		
+	}
+	
+	public void quitGame() {
+		System.out.println("Terminating game");
+		try {
+			controller.getChannel().close();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		controller = null;
+		state = GameState.MENU;
+		System.out.println("Trying to stop internal server");
+		internalserver.stopServer();
+		System.out.println("Server stop called");
+		try {
+			internalserver.join();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		System.out.println("Internal Server died");
+		internalserver = null;
+		mylocation = new Position(0, 0);
+		activegui = getMainMenu();
+		editorObj = null;
 	}
 
 }

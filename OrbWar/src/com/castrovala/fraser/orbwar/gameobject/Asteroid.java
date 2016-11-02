@@ -69,7 +69,18 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	public void update() {
 		super.update();
 		
-		setRotation(rotation + 1);
+		setRotation(rotation + 0.5f);
+		if (rotation >= 360) {
+			setRotation(0);
+		}
+	}
+	
+	@Override
+	public void clientUpdate() {
+		// TODO Auto-generated method stub
+		super.clientUpdate();
+		
+		setRotation(rotation + 0.5f);
 		if (rotation >= 360) {
 			setRotation(0);
 		}

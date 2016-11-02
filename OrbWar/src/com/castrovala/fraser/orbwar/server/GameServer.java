@@ -482,8 +482,10 @@ public class GameServer extends Thread {
 			WorldController c = getGameThread().getController();
 			if (!savefile.exists()) {
 				savefile.mkdir();
-				c.saveZones(savefile);
-			} 
+				
+			}
+			
+			c.saveZones(savefile);
 		}
 	}
 
