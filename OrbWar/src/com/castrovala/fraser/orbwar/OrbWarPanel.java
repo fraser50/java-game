@@ -15,6 +15,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -685,16 +686,20 @@ public class OrbWarPanel extends JPanel implements Runnable {
 				
 			}
 		}
-		Graphics2D g2d = (Graphics2D) dbImage.getGraphics();
+		
+		BufferedImage tmpImage = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_RGB);
+		tmpImage.getGraphics().setColor(Color.BLACK);
+		tmpImage.getGraphics().fillRect(0, 0, PWIDTH, PHEIGHT);
+		Graphics2D g2d = (Graphics2D) tmpImage.getGraphics();
 		
 		
 //		System.out.println("Adding all zones");
-		dbg.setColor(Color.BLACK);
-		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
-		dbg.drawString("Fixer", 5, 5);
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(0, 0, PWIDTH, PHEIGHT);
+		g2d.drawString("Fixer", 5, 5);
 		int rendereditems = 0;
 		for (Position star : starpoints) {
-			dbg.setColor(Color.WHITE);
+			g2d.setColor(Color.WHITE);
 			int offsetx = 0;
 			int offsety = 0;
 			int newposx = (int) star.getX();
@@ -722,7 +727,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 					newposy -= PHEIGHT;
 				}
 			}
-			dbg.drawLine( newposx, newposy, newposx, newposy );
+			g2d.drawLine( newposx, newposy, newposx, newposy );
 			rendereditems++;
 		}
 		
@@ -733,6 +738,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		if (state == GameState.MENU) {
+			dbg.drawImage(tmpImage, 0, 0, null);
 			repaint();
 			return;
 		}
@@ -962,6 +968,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		long repaintstart = System.currentTimeMillis();
+		dbg.drawImage(tmpImage, 0, 0, null);
 		repaint();
 		long repaintend = System.currentTimeMillis();
 		long repaintdelay = repaintend - repaintstart;
@@ -1284,6 +1291,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		mylocation = new Position(0, 0);
 		activegui = getMainMenu();
 		editorObj = null;
+		mousePos = new Position(0, 0);
+		
 	}
 
 }

@@ -79,6 +79,13 @@ public class Planet extends GameObject {
 								r = 50 + (int)(value * 100);
 								g = 60;
 								b = 60;
+								break;
+							case DESERT:
+								r = 128;
+								g = 128;
+								b = (int)(value * 100);
+						default:
+							break;
 						}
 						
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
@@ -100,6 +107,13 @@ public class Planet extends GameObject {
 								r = 255;
 								g = (int) (100 - (value * 100) );
 								b = 40;
+								break;
+							case DESERT:
+								r = 255;
+								g = 255;
+								b = 250 - (int)(value * 100);
+						default:
+							break;
 						}
 						
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
