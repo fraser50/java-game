@@ -476,18 +476,22 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		JFrame frame = new JFrame("OrbWar");
+		Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
+		PWIDTH = (int) (screensize.getWidth() >= PWIDTH ? PWIDTH : screensize.getWidth());
+		PHEIGHT = (int) (screensize.getHeight() >= PHEIGHT ? PHEIGHT : screensize.getHeight());
+		
+		
 		OrbWarPanel panel = new OrbWarPanel();
 		frame.add(panel);
-		
-		Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
-		PWIDTH = (int) (screensize.getWidth() >= PWIDTH ? PWIDTH : screensize.getHeight());
-		PHEIGHT = (int) (screensize.getWidth() >= PHEIGHT ? PHEIGHT : screensize.getHeight());
-		
 		frame.setSize(PWIDTH, PHEIGHT);
 		frame.setVisible(true);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel.addNotify();
+		
+		
+		
+		
 	}
 	
 	public void addNotify() {
@@ -1258,7 +1262,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			controller = c;
 		}
 		
-		controller.sendPacket(new NameCheckPacket(true, name));
+		controller.sendPacket(new NameCheckPacket(true, name, PWIDTH, PHEIGHT));
 		while (!controller.didgetncp) {
 			controller.processPackets();
 		}

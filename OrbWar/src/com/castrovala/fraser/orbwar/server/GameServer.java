@@ -37,6 +37,7 @@ public class GameServer extends Thread {
 	private volatile List<NetworkPlayer> readyplayers = new ArrayList<>();
 	private ServerState state = ServerState.STARTING;
 	private File savefile = null;
+	private boolean nosecurity = false;
 	
 	public File getSavefile() {
 		return savefile;
@@ -247,7 +248,7 @@ public class GameServer extends Thread {
 						if (pa instanceof NameCheckPacket && !readyplayers.contains(p)) {
 							NameCheckPacket ncp = (NameCheckPacket) pa;
 							
-							NameCheckPacket response = new NameCheckPacket(false, "A login error occurred");
+							NameCheckPacket response = new NameCheckPacket(false, "A login error occurred", 0, 0);
 							for (char c : ncp.getName().toCharArray()) {
 								if (Character.isLetterOrDigit(c) || c == '_') {
 									response.setLogin(true);
@@ -270,10 +271,17 @@ public class GameServer extends Thread {
 								}
 							}
 							
+							if (p.getScreenWidth() > 1024 || p.getScreenHeight() > 1024) {
+								response.setLogin(false);
+								response.setName("Invalid game size! (Don't try to cheat! :O )");
+							}
+							
 							p.sendPacket(response);
 							
 							if (ncp.isLogin() && response.isLogin()) {
 								p.setName(ncp.getName());
+								p.setScreenWidth(ncp.getWidth());
+								p.setScreenHeight(ncp.getHeight());
 								finishLogin(p);
 							}
 							
@@ -315,13 +323,16 @@ public class GameServer extends Thread {
 						}
 						
 						if (pa instanceof EditorTransmitPacket) {
-							EditorTransmitPacket etp = (EditorTransmitPacket) pa;
-							GameObject obj = GameObjectProcessor.fromJSON(etp.getObj());
 							
-							synchronized (gamelogic.getController()) {
-								obj.setController(gamelogic.getController());
-								gamelogic.getController().addObject(obj);
-								obj.afterBirth();
+							
+							if (p.isAdmin() || nosecurity) {
+								EditorTransmitPacket etp = (EditorTransmitPacket) pa;
+								GameObject obj = GameObjectProcessor.fromJSON(etp.getObj());
+								synchronized (gamelogic.getController()) {
+									obj.setController(gamelogic.getController());
+									gamelogic.getController().addObject(obj);
+									obj.afterBirth();
+								} 
 							}
 							
 						}
@@ -338,9 +349,21 @@ public class GameServer extends Thread {
 										break;
 									}
 									
+									if (message.equalsIgnoreCase("/secon") && p.isAdmin()) {
+										nosecurity = false;
+										break;
+									}
+									
+									if (message.equalsIgnoreCase("/secoff") && p.isAdmin()) {
+										nosecurity = true;
+										break;
+									}
+									
 									pl.sendPacket(cepp);
 								}
 							}
+							
+							
 						}
 					}
 					

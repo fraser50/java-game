@@ -5,10 +5,14 @@ import net.minidev.json.JSONObject;
 public class NameCheckPacket implements AbstractPacket {
 	private boolean login;
 	private String name;
+	private int width;
+	private int height;
 	
-	public NameCheckPacket(boolean login, String name) {
+	public NameCheckPacket(boolean login, String name, int width, int height) {
 		this.login = login;
 		this.name = name;
+		this.width = width;
+		this.height = height;
 	}
 
 	@Override
@@ -42,18 +46,36 @@ public class NameCheckPacket implements AbstractPacket {
 				obj.put("type", "ncp");
 				obj.put("login", ncp.isLogin());
 				obj.put("name", ncp.getName());
+				obj.put("width", ncp.getWidth());
+				obj.put("height", ncp.getHeight());
 				
 				return obj;
 			}
 			
 			@Override
 			public AbstractPacket fromJSON(JSONObject obj) {
-				NameCheckPacket ncp = new NameCheckPacket((boolean)obj.get("login"), obj.getAsString("name"));
+				NameCheckPacket ncp = new NameCheckPacket((boolean)obj.get("login"), obj.getAsString("name"), obj.getAsNumber("width").intValue(), obj.getAsNumber("height").intValue());
 				return ncp;
 			}
 		};
 		
 		PacketProcessor.addParser("ncp", parser);
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 }

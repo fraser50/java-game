@@ -24,6 +24,13 @@ public class GameThread extends Thread {
 	
 	public GameThread(GameServer server) {
 		this.setServer(server);
+		
+		if (server.getSavefile() == null) {
+			controller = new WorldController(server);
+			this.setName("Game Thread");
+			return;
+		}
+		
 		if (server.getSavefile().exists()) {
 			try {
 				controller = WorldController.createFromFile(server.getSavefile());
@@ -145,8 +152,8 @@ public class GameThread extends Thread {
 				
 				GameObject obj = (GameObject) p.getControl();
 				Position mylocation = p.getCurrentpos();
-				int PWIDTH = 1024;
-				int PHEIGHT = 1024;
+				int PWIDTH = p.getScreenWidth();
+				int PHEIGHT = p.getScreenHeight();
 				
 				if (mylocation.getX() - obj.getPosition().getX() >= 1000000 || mylocation.getY() - obj.getPosition().getY() >= 1000000 ||
 						mylocation.getX() - obj.getPosition().getX() <= -1000000 || mylocation.getY() - obj.getPosition().getY() <= -1000000	) {

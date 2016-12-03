@@ -27,6 +27,8 @@ public class NetworkPlayer implements ControlUser {
 	private volatile ByteBuffer received;
 	private volatile ByteBuffer recievedLen;
 	private boolean admin;
+	private int screenWidth = 0;
+	private int screenHeight = 0;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -147,6 +149,22 @@ public class NetworkPlayer implements ControlUser {
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+
+	public int getScreenWidth() {
+		return screenWidth;
+	}
+
+	public void setScreenWidth(int screenWidth) {
+		this.screenWidth = screenWidth;
+	}
+
+	public int getScreenHeight() {
+		return screenHeight;
+	}
+
+	public void setScreenHeight(int screenHeight) {
+		this.screenHeight = screenHeight;
 	}
 
 }
