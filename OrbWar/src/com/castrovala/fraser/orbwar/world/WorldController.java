@@ -319,6 +319,11 @@ public class WorldController implements WorldProvider {
 		File zonefile;
 		for (String s : zonedirfile.list()) {
 			zonefile = new File(zonedirfile, s);
+			
+			if (!s.endsWith(".json")) {
+				continue;
+			}
+			
 			s = s.substring(0, s.length() - 5);
 			
 			String[] coords = s.split(Pattern.quote("_"));
