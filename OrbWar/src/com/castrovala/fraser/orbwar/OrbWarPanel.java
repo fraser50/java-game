@@ -32,6 +32,7 @@ import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
+import com.castrovala.fraser.orbwar.gameobject.BombBoy;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
@@ -47,6 +48,7 @@ import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
 import com.castrovala.fraser.orbwar.gameobject.WormHole;
 import com.castrovala.fraser.orbwar.gameobject.npc.EnemyDrone;
+import com.castrovala.fraser.orbwar.gameobject.npc.WarShip;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.GuiButton;
@@ -455,6 +457,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		Star.registerGameObj();
 		EnemyDrone.registerGameObj();
 		OliverGuider.registerGameObj();
+		WarShip.registerGameObj();
+		BombBoy.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {

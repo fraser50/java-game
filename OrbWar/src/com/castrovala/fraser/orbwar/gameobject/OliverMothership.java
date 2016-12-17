@@ -7,11 +7,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
+import com.castrovala.fraser.orbwar.gameobject.npc.WarShip;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
@@ -20,6 +23,7 @@ import com.castrovala.fraser.orbwar.server.NetworkPlayer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.OrbitControl;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
+import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
@@ -35,6 +39,8 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	private boolean firstrun = true;
 	private final float distanceaway = 200;
 	private int timer = 0;
+	
+	private int missiletimer = 0;
 
 	public OliverMothership(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -121,6 +127,16 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			for (NetworkPlayer pl : c.getServer().getPlayers()) {
 				pl.sendPacket(p);
 			}
+		}
+		
+		missiletimer++;
+		if (missiletimer >= 50) {
+			Random r = ThreadLocalRandom.current();
+			float rotation = r.nextInt(361);
+			Position adder = Util.angleToVel(rotation, 200f + r.nextInt(100));
+			WarShip war = new WarShip(getPosition().copy().add(adder), getController());
+			getController().addObject(war);
+			missiletimer = 0;
 		}
 		
 	}
