@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import java.nio.ByteBuffer;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class NameCheckPacket implements AbstractPacket {
 	private boolean login;
@@ -15,12 +17,8 @@ public class NameCheckPacket implements AbstractPacket {
 		this.height = height;
 	}
 
-	@Override
-	public String getType() {
-		return "ncp";
-	}
-
 	public boolean isLogin() {
+		//return true;
 		return login;
 	}
 
@@ -40,26 +38,32 @@ public class NameCheckPacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				NameCheckPacket ncp = (NameCheckPacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "ncp");
-				obj.put("login", ncp.isLogin());
-				obj.put("name", ncp.getName());
-				obj.put("width", ncp.getWidth());
-				obj.put("height", ncp.getHeight());
+				ByteBuffer buff = ByteBuffer.allocate(9 + ncp.getName().getBytes().length + 4);
+				buff.put(Util.boolToByte(ncp.isLogin()));
+				buff.putInt(ncp.getWidth());
+				buff.putInt(ncp.getHeight());
+				buff.put(Util.encodeString(ncp.getName()));
 				
-				return obj;
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				NameCheckPacket ncp = new NameCheckPacket((boolean)obj.get("login"), obj.getAsString("name"), obj.getAsNumber("width").intValue(), obj.getAsNumber("height").intValue());
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				boolean login = Util.byteToBool(buff.get());
+				int width = buff.getInt();
+				int height = buff.getInt();
+				String name = Util.decodeString(buff);
+				NameCheckPacket ncp = new NameCheckPacket(login, name, width, height);
 				return ncp;
 			}
 		};
 		
-		PacketProcessor.addParser("ncp", parser);
+		PacketProcessor.addParser(parser, NameCheckPacket.class);
 	}
 
 	public int getWidth() {

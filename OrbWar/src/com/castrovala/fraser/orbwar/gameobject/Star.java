@@ -8,6 +8,8 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
@@ -18,8 +20,6 @@ import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Star extends GameObject {
 	private static BufferedImage renderimage;

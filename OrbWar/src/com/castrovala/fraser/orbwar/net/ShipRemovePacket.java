@@ -1,17 +1,10 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
-
 public class ShipRemovePacket implements AbstractPacket {
 	private String uuid;
 	
 	public ShipRemovePacket(String uuid) {
 		this.setUuid(uuid);
-	}
-	
-	@Override
-	public String getType() {
-		return "srp";
 	}
 
 	public String getUuid() {
@@ -26,22 +19,18 @@ public class ShipRemovePacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				ShipRemovePacket srp = (ShipRemovePacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "srp");
-				obj.put("uuid", srp.getUuid());
-				return obj;
+				return srp.getUuid().getBytes();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				ShipRemovePacket srp = new ShipRemovePacket(obj.getAsString("uuid"));
-				return srp;
+			public AbstractPacket fromBytes(byte[] data) {
+				return new ShipRemovePacket(new String(data));
 			}
 		};
 		
-		PacketProcessor.addParser("srp", parser);
+		PacketProcessor.addParser(parser, ShipRemovePacket.class);
 	}
 
 }

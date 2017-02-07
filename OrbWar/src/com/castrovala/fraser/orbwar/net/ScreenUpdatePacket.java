@@ -1,19 +1,14 @@
 package com.castrovala.fraser.orbwar.net;
 
-import com.castrovala.fraser.orbwar.world.Position;
+import java.nio.ByteBuffer;
 
-import net.minidev.json.JSONObject;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class ScreenUpdatePacket implements AbstractPacket {
 	private Position pos;
 	
 	public ScreenUpdatePacket(Position pos) {
 		this.pos = pos;
-	}
-
-	@Override
-	public String getType() {
-		return "sup";
 	}
 
 	public Position getPos() {
@@ -28,24 +23,27 @@ public class ScreenUpdatePacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				ScreenUpdatePacket sup = (ScreenUpdatePacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", sup.getType());
-				obj.put("x", sup.getPos().getX());
-				obj.put("y", sup.getPos().getY());
-				return obj;
+				ByteBuffer buff = ByteBuffer.allocate(8 * 2);
+				buff.putDouble(sup.getPos().getX());
+				buff.putDouble(sup.getPos().getY());
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				double x = (double) obj.get("x");
-				double y = (double) obj.get("y");
-				return new ScreenUpdatePacket(new Position(x, y));
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				double x = buff.getDouble();
+				double y = buff.getDouble();
+				ScreenUpdatePacket sup = new ScreenUpdatePacket(new Position(x, y));
+				return sup;
 			}
 		};
 		
-		PacketProcessor.addParser("sup", parser);
+		PacketProcessor.addParser(parser, ScreenUpdatePacket.class);
 	}
 
 }

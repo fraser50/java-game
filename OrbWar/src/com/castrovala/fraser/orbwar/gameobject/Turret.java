@@ -8,6 +8,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
@@ -20,8 +22,6 @@ import com.castrovala.fraser.orbwar.weapons.Weapon;
 import com.castrovala.fraser.orbwar.weapons.WeaponOwner;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Turret extends GameObject implements WeaponOwner, CollisionHandler {
 	private static BufferedImage renderimage;

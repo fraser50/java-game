@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import java.nio.ByteBuffer;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class ShieldUpdatePacket implements AbstractPacket {
 	private String shipid;
@@ -9,11 +11,6 @@ public class ShieldUpdatePacket implements AbstractPacket {
 	public ShieldUpdatePacket(String shipid, boolean shield) {
 		this.shipid = shipid;
 		this.shield = shield;
-	}
-
-	@Override
-	public String getType() {
-		return "fup";
 	}
 
 	public String getShipid() {
@@ -33,27 +30,29 @@ public class ShieldUpdatePacket implements AbstractPacket {
 	}
 	
 	public static void registerPacket() {
-		PacketParser proc = new PacketParser() {
+		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				ShieldUpdatePacket packet = (ShieldUpdatePacket) p;
-				JSONObject json = new JSONObject();
-				json.put("type", packet.getType());
-				
-				json.put("shipid", packet.getShipid());
-				json.put("shield", packet.isShieldActive());
-				return json;
+			public byte[] toBytes(AbstractPacket p) {
+				ShieldUpdatePacket sup = (ShieldUpdatePacket) p;
+				ByteBuffer buff = ByteBuffer.allocate(sup.getShipid().getBytes().length + 5);
+				buff.put(Util.encodeString(sup.getShipid()));
+				buff.put(Util.boolToByte(sup.isShieldActive()));
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				ShieldUpdatePacket p = new ShieldUpdatePacket(obj.getAsString("shipid"), (boolean)obj.get("shield"));
-				return p;
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				String id = Util.decodeString(buff);
+				boolean shield = Util.byteToBool(buff.get());
+				return new ShieldUpdatePacket(id, shield);
 			}
 		};
 		
-		PacketProcessor.addParser("fup", proc);
+		PacketProcessor.addParser(parser, ShieldUpdatePacket.class);
 		
 	}
 

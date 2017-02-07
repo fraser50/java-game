@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.Util;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 public class WorldZone {
 	private List<GameObject> gameobjects = new ArrayList<>();
@@ -42,6 +42,7 @@ public class WorldZone {
 	}
 	
 	public void populate() {
+		
 		Position startpos = getStartPoint();
 		Position endpos = getEndPoint();
 		List<Rectangle> prevAst = new ArrayList<>();

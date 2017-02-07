@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import java.nio.ByteBuffer;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class HealthUpdatePacket implements AbstractPacket {
 	private String uuid;
@@ -13,35 +15,32 @@ public class HealthUpdatePacket implements AbstractPacket {
 		this.rotation = rotation;
 	}
 	
-	@Override
-	public String getType() {
-		return "health_update";
-	}
-	
 	public static void registerPacket() {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				HealthUpdatePacket packet = (HealthUpdatePacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "health_update");
-				obj.put("uuid", packet.getUuid());
-				obj.put("health", packet.getHealth());
-				obj.put("rotation", packet.getRotation());
-				return obj;
+			public byte[] toBytes(AbstractPacket p) {
+				HealthUpdatePacket hup = (HealthUpdatePacket) p;
+				ByteBuffer buff = ByteBuffer.allocate(hup.getUuid().getBytes().length + 16);
+				buff.put(Util.encodeString(hup.getUuid()));
+				buff.putInt(hup.getHealth());
+				buff.putFloat(hup.getRotation());
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				String uuid = (String) obj.get("uuid");
-				int health = obj.getAsNumber("health").intValue();
-				double rotation = obj.getAsNumber("rotation").doubleValue();
-				return new HealthUpdatePacket(uuid, health, (float)rotation);
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				String id = Util.decodeString(buff);
+				int health = buff.getInt();
+				float rotation = buff.getFloat();
+				return new HealthUpdatePacket(id, health, rotation);
 			}
 		};
 		
-		PacketProcessor.addParser("health_update", parser);
+		PacketProcessor.addParser(parser, HealthUpdatePacket.class);
 	}
 
 	public String getUuid() {

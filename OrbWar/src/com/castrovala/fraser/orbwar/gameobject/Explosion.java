@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Explosion extends GameObject {
 	public Explosion(Position pos, WorldProvider controller) {

@@ -12,6 +12,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.npc.WarShip;
@@ -27,8 +29,6 @@ import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class OliverMothership extends GameObject implements CollisionHandler {
 	private boolean shield = true;

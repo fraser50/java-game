@@ -27,11 +27,8 @@ import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.net.SizeUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.server.NoPacketParserException;
 import com.castrovala.fraser.orbwar.util.Util;
-
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 
 public class WorldNetController implements WorldProvider {
 	private SocketChannel channel;
@@ -181,25 +178,15 @@ public class WorldNetController implements WorldProvider {
 			}
 		}
 		
-		String value = new String(buff.array());
-		
-		JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
-		JSONObject jobj;
 		try {
-			jobj = (JSONObject) parser.parse(value);
-			AbstractPacket packet = PacketProcessor.fromJSON(jobj);
+			AbstractPacket packet = PacketProcessor.fromBytes(buff.array());
 			
 			if (packet == null) {
 				System.out.println("Packet is null, no parser exists!");
 			}
 			
 			packets.add(packet);
-		} catch (ParseException e) {
-			System.out.println("Error with parsing " + value);
-			System.out.println("Len of string: " + value.length());
-			receiveBufferLen.position(0);
-			System.out.println("Len of buff: " + receiveBufferLen.getInt());
-			System.out.println("ASCII data: " + new String(receiveBufferLen.array()));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -218,9 +205,6 @@ public class WorldNetController implements WorldProvider {
 			}
 			
 			if (pack instanceof ObjectTransmitPacket) {
-				if (pack.getType() != "obj_transmit") {
-					System.out.println("Not an OTP!");
-				}
 				
 				ObjectTransmitPacket otp = (ObjectTransmitPacket) pack;
 				
@@ -242,6 +226,7 @@ public class WorldNetController implements WorldProvider {
 					obj.getPosition().setY(pup.getPosition().getY());
 				} else {
 					//System.out.println("object for pos update doesn't exist!");
+					//System.out.println(pup.getObjectid());
 				}
 			}
 			
@@ -337,43 +322,23 @@ public class WorldNetController implements WorldProvider {
 	}
 	
 	public void sendPacket(AbstractPacket pa) {
-		long start = System.currentTimeMillis();
-		long json_start = start;
-		long start_convert_obj = System.currentTimeMillis();
-		JSONObject jobj = PacketProcessor.toJSON(pa);
-		long end_convert_obj = System.currentTimeMillis();
-		long delay_convert_obj = end_convert_obj - start_convert_obj;
-		
-		if (delay_convert_obj >= 2) {
-			System.out.println("Slow on generating JSONObject! (" + delay_convert_obj + "ms)");
-			System.out.println("Slow Object Class: " + pa.getClass().getName());
+		byte[] data;
+		try {
+			data = PacketProcessor.toBytes(pa);
+		} catch (NoPacketParserException e1) {
+			return;
 		}
 		
-		String raw_message = jobj.toJSONString();
-		long json_end = System.currentTimeMillis();
-		long json_delay = json_end - json_start;
-		
-		if (json_delay >= 2) {
-			System.out.println("JSON conversion finished in " + json_delay + "ms");
-		}
-		
-		
-		ByteBuffer buf = ByteBuffer.allocate(raw_message.getBytes().length + 4);
+		ByteBuffer buf = ByteBuffer.allocate(data.length + 4);
 		
 		ByteBuffer len_buf = ByteBuffer.allocate(4);
-		len_buf.putInt(raw_message.length());
+		len_buf.putInt(data.length);
 		byte[] len_bytes = len_buf.array();
 		
 		buf.put(len_bytes);
-		buf.put(raw_message.getBytes());
+		buf.put(data);
 		
 		buf.flip();
-		long end = System.currentTimeMillis();
-		long delay = end - start;
-		if (delay >= 10) {
-			System.out.println("Constructed data packet in " + delay + "ms");
-			System.out.println(new String(buf.array()));
-		}
 		
 		try {
 			while (buf.position() != buf.array().length) {
@@ -383,13 +348,6 @@ public class WorldNetController implements WorldProvider {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//System.out.println("Server msg: " + new String(buf.array()));
-		//p.getPacketQueue().remove(pa);
-		//count++;
-		//if (count >= 600000000) {
-			//break;
-		//}
 	}
 
 	public HashMap<String, ClientPlayer> getClients() {

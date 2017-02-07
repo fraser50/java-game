@@ -1,17 +1,10 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
-
 public class DeleteObjectPacket implements AbstractPacket {
 	private String uuid;
 	
 	public DeleteObjectPacket(String uuid) {
 		this.uuid = uuid;
-	}
-	
-	@Override
-	public String getType() {
-		return "obj_delete";
 	}
 
 	public String getUuid() {
@@ -26,22 +19,18 @@ public class DeleteObjectPacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				DeleteObjectPacket dop = (DeleteObjectPacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "obj_delete");
-				obj.put("uuid", dop.getUuid());
-				return obj;
+				return dop.getUuid().getBytes();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				DeleteObjectPacket dop = new DeleteObjectPacket(obj.getAsString("uuid"));
-				return dop;
+			public AbstractPacket fromBytes(byte[] data) {
+				return new DeleteObjectPacket(new String(data));
 			}
 		};
 		
-		PacketProcessor.addParser("obj_delete", parser);
+		PacketProcessor.addParser(parser, DeleteObjectPacket.class);
 	}
 
 }

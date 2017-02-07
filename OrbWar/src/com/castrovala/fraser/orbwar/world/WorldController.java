@@ -14,17 +14,17 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.GameServer;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.util.WormHoleData;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 
 public class WorldController implements WorldProvider {
 	private List<WorldZone> zones = new ArrayList<>();
@@ -336,7 +336,7 @@ public class WorldController implements WorldProvider {
 			scan.useDelimiter("\\Z"); 
 			String zonejson = scan.next();
 			scan.close();
-			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+			JSONParser parser = new JSONParser();
 			JSONObject jsonobj = (JSONObject) parser.parse(zonejson);
 			JSONArray array = (JSONArray) jsonobj.get("objects");
 			

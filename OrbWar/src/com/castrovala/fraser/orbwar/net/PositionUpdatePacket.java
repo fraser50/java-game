@@ -1,23 +1,17 @@
 package com.castrovala.fraser.orbwar.net;
 
-import com.castrovala.fraser.orbwar.world.Position;
+import java.nio.ByteBuffer;
 
-import net.minidev.json.JSONObject;
+import com.castrovala.fraser.orbwar.util.Util;
+import com.castrovala.fraser.orbwar.world.Position;
 
 public class PositionUpdatePacket implements AbstractPacket {
 	private Position position;
 	private String objectid;
-
-	@Override
-	public String getType() {
-		return "pos_update";
-	}
 	
 	public PositionUpdatePacket(Position position, String obj_id) {
 		this.position = position;
 		this.objectid = obj_id;
-		
-		//System.out.println("PUP has been constructed");
 	}
 
 	public Position getPosition() {
@@ -32,31 +26,28 @@ public class PositionUpdatePacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				
-				PositionUpdatePacket packet = (PositionUpdatePacket) p;
-				
-				JSONObject json = new JSONObject();
-				json.put("type", p.getType());
-				json.put("x", Double.toHexString(packet.getPosition().getX()) );
-				json.put("y", Double.toHexString(packet.getPosition().getY()) );
-				json.put("obj_id", packet.getObjectid());
-				return json;
-				
+			public byte[] toBytes(AbstractPacket p) {
+				PositionUpdatePacket pup = (PositionUpdatePacket) p;
+				ByteBuffer buff = ByteBuffer.allocate(20 + pup.getObjectid().getBytes().length);
+				buff.putDouble(pup.getPosition().getX());
+				buff.putDouble(pup.getPosition().getY());
+				buff.put(Util.encodeString(pup.getObjectid()));
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				double x = Double.parseDouble(obj.getAsString("x"));
-				double y = Double.parseDouble(obj.getAsString("y"));
-				String obj_id = (String) obj.get("obj_id");
-				
-				PositionUpdatePacket packet = new PositionUpdatePacket(new Position(x, y), obj_id);
-				return packet;
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				double x = buff.getDouble();
+				double y = buff.getDouble();
+				String id = Util.decodeString(buff);
+				return new PositionUpdatePacket(new Position(x, y), id);
 			}
 		};
 		
-		PacketProcessor.addParser("pos_update", parser);
+		PacketProcessor.addParser(parser, PositionUpdatePacket.class);
 	}
 
 	public String getObjectid() {

@@ -2,6 +2,8 @@ package com.castrovala.fraser.orbwar.server;
 
 import java.io.FileNotFoundException;
 
+import org.json.simple.parser.ParseException;
+
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
@@ -14,8 +16,6 @@ import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldZone;
-
-import net.minidev.json.parser.ParseException;
 
 public class GameThread extends Thread {
 	private volatile GameServer server;
@@ -197,7 +197,7 @@ public class GameThread extends Thread {
 			
 			
 			try {
-				Thread.sleep(1000 / 60); // / 60
+				Thread.sleep(20); // 1000 / 60
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

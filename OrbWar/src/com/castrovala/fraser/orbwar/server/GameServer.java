@@ -23,10 +23,6 @@ import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-
 public class GameServer extends Thread {
 	private boolean localserver;
 	private boolean isTicking = true;
@@ -105,7 +101,7 @@ public class GameServer extends Thread {
 		while (active) {
 			//System.out.println("Server tick");
 			try {
-				Thread.sleep(15);
+				Thread.sleep(30);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -142,43 +138,24 @@ public class GameServer extends Thread {
 								System.out.println("Packet is null");
 								continue;
 							}
-
-							long start = System.currentTimeMillis();
-							long json_start = start;
-							long start_convert_obj = System.currentTimeMillis();
-							JSONObject jobj = PacketProcessor.toJSON(pa);
-							long end_convert_obj = System.currentTimeMillis();
-							long delay_convert_obj = end_convert_obj - start_convert_obj;
-
-							if (delay_convert_obj >= 2) {
-								System.out.println("Slow on generating JSONObject! (" + delay_convert_obj + "ms)");
-								System.out.println("Slow Object Class: " + pa.getClass().getName());
-							}
-
-							String raw_message = jobj.toJSONString();
 							
-							long json_end = System.currentTimeMillis();
-							long json_delay = json_end - json_start;
+							byte[] data;
+							
+							try {
+								data = PacketProcessor.toBytes(pa);
+							} catch (NoPacketParserException e) {continue;};
 
-							if (json_delay >= 2) {
-								System.out.println("JSON conversion finished in " + json_delay + "ms");
-							}
-
-							ByteBuffer buf = ByteBuffer.allocate(raw_message.getBytes().length + 4);
+							ByteBuffer buf = ByteBuffer.allocate(data.length + 4);
 
 							ByteBuffer len_buf = ByteBuffer.allocate(4);
-							len_buf.putInt(raw_message.length());
+							len_buf.putInt(data.length);
 							byte[] len_bytes = len_buf.array();
 
 							buf.put(len_bytes);
 
-							buf.put(raw_message.getBytes());
+							buf.put(data);
 
 							buf.flip();
-							long end = System.currentTimeMillis();
-							long delay = end - start;
-							if (delay >= 10) {
-							}
 							
 							//System.out.println("msg size: " + msgsize + " bytes");
 							while (buf.array().length != buf.position()) {
@@ -219,21 +196,16 @@ public class GameServer extends Thread {
 						}
 					}
 					
-					String value = new String(buff.array());
-					//System.out.println("value: " + value);
 					
-					JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-					JSONObject jobj;
 					try {
-						jobj = (JSONObject) parser.parse(value);
-						AbstractPacket packet = PacketProcessor.fromJSON(jobj);
+						AbstractPacket packet = PacketProcessor.fromBytes(buff.array());
 						
 						if (packet == null) {
 							System.out.println("Packet is null, no parser exists!");
 						}
 						
 						packets.add(packet);
-					} catch (ParseException e) {
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -276,6 +248,10 @@ public class GameServer extends Thread {
 								response.setName("Invalid game size! (Don't try to cheat! :O )");
 							}
 							
+							if (!response.isLogin()) {
+								System.out.println("Refusing player with reason '" + response.getName() + "'");
+								System.out.println(ncp.getName());
+							}
 							p.sendPacket(response);
 							
 							if (ncp.isLogin() && response.isLogin()) {
@@ -371,7 +347,7 @@ public class GameServer extends Thread {
 					p.setRecievedLen(null);
 					p.setReceived(buff);
 					
-				} catch (IOException | IllegalArgumentException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 					try {
 						p.getConn().close();

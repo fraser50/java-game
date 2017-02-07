@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
@@ -19,8 +21,6 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 import com.castrovala.fraser.orbwar.world.WorldNetController;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class RespawnLaser extends GameObject {
 	
@@ -113,7 +113,7 @@ public class RespawnLaser extends GameObject {
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				RespawnLaser laser = new RespawnLaser(null, null);
-				laser.clientbodyid = obj.getAsString("point");
+				laser.clientbodyid = (String)obj.get("point");
 				return laser;
 			}
 		};

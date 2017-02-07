@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.planet.PlanetType;
@@ -17,8 +19,6 @@ import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Planet extends GameObject {
 	private static Map<String, BufferedImage> planetimages = new HashMap<>();

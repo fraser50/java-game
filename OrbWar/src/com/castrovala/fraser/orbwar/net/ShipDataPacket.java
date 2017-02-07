@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import java.nio.ByteBuffer;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class ShipDataPacket implements AbstractPacket {
 	private String shipid;
@@ -11,11 +13,6 @@ public class ShipDataPacket implements AbstractPacket {
 		this.name = name;
 		this.shipid = shipid;
 		this.admin = admin;
-	}
-
-	@Override
-	public String getType() {
-		return "supp";
 	}
 
 	public String getShipid() {
@@ -46,25 +43,28 @@ public class ShipDataPacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				ShipDataPacket supp = (ShipDataPacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "supp");
-				obj.put("uuid", supp.getShipid());
-				obj.put("name", supp.getName());
-				obj.put("admin", supp.isAdmin());
-				return obj;
+			public byte[] toBytes(AbstractPacket p) {
+				ShipDataPacket sdp = (ShipDataPacket) p;
+				ByteBuffer buff = ByteBuffer.allocate(sdp.getShipid().getBytes().length + sdp.getName().getBytes().length + 9);
+				buff.put(Util.encodeString(sdp.getShipid()));
+				buff.put(Util.encodeString(sdp.getName()));
+				buff.put(Util.boolToByte(sdp.isAdmin()));
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				ShipDataPacket supp = new ShipDataPacket(obj.getAsString("uuid"), obj.getAsString("uuid"), (boolean)obj.get("admin"));
-				supp.setName(obj.getAsString("name"));
-				return supp;
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				String id = Util.decodeString(buff);
+				String name = Util.decodeString(buff);
+				boolean admin = Util.byteToBool(buff.get());
+				return new ShipDataPacket(name, id, admin);
 			}
 		};
 		
-		PacketProcessor.addParser("supp", parser);
+		PacketProcessor.addParser(parser, ShipDataPacket.class);
 	}
 
 }

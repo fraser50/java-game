@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import java.nio.ByteBuffer;
+
+import com.castrovala.fraser.orbwar.util.Util;
 
 public class SizeUpdatePacket implements AbstractPacket {
 	private String uuid;
@@ -13,35 +15,32 @@ public class SizeUpdatePacket implements AbstractPacket {
 		this.setHeight(height);
 	}
 	
-	@Override
-	public String getType() {
-		return "scale_upd";
-	}
-	
 	public static void registerPacket() {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				SizeUpdatePacket packet = (SizeUpdatePacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "scale_upd");
-				obj.put("uuid", packet.getUuid());
-				obj.put("width", packet.getWidth());
-				obj.put("height", packet.getHeight());
-				return obj;
+			public byte[] toBytes(AbstractPacket p) {
+				SizeUpdatePacket sup = (SizeUpdatePacket) p;
+				ByteBuffer buff = ByteBuffer.allocate(sup.getUuid().getBytes().length + 12);
+				buff.put(Util.encodeString(sup.getUuid()));
+				buff.putInt(sup.getWidth());
+				buff.putInt(sup.getHeight());
+				return buff.array();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				String uuid = (String) obj.get("uuid");
-				int width = obj.getAsNumber("width").intValue();
-				int height = obj.getAsNumber("height").intValue();
-				return new SizeUpdatePacket(uuid, width, height);
+			public AbstractPacket fromBytes(byte[] data) {
+				ByteBuffer buff = ByteBuffer.allocate(data.length);
+				buff.put(data);
+				buff.position(0);
+				String id = Util.decodeString(buff);
+				int width = buff.getInt();
+				int height = buff.getInt();
+				return new SizeUpdatePacket(id, width, height);
 			}
 		};
 		
-		PacketProcessor.addParser("scale_upd", parser);
+		PacketProcessor.addParser(parser, SizeUpdatePacket.class);
 	}
 
 	public String getUuid() {

@@ -6,14 +6,14 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Bullet extends GameObject implements CollisionHandler {
 	private static BufferedImage renderimage;
@@ -63,7 +63,7 @@ public class Bullet extends GameObject implements CollisionHandler {
 		super.update();
 		
 		long timepassed = System.currentTimeMillis() - timeborn;
-		int loopsince = (int) (timepassed / (1000 / 60));
+		int loopsince = (int) (timepassed / (20)); // 1000 / 60
 		
 		double dx = loopsince * getVelocity().getX();
 		double dy = loopsince * getVelocity().getY();
@@ -156,10 +156,10 @@ public class Bullet extends GameObject implements CollisionHandler {
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				Bullet bullet = new Bullet(null, null, null);
-				bullet.getVelocity().setX(obj.getAsNumber("velx").doubleValue());
-				bullet.getVelocity().setY(obj.getAsNumber("vely").doubleValue());
-				bullet.setTimeborn(obj.getAsNumber("birth").longValue());
-				bullet.setInitialpos(new Position(obj.getAsNumber("ix").doubleValue(), obj.getAsNumber("iy").doubleValue()));
+				bullet.getVelocity().setX(((Number) obj.get("velx")).doubleValue());
+				bullet.getVelocity().setY(((Number) obj.get("vely")).doubleValue());
+				bullet.setTimeborn(((Number) obj.get("birth")).longValue());
+				bullet.setInitialpos(new Position(((Number) obj.get("ix")).doubleValue(), ((Number) obj.get("iy")).doubleValue()));
 				return bullet;
 			}
 		};

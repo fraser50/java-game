@@ -2,7 +2,7 @@ package com.castrovala.fraser.orbwar.save;
 
 import java.util.HashMap;
 
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.world.Position;
@@ -15,6 +15,7 @@ public class GameObjectProcessor {
 		System.out.println("Added parser '" + type + "' successfully!");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static JSONObject toJSON(GameObject obj) {
 		String uuid = obj.getUuid();
 		if (!parsers.containsKey(obj.getType())) {
@@ -32,14 +33,14 @@ public class GameObjectProcessor {
 	public static GameObject fromJSON(JSONObject obj) {
 		String type = (String) obj.get("type");
 		String uuid = (String) obj.get("uuid");
-		Number dx = obj.getAsNumber("x");
-		Number dy = obj.getAsNumber("y");
+		Number dx = (Number) obj.get("x");
+		Number dy = (Number) obj.get("y");
 		double x, y;
 		
 		x = dx.doubleValue();
 		y = dy.doubleValue();
-		float rotation = obj.getAsNumber("rotation").floatValue();
-		int health = obj.getAsNumber("health").intValue();
+		float rotation = ((Number)obj.get("rotation")).floatValue();
+		int health = ((Number)obj.get("health")).intValue();
 		if (!parsers.containsKey(type)) {
 			return null;
 		}

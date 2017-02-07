@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class ObjectTransmitPacket implements AbstractPacket {
 	private JSONObject obj;
@@ -10,12 +12,6 @@ public class ObjectTransmitPacket implements AbstractPacket {
 		if (obj == null) {
 			throw new NullPointerException("OTP obj was null!");
 		}
-	}
-	
-	
-	@Override
-	public String getType() {
-		return "obj_transmit";
 	}
 
 
@@ -29,30 +25,32 @@ public class ObjectTransmitPacket implements AbstractPacket {
 	}
 	
 	public static void registerPacket() {
-		PacketParser proc = new PacketParser() {
-			
+		PacketParser parser = new PacketParser() {
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				ObjectTransmitPacket packet = (ObjectTransmitPacket) p;
-				JSONObject json = new JSONObject();
-				json.put("type", packet.getType());
 				
 				packet.getObj().put("x", (double)packet.getObj().get("x"));
 				packet.getObj().put("y", (double)packet.getObj().get("y"));
-				
-				json.put("obj", packet.getObj());
-				return json;
+				String objdata = packet.getObj().toJSONString();
+				return objdata.getBytes();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				JSONObject gobj = (JSONObject) obj.get("obj");
-				ObjectTransmitPacket p = new ObjectTransmitPacket(gobj);
-				return p;
+			public AbstractPacket fromBytes(byte[] data) {
+				try {
+					
+					JSONObject jobj = (JSONObject) (new JSONParser()).parse(new String(data));
+					ObjectTransmitPacket otp = new ObjectTransmitPacket(jobj);
+					return otp;
+				} catch (ParseException e) {
+					e.printStackTrace();
+					throw new NullPointerException("Invalid JSON for OTP!");
+				}
 			}
 		};
 		
-		PacketProcessor.addParser("obj_transmit", proc);
+		PacketProcessor.addParser(parser, ObjectTransmitPacket.class);
 		
 	}
 

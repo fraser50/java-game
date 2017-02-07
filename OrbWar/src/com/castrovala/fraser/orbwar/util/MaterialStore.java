@@ -1,17 +1,17 @@
 package com.castrovala.fraser.orbwar.util;
 
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Set;
 
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
 
 public class MaterialStore {
 	private HashMap<String, Integer> materials = new HashMap<>();
 	
 	public MaterialStore(JSONObject obj) {
-		for (Entry<String, Object> m : obj.entrySet()) {
-			addMaterial(m.getKey(), obj.getAsNumber(m.getKey()).intValue());
-		}
+		//for (Set<String, Object> m : obj.) {
+		//	addMaterial(m.getKey(), ((Number)obj.get(m.getKey())).intValue());
+		//}
 	}
 	
 	public MaterialStore() {}

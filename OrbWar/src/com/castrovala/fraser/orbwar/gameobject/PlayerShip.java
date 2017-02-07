@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import com.castrovala.fraser.orbwar.gameobject.particle.SmokeParticle;
 import com.castrovala.fraser.orbwar.gui.RenderStage;

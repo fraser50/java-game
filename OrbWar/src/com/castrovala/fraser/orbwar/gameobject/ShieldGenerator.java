@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -18,8 +20,6 @@ import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class ShieldGenerator extends GameObject implements CollisionHandler {
 	private OrbitControl control;
@@ -86,7 +86,7 @@ public class ShieldGenerator extends GameObject implements CollisionHandler {
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				ShieldGenerator sg = new ShieldGenerator(null, null);
-				sg.setBossid(obj.getAsString("boss"));
+				sg.setBossid((String)obj.get("boss"));
 				return sg;
 			}
 		};

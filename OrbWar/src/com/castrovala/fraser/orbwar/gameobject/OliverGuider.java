@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
@@ -13,8 +15,6 @@ import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class OliverGuider extends GameObject implements CollisionHandler {
 	private GameObject parent;
@@ -86,7 +86,7 @@ public class OliverGuider extends GameObject implements CollisionHandler {
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
 				OliverGuider g = new OliverGuider(null, null);
-				g.setParentuuid(obj.getAsString("parent"));
+				g.setParentuuid((String)obj.get("parent"));
 				return g;
 			}
 		};

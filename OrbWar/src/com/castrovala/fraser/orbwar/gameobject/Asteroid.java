@@ -12,6 +12,8 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
@@ -22,8 +24,6 @@ import com.castrovala.fraser.orbwar.util.MaterialStore;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class Asteroid extends GameObject implements CollisionHandler {
 	private static BufferedImage renderimage;
@@ -159,6 +159,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	public static void registerGameObj() {
 		GameObjParser parser = new GameObjParser() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(GameObject obj) {
 				Asteroid ast = (Asteroid) obj;
@@ -169,7 +170,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 				jobj.put("y", ast.getPosition().getY());
 				
 				if (ast.getMstore() != null) {
-					jobj.put("materials", ast.getMstore().toJSON());
+					//jobj.put("materials", ast.getMstore().toJSON());
 				}
 				
 				return jobj;

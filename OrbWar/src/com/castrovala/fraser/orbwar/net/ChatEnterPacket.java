@@ -1,17 +1,10 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
-
 public class ChatEnterPacket implements AbstractPacket {
 	private String message;
 	
 	public ChatEnterPacket(String message) {
 		this.setMessage(message);
-	}
-
-	@Override
-	public String getType() {
-		return "cep";
 	}
 
 	public String getMessage() {
@@ -26,22 +19,18 @@ public class ChatEnterPacket implements AbstractPacket {
 		PacketParser parser = new PacketParser() {
 			
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
+			public byte[] toBytes(AbstractPacket p) {
 				ChatEnterPacket cep = (ChatEnterPacket) p;
-				JSONObject obj = new JSONObject();
-				obj.put("type", "cep");
-				obj.put("message", cep.getMessage());
-				return obj;
+				return cep.getMessage().getBytes();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				ChatEnterPacket cep = new ChatEnterPacket(obj.getAsString("message"));
-				return cep;
+			public AbstractPacket fromBytes(byte[] data) {
+				return new ChatEnterPacket(new String(data));
 			}
 		};
 		
-		PacketProcessor.addParser("cep", parser);
+		PacketProcessor.addParser(parser, ChatEnterPacket.class);
 	}
 
 }

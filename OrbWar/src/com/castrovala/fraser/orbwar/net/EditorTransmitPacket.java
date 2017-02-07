@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.net;
 
-import net.minidev.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class EditorTransmitPacket implements AbstractPacket {
 	private JSONObject obj;
@@ -11,13 +13,6 @@ public class EditorTransmitPacket implements AbstractPacket {
 			throw new NullPointerException("ETP obj was null!");
 		}
 	}
-	
-	
-	@Override
-	public String getType() {
-		return "editor_transmit";
-	}
-
 
 	public JSONObject getObj() {
 		return obj;
@@ -29,30 +24,32 @@ public class EditorTransmitPacket implements AbstractPacket {
 	}
 	
 	public static void registerPacket() {
-		PacketParser proc = new PacketParser() {
-			
+		PacketParser parser = new PacketParser() {
 			@Override
-			public JSONObject toJSON(AbstractPacket p) {
-				EditorTransmitPacket packet = (EditorTransmitPacket) p;
-				JSONObject json = new JSONObject();
-				json.put("type", packet.getType());
+			public byte[] toBytes(AbstractPacket p) {
+				EditorTransmitPacket etp = (EditorTransmitPacket) p;
 				
-				packet.getObj().put("x", (double)packet.getObj().get("x"));
-				packet.getObj().put("y", (double)packet.getObj().get("y"));
-				
-				json.put("obj", packet.getObj());
-				return json;
+				etp.getObj().put("x", (double)etp.getObj().get("x"));
+				etp.getObj().put("y", (double)etp.getObj().get("y"));
+				String objdata = etp.getObj().toJSONString();
+				return objdata.getBytes();
 			}
 			
 			@Override
-			public AbstractPacket fromJSON(JSONObject obj) {
-				JSONObject gobj = (JSONObject) obj.get("obj");
-				EditorTransmitPacket p = new EditorTransmitPacket(gobj);
-				return p;
+			public AbstractPacket fromBytes(byte[] data) {
+				try {
+					
+					JSONObject jobj = (JSONObject) (new JSONParser()).parse(new String(data));
+					EditorTransmitPacket etp = new EditorTransmitPacket(jobj);
+					return etp;
+				} catch (ParseException e) {
+					e.printStackTrace();
+					throw new NullPointerException("Invalid JSON for ETP!");
+				}
 			}
 		};
 		
-		PacketProcessor.addParser("editor_transmit", proc);
+		PacketProcessor.addParser(parser, EditorTransmitPacket.class);
 		
 	}
 

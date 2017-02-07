@@ -118,6 +118,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private String currentmsg = "";
 	private volatile int turntime = 0;
 	private volatile int turnamount = 0;
+	private long timesticked = 3;
+	private BufferedImage tmpImage = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_RGB);
 	
 	public OrbWarPanel() {
 		
@@ -518,7 +520,7 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	public void run() {
 		running = true;
 		while (running) {
-			int updatespeed = 20; // 1000 / 60;
+			int updatespeed = 1000 / 60; // 1000 / 60;
 			if (state == GameState.MENU) {
 				if (init_game) {
 					long start = System.currentTimeMillis();
@@ -611,6 +613,8 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	
 	private void gameUpdate() {
 		
+		timesticked++;
+		
 		if (activegui != null) {
 			for (GuiElement e : activegui.getElements()) {
 				e.update((int)mousePos.getX(), (int)mousePos.getY());
@@ -675,6 +679,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public void gameRender() {
+		
+		if (timesticked % 3 != 0) return;
+		
 		RenderDebug rd = new RenderDebug(mylocation);
 		// start
 		if (dbImage == null) {
@@ -695,7 +702,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 			}
 		}
 		
-		BufferedImage tmpImage = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_RGB);
 		tmpImage.getGraphics().setColor(Color.BLACK);
 		tmpImage.getGraphics().fillRect(0, 0, PWIDTH, PHEIGHT);
 		Graphics2D g2d = (Graphics2D) tmpImage.getGraphics();

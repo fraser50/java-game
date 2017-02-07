@@ -2,14 +2,14 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.Graphics2D;
 
+import org.json.simple.JSONObject;
+
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
-
-import net.minidev.json.JSONObject;
 
 public class BombBoy extends GameObject implements CollisionHandler {
 	private GameObject target;

@@ -131,5 +131,30 @@ public class Util {
 		g2d.setStroke(prevstroke);
 		
 	}
+	
+	public static byte[] encodeString(String s) {
+		ByteBuffer b = ByteBuffer.allocate(4 + s.getBytes().length);
+		b.putInt(s.getBytes().length);
+		b.put(s.getBytes());
+		return b.array();
+	}
+	
+	public static String decodeString(ByteBuffer buff) {
+		int length = buff.getInt();
+		byte[] b = new byte[length];
+		for (int i = 0; i < length; i++) {
+			b[i] = buff.get();
+		}
+		
+		return new String(b);
+	}
+	
+	public static byte boolToByte(boolean b) {
+		return b ? (byte)1 : (byte)0;
+	}
+	
+	public static boolean byteToBool(byte b) {
+		return b == (byte)1 ? true : false;
+	}
 
 }
