@@ -197,7 +197,7 @@ public class GameThread extends Thread {
 			
 			
 			try {
-				Thread.sleep(20); // 1000 / 60
+				Thread.sleep(1000 / 60); // 1000 / 60
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

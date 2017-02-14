@@ -101,7 +101,7 @@ public class GameServer extends Thread {
 		while (active) {
 			//System.out.println("Server tick");
 			try {
-				Thread.sleep(30);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

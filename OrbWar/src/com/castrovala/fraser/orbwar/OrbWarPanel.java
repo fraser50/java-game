@@ -1,13 +1,11 @@
 package com.castrovala.fraser.orbwar;
 
 import java.awt.AlphaComposite;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -15,7 +13,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
+import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +23,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
@@ -88,14 +85,12 @@ import com.castrovala.fraser.orbwar.world.WorldNetController;
 import com.castrovala.fraser.orbwar.world.WorldZone;
 
 @SuppressWarnings("serial")
-public class OrbWarPanel extends JPanel implements Runnable {
+public class OrbWarPanel extends Canvas implements Runnable {
 	private static int PWIDTH  = 1024;
 	private static int PHEIGHT = 1024;
 	
 	private Thread game;
 	private volatile boolean running = false;
-	private Graphics dbg;
-	private Image dbImage = null;
 	private volatile WorldNetController controller;
 	private volatile Position mylocation = new Position(0, 0);
 	public Controllable myship;
@@ -118,8 +113,9 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	private String currentmsg = "";
 	private volatile int turntime = 0;
 	private volatile int turnamount = 0;
-	private long timesticked = 3;
-	private BufferedImage tmpImage = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_RGB);
+	private Graphics2D g2d;
+	//private long timesticked = 2;
+	private BufferStrategy strategy;
 	
 	public OrbWarPanel() {
 		
@@ -492,9 +488,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		frame.setSize(PWIDTH, PHEIGHT);
 		frame.setVisible(true);
 		frame.setResizable(false);
+		panel.setIgnoreRepaint(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel.addNotify();
-		
+		frame.setIgnoreRepaint(true);
 		
 		
 		
@@ -519,6 +516,11 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	
 	public void run() {
 		running = true;
+		
+		createBufferStrategy(2);
+		strategy = getBufferStrategy();
+		g2d = (Graphics2D) strategy.getDrawGraphics();
+		
 		while (running) {
 			int updatespeed = 1000 / 60; // 1000 / 60;
 			if (state == GameState.MENU) {
@@ -613,8 +615,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	
 	private void gameUpdate() {
 		
-		timesticked++;
-		
 		if (activegui != null) {
 			for (GuiElement e : activegui.getElements()) {
 				e.update((int)mousePos.getX(), (int)mousePos.getY());
@@ -679,34 +679,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 	}
 	
 	public void gameRender() {
-		
-		if (timesticked % 3 != 0) return;
-		
 		RenderDebug rd = new RenderDebug(mylocation);
-		// start
-		if (dbImage == null) {
-			dbImage = createImage(PWIDTH, PHEIGHT);
-			Graphics2D g2d = (Graphics2D) dbImage.getGraphics();
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-			if (dbImage == null) {
-				System.out.println("dbImage is null");
-				return;
-			} else {
-				dbg = dbImage.getGraphics();
-				
-				dbg.setColor(Color.BLACK);
-				dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
-				
-			}
-		}
-		
-		tmpImage.getGraphics().setColor(Color.BLACK);
-		tmpImage.getGraphics().fillRect(0, 0, PWIDTH, PHEIGHT);
-		Graphics2D g2d = (Graphics2D) tmpImage.getGraphics();
-		
-		
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(0, 0, PWIDTH, PHEIGHT);
+			
 //		System.out.println("Adding all zones");
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(0, 0, PWIDTH, PHEIGHT);
@@ -752,8 +728,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		if (state == GameState.MENU) {
-			dbg.drawImage(tmpImage, 0, 0, null);
-			repaint();
+			if (!strategy.contentsLost()) {
+				strategy.show();
+			}
+			
 			return;
 		}
 		
@@ -982,8 +960,10 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		}
 		
 		long repaintstart = System.currentTimeMillis();
-		dbg.drawImage(tmpImage, 0, 0, null);
-		repaint();
+		if (!strategy.contentsLost()) {
+			strategy.show();
+		}
+		
 		long repaintend = System.currentTimeMillis();
 		long repaintdelay = repaintend - repaintstart;
 		
@@ -997,13 +977,6 @@ public class OrbWarPanel extends JPanel implements Runnable {
 		rendertime = (int) rd.getTime();
 		
 	
-	}
-	
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		if (dbImage != null) {
-			g.drawImage(dbImage, 0, 0, null);
-		}
 	}
 	
 	public void prepareGame(String world) throws IOException {

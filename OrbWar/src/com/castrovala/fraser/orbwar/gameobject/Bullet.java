@@ -63,7 +63,7 @@ public class Bullet extends GameObject implements CollisionHandler {
 		super.update();
 		
 		long timepassed = System.currentTimeMillis() - timeborn;
-		int loopsince = (int) (timepassed / (20)); // 1000 / 60
+		int loopsince = (int) (timepassed / (1000 / 60)); // 1000 / 60
 		
 		double dx = loopsince * getVelocity().getX();
 		double dy = loopsince * getVelocity().getY();
