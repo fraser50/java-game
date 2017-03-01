@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -33,7 +34,12 @@ public class WorldController implements WorldProvider {
 	private HashMap<String, GameObject> objectuuid = new HashMap<>();
 	private List<GameObject> newObjects = new ArrayList<>();
 	private List<GameObject> deadObjects = new ArrayList<>();
+	private Map<String, WorldZone> zonemap = new HashMap<>();
 	
+	public Map<String, WorldZone> getZonemap() {
+		return zonemap;
+	}
+
 	private List<WormHoleData> wormHoleDataList = new ArrayList<>();
 	private HashMap<String, WormHoleData> wormHoleDataMap = new HashMap<>();
 	
@@ -45,15 +51,20 @@ public class WorldController implements WorldProvider {
 	
 	@Override
 	public synchronized WorldZone getZone(Position pos) {
-		for (WorldZone zone : zones) {
-			//System.out.println("Checking: X=" + pos.x + " Y=" + pos.y + " = X=" + zone.getX() + " Y=" + zone.getY() + " --> " + (zone.getX() == ((long)pos.x) && zone.getY() == ((long)pos.y)));
-			if (zone.getX() == ((long)pos.x) && zone.getY() == ((long)pos.y)) {
-				return zone;
-			}
+		pos.x = (long) pos.x;
+		pos.y = (long) pos.y;
+		if (zonemap.containsKey(pos.x + ":" + pos.y)) {
+			return zonemap.get(pos.x + ":" + pos.y);
 		}
 		
 		WorldZone zone = new WorldZone((long)pos.x, (long)pos.y, this);
+		
+		if (zonemap.containsKey(pos.x + pos.y)) {
+			throw new IllegalArgumentException("Zone already exists! (" + (pos.x + ":" + pos.y) + ")");
+		}
+		
 		zones.add(zone);
+		zonemap.put(pos.x + ":" + pos.y, zone);
 		zone.populate();
 		return zone;
 	}
@@ -76,7 +87,7 @@ public class WorldController implements WorldProvider {
 	}
 	
 	public void handleZoneUnload() {
-		
+		//TODO: Dynamic unloading of zones
 	}
 
 	@Override
@@ -348,6 +359,7 @@ public class WorldController implements WorldProvider {
 			
 			
 			c.getZones().add(zone);
+			c.getZonemap().put(x + ":" + y, zone);
 		}
 		
 		return c;

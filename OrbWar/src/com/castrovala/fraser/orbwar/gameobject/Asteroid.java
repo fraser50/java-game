@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -112,10 +113,11 @@ public class Asteroid extends GameObject implements CollisionHandler {
 			
 			g2d.setColor(Color.GREEN);
 			
+			Composite c = g2d.getComposite();
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
 			
 			g2d.fillRect(x - 50, y - 50, 100, mstore.getMaterials().keySet().size() * 20);
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+			g2d.setComposite(c);
 			
 			g2d.setColor(Color.WHITE);
 			int i = 1;

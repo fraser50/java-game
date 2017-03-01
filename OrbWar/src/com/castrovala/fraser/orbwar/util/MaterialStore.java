@@ -1,7 +1,6 @@
 package com.castrovala.fraser.orbwar.util;
 
 import java.util.HashMap;
-import java.util.Set;
 
 import org.json.simple.JSONObject;
 

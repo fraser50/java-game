@@ -5,6 +5,9 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
@@ -12,7 +15,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.io.IOException;
@@ -401,25 +403,6 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			}
 		});
 		
-		addMouseMotionListener(new MouseMotionListener() {
-			
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (mousePos == null) {
-					mousePos = new Position(e.getX(), e.getY());
-				} else {
-					mousePos.setX(e.getX());
-					mousePos.setY(e.getY());
-				}
-				
-			}
-			
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				
-			}
-		});
-		
 		// Create menu GUI
 		activegui = getMainMenu();
 	}
@@ -540,6 +523,10 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					activegui = null;
 				}
 				gameUpdate();
+				
+				updateMouse();
+				
+				
 				gameRender();
 				
 				try {
@@ -557,6 +544,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			
 			GameObject obj = (GameObject) myship;
 			if (myship == null) {
+				updateMouse();
 				gameUpdate();
 				gameRender();
 				try {
@@ -574,7 +562,9 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				mylocation.setY(obj.getPosition().getY() - (PHEIGHT / 2) );
 			}
 			
+			updateMouse();
 			gameUpdate();
+			
 			
 			Position toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
 			long screen_x = (long) toscreen.getX();
@@ -613,6 +603,20 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		System.exit(0);
 	}
 	
+	private void updateMouse() {
+		PointerInfo info = MouseInfo.getPointerInfo();
+		if (info != null) {
+			Point p = info.getLocation();
+			int x = (int) p.getX();
+			int y = (int) p.getY();
+			x -= this.getLocationOnScreen().getX();
+			y -= this.getLocationOnScreen().getY();
+			mousePos.setX(x);
+			mousePos.setY(y);
+		}
+		
+	}
+
 	private void gameUpdate() {
 		
 		if (activegui != null) {
