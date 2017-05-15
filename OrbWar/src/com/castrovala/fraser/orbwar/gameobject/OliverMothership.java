@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -39,6 +40,9 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	private boolean firstrun = true;
 	private final float distanceaway = 200;
 	private int timer = 0;
+	private int deathtimer = 0;
+	
+	private List<MotherTransport> transport = new ArrayList<>();
 	
 	private int missiletimer = 0;
 
@@ -55,6 +59,12 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void hurt(int damage) {
+		
+		if (getHealth() <= 0) {
+			setHealth(0);
+			return;
+		}
+		
 		if (!shield) {
 			super.hurt(damage);
 		}
@@ -64,10 +74,11 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
 		if (shield) {
+			Composite orig = g2d.getComposite();
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
 			g2d.setColor(Color.CYAN);
 			g2d.fillOval(rel_x - 40, rel_y - 40, getWidth() + 80, getHeight() + 80);
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+			g2d.setComposite(orig);
 		}
 		
 		g2d.setColor(Color.GREEN);
@@ -77,17 +88,61 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 		g2d.setColor(Color.RED);
 		g2d.fillRect(rel_x + green, rel_y - 60, getWidth() - green, 5);
 		rd.onRender(4);
+		
+		if (getHealth() <= 0) {
+			Composite orig = g2d.getComposite();
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
+			g2d.setColor(new Color(25, 200, 6));
+			g2d.fillOval((rel_x + 256) - (getWidth() / 2), (rel_y + 256) - (getHeight() / 2), getWidth() - 256, getHeight() - 256);
+			g2d.setComposite(orig);
+		}
+		
 	}
 	
 	@Override
 	public void update() {
-		super.update();
+		
+		if (getHealth() <= 0) {
+			
+			for (ShieldGenerator drone : drones) {
+				drone.delete();
+			}
+			
+			deathtimer++;
+			
+			if (deathtimer < 500) {
+				return;
+			}
+			
+			if (transport.size() == 0) {
+				for (int i = 90; i<361; i+=90) {
+					OrbitControl c = new OrbitControl(this, 0, 0.5f);
+					c.setRotation(i);
+					MotherTransport t = new MotherTransport(getPosition().copy().add(new Position(128, 128)), getController(), c);
+					getController().addObject(t);
+					
+				}
+			}
+			
+			//if (getHealth() < 0) setHealth(0);
+			setWidth(getWidth() + 1);
+			setHeight(getHeight() + 1);
+			
+			for (MotherTransport t : transport) {
+				t.orbit.setSpeed(getWidth() / 2);
+			}
+			
+			if (getWidth() >= 300 + 128) {
+				delete();
+			}
+			return;
+		}
 		
 		timer++;
 		if (timer >= 500) {
 			OliverGuider g = new OliverGuider(getPosition().copy().add(new Position(128, 128)), getController());
 			g.setParent(this);
-			getController().addObject(g);
+			//getController().addObject(g);
 			timer = 0;
 		}
 		
@@ -129,7 +184,7 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			}
 		}
 		
-		missiletimer++;
+		//missiletimer++;
 		if (missiletimer >= 50) {
 			Random r = ThreadLocalRandom.current();
 			float rotation = r.nextInt(361);

@@ -36,6 +36,10 @@ public class OliverGuider extends GameObject implements CollisionHandler {
 		super.update();
 		hurt();
 		
+		if (parent.isDeleted()) {
+			delete();
+		}
+		
 		PlayerShip ship = null;
 		for (GameObject obj : getNearbyObjects(500)) {
 			if (obj instanceof PlayerShip) {

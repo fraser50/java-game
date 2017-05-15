@@ -96,6 +96,11 @@ public class WorldNetController implements WorldProvider {
 
 	@Override
 	public void addObject(GameObject o) {
+		if (objids.containsKey(o.getUuid())) {
+			System.out.println("Object already exists!!");
+			return;
+		}
+		
 		Position zonepos = Util.toZoneCoords(o.getPosition());
 		WorldZone zone = getZone(zonepos);
 		zone.getGameobjects().add(o);

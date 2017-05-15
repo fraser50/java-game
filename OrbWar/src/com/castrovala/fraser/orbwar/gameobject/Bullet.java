@@ -48,7 +48,7 @@ public class Bullet extends GameObject implements CollisionHandler {
 					obj.setHeight(obj.getHeight() + 10);
 				}
 				
-				obj.hurt();
+				obj.hurt(5); // 1
 				delete();
 			}
 			

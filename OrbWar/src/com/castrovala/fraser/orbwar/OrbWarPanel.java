@@ -35,6 +35,7 @@ import com.castrovala.fraser.orbwar.gameobject.BombBoy;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
+import com.castrovala.fraser.orbwar.gameobject.MotherTransport;
 import com.castrovala.fraser.orbwar.gameobject.OliverGuider;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.gameobject.Planet;
@@ -440,6 +441,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		OliverGuider.registerGameObj();
 		WarShip.registerGameObj();
 		BombBoy.registerGameObj();
+		MotherTransport.registerGameObj();
 		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {
