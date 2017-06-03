@@ -37,7 +37,6 @@ public class Planet extends GameObject {
 	
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
-		
 		if (rd.isEditor()) {
 			g2d.drawOval(rel_x, rel_y, getWidth(), getHeight());
 			return;
@@ -55,11 +54,11 @@ public class Planet extends GameObject {
 			
 			OpenSimplexNoise noise = new OpenSimplexNoise(UUID.fromString(getUuid()).getMostSignificantBits());
 			
-			
+			Position centrepos = getPosition().copy().add(new Position(getWidth() / 2, getHeight() / 2));
 			for (int x = 1; x < getWidth() + 1; x++) {
 				for (int y = 1; y < getHeight() + 1; y++) {
 					
-					Position centrepos = new Position(centre_x, centre_y);
+					
 					Position chosenpos = getPosition().copy().add(new Position(x, y));
 					
 					double distance = Util.distance(centrepos, chosenpos);

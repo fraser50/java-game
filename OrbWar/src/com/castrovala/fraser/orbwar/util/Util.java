@@ -25,9 +25,13 @@ public class Util {
 	}
 	
 	public static Position toZoneCoords(Position pos) {
-		long x = (long) pos.getX() / WorldZone.len_x;
-		long y = (long) pos.getY() / WorldZone.len_y;
-		Position zonepos = new Position(x, y);
+		double x = (long) pos.getX() / WorldZone.len_x;
+		double y = (long) pos.getY() / WorldZone.len_y;
+		
+		x = x < 0 ? x - 0.999 : x;
+		y = y < 0 ? y - 0.999 : y;
+		
+		Position zonepos = new Position((int)x, (int)y);
 		return zonepos;
 	}
 	

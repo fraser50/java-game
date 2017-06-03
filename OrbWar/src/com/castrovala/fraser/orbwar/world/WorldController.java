@@ -329,7 +329,7 @@ public class WorldController implements WorldProvider {
 			
 			String[] coords = s.split(Pattern.quote("_"));
 			long x = Long.parseLong(coords[0]);
-			long y = Long.parseLong(coords[0]);
+			long y = Long.parseLong(coords[1]);
 			
 			WorldZone zone = new WorldZone(x, y, c);
 			
