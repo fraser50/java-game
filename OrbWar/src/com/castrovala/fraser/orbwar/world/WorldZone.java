@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -48,8 +49,9 @@ public class WorldZone {
 		List<Rectangle> prevAst = new ArrayList<>();
 		
 		for (int i = 1; i <= 5;i++) {
-			Random rand = new Random();
-			if (rand.nextInt(10) == rand.nextInt(10)) {
+			Random rand = ThreadLocalRandom.current();
+			int r1 = rand.nextInt(10);
+			if (r1 == rand.nextInt(10) || true) {
 				long chosen_x = 0;
 				long chosen_y = 0;
 				
@@ -58,19 +60,19 @@ public class WorldZone {
 				
 				while (isTouched) {
 					
-					chosen_x = Util.randomRange((long)startpos.x, (long)endpos.x);
-					chosen_y = Util.randomRange((long)startpos.y, (long)endpos.y);
-					
+					chosen_x = Util.randomRange((long)startpos.x, (long)endpos.x - 64);
+					chosen_y = Util.randomRange((long)startpos.y, (long)endpos.y - 64);
+					thisAst = new Rectangle((int)chosen_x, (int)chosen_y, 64, 64);
 					
 					isTouched = false;
 					for (Rectangle rect : prevAst) {
 						if (rect.intersects(thisAst)) {
-							System.out.println("Intersects");
+							//System.out.println("Intersects");
 							isTouched = true;
 							break;
 						}
 					}
-					thisAst = new Rectangle((int)chosen_x, (int)chosen_y, 64, 64);
+					
 				}
 				
 				prevAst.add(thisAst);

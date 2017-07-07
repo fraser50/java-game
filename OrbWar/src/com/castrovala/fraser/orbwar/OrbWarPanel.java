@@ -102,7 +102,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	private boolean init_game = false;
 	private int rendertime;
 	private int updatetime;
-	private boolean renderedbefore;
+	private boolean renderedbefore = true; // Just to disable annoying message, change to false to see time to render things
 	private GameState state = GameState.MENU;
 	private GuiScreen activegui;
 	private GameServer internalserver;
@@ -119,6 +119,8 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	private Graphics2D g2d;
 	//private long timesticked = 2;
 	private BufferStrategy strategy;
+	
+	private int fuel = 10000;
 	
 	public OrbWarPanel() {
 		

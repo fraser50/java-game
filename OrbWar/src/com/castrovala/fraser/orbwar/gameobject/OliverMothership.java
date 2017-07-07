@@ -129,10 +129,10 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			setHeight(getHeight() + 1);
 			
 			for (MotherTransport t : transport) {
-				t.orbit.setSpeed(getWidth() / 2);
+				t.orbit.setSpeed((getWidth() / 2));
 			}
 			
-			if (getWidth() >= 300 + 128) {
+			if (getWidth() >= 512) {
 				delete();
 			}
 			return;

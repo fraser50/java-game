@@ -37,8 +37,8 @@ public class Util {
 	
 	public static Position angleToVel(float angle, float speed) {
 		double radian = Math.toRadians(angle);
-		double vx = Math.cos(radian - Math.toRadians(45) - 0.80f) * speed;
-		double vy = Math.sin(radian - Math.toRadians(45) - 0.80f) * speed;
+		double vx = Math.cos(radian - Math.toRadians(90)) * speed;
+		double vy = Math.sin(radian - Math.toRadians(90)) * speed;
 		
 		Position pos = new Position(vx, vy);
 		return pos;

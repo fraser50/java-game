@@ -41,6 +41,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	private ControlUser user;
 	private final int healingrate = 1;
 	private int timeundamaged = 0;
+	private int fuel = 10000;
 	
 	public PlayerShip(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -76,6 +77,9 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		
 		//setRotation(getRotation() + 1);
 		//forward();
+		
+		//fuel -= (speed / 2);
+		fuel = 100;
 		
 		if (primaryweapon != null) {
 			primaryweapon.update(this);
@@ -180,6 +184,9 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 	}
 	
 	public void forward() {
+		
+		if (fuel <= 0) return;
+		
 		speed += 2; // 2
 		
 	}
