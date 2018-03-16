@@ -10,7 +10,7 @@ public class Forcefield implements RechargeWeapon {
 	private int charge = 20;
 	
 	@Override
-	public void fire(GameObject user) {
+	public void fire(GameObject user, Position gunpos) {
 		if (charge == maxcharge) {
 			Position pos = user.getPosition();
 			for (int i = 1; i<360;i+=23.5) {

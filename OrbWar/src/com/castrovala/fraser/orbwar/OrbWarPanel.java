@@ -120,8 +120,6 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	//private long timesticked = 2;
 	private BufferStrategy strategy;
 	
-	private int fuel = 10000;
-	
 	public OrbWarPanel() {
 		
 		for (int i = 1; i<3;i++) {
@@ -412,41 +410,9 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 		
-		
-		ObjectTransmitPacket.registerPacket();
-		PositionUpdatePacket.registerPacket();
-		HealthUpdatePacket.registerPacket();
-		KeyPressPacket.registerPacket();
-		DeleteObjectPacket.registerPacket();
-		EditorTransmitPacket.registerPacket();
-		ScreenUpdatePacket.registerPacket();
-		ShipDataPacket.registerPacket();
-		ShipRemovePacket.registerPacket();
-		ChatEnterPacket.registerPacket();
-		ShieldUpdatePacket.registerPacket();
-		NameCheckPacket.registerPacket();
-		SizeUpdatePacket.registerPacket();
-		
-		PlayerShip.registerGameObj();
-		Asteroid.registerGameObj();
-		Bullet.registerGameObj();
-		RespawnPoint.registerGameObj();
-		RespawnLaser.registerGameObj();
-		Turret.registerGameObj();
-		Explosion.registerGameObj();
-		OliverMothership.registerGameObj();
-		ShieldGenerator.registerGameObj();
-		Planet.registerGameObj();
-		WormHole.registerGameObj();
-		Star.registerGameObj();
-		EnemyDrone.registerGameObj();
-		OliverGuider.registerGameObj();
-		WarShip.registerGameObj();
-		BombBoy.registerGameObj();
-		MotherTransport.registerGameObj();
-		
 		if (args.length > 0) {
 			if (args[0].equals("server")) {
+				OrbWarPanel.registerGameAssets();
 				System.out.println("Running headless server");
 				System.out.println("");
 				GameServer server = new GameServer(false);
@@ -477,6 +443,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		frame.setResizable(false);
 		panel.setIgnoreRepaint(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		registerGameAssets();
 		panel.addNotify();
 		frame.setIgnoreRepaint(true);
 		
@@ -1288,6 +1255,40 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		editorObj = null;
 		mousePos = new Position(0, 0);
 		
+	}
+	
+	private static void registerGameAssets() {
+		ObjectTransmitPacket.registerPacket();
+		PositionUpdatePacket.registerPacket();
+		HealthUpdatePacket.registerPacket();
+		KeyPressPacket.registerPacket();
+		DeleteObjectPacket.registerPacket();
+		EditorTransmitPacket.registerPacket();
+		ScreenUpdatePacket.registerPacket();
+		ShipDataPacket.registerPacket();
+		ShipRemovePacket.registerPacket();
+		ChatEnterPacket.registerPacket();
+		ShieldUpdatePacket.registerPacket();
+		NameCheckPacket.registerPacket();
+		SizeUpdatePacket.registerPacket();
+		
+		PlayerShip.registerGameObj();
+		Asteroid.registerGameObj();
+		Bullet.registerGameObj();
+		RespawnPoint.registerGameObj();
+		RespawnLaser.registerGameObj();
+		Turret.registerGameObj();
+		Explosion.registerGameObj();
+		OliverMothership.registerGameObj();
+		ShieldGenerator.registerGameObj();
+		Planet.registerGameObj();
+		WormHole.registerGameObj();
+		Star.registerGameObj();
+		EnemyDrone.registerGameObj();
+		OliverGuider.registerGameObj();
+		WarShip.registerGameObj();
+		BombBoy.registerGameObj();
+		MotherTransport.registerGameObj();
 	}
 
 }

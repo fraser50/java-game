@@ -49,6 +49,8 @@ public class GameThread extends Thread {
 	@Override
 	public void run() {
 		
+		int updatecounter = 0;
+		
 		while (active) {
 			synchronized (controller) {
 				controller.updateGame();
@@ -91,10 +93,30 @@ public class GameThread extends Thread {
 					}
 					
 				}
+				
+				if (updatecounter >= 1) {
+					updatecounter = 0;
+				} else {
+					updatecounter++;
+				}
+				
 			}
 			
 			synchronized (controller) {
 				for (NetworkPlayer player : getServer().getPlayers()) {
+					
+					if (player.forward) player.getControl().fly();
+					if (player.left) player.getControl().left();
+					if (player.right) player.getControl().right();
+					if (player.fire) player.getControl().fire();
+					
+					player.forward = false;
+					player.left = false;
+					player.right = false;
+					player.fire = false;
+					
+					//TODO: Continue this!
+					
 					for (int x = WorldZone.len_x * -1;x<=1000; x+=WorldZone.len_x) {
 						for (int y = WorldZone.len_y * -1;y<=1000; y+=WorldZone.len_y) {
 							long px = (long) player.getCurrentpos().getX() + x;

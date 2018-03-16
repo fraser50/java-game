@@ -33,6 +33,7 @@ public class WorldController implements WorldProvider {
 	private HashMap<String, GameObject> objectuuid = new HashMap<>();
 	private List<GameObject> newObjects = new ArrayList<>();
 	private List<GameObject> deadObjects = new ArrayList<>();
+	private List<GameObject> toAdd = new ArrayList<>();
 	
 	private List<WormHoleData> wormHoleDataList = new ArrayList<>();
 	private HashMap<String, WormHoleData> wormHoleDataMap = new HashMap<>();
@@ -70,8 +71,7 @@ public class WorldController implements WorldProvider {
 	
 	@Override
 	public synchronized void addObject(GameObject o) {
-		getNewObjects().add(o);
-		getZone(Util.toZoneCoords(o.getPosition())).getGameobjects().add(o);
+		toAdd.add(o);
 		objectuuid.put(o.getUuid(), o);
 	}
 	
@@ -97,13 +97,24 @@ public class WorldController implements WorldProvider {
 	@Override
 	public void updateGame() {
 		List<CollisionHandler> colliders = new ArrayList<>();
+		List<GameObject> todelete = new ArrayList<>();
+		//List<GameObject> toadd = new ArrayList<>();
+		
+		for (GameObject obj : toAdd.toArray(new GameObject[toAdd.size()])) {
+			getNewObjects().add(obj);
+			getZone(Util.toZoneCoords(obj.getPosition())).getGameobjects().add(obj);
+		}
+		
+		toAdd.clear();
+		
 		for (WorldZone zone : getZones().toArray(new WorldZone[getZones().size()])) {
-			for (GameObject obj : (zone.getGameobjects().toArray(new GameObject[zone.getGameobjects().size()]))) {
+			for (GameObject obj : zone.getGameobjects()) {
 				
 				WorldZone ozone = getZone(Util.toZoneCoords(obj.getPosition()));
 				if (ozone != zone) {
-					zone.getGameobjects().remove(obj);
+					todelete.add(obj);
 					ozone.getGameobjects().add(obj);
+					System.out.println("old-zone detected");
 					continue;
 				}
 				
@@ -134,17 +145,18 @@ public class WorldController implements WorldProvider {
 				
 				if (obj.isDeleted()) {
 					getDeadObjects().add(obj);
-					zone.getGameobjects().remove(obj);
+					//zone.getGameobjects().remove(obj);
+					todelete.add(obj);
 					objectuuid.remove(obj.getUuid());
 					getScanners().remove(obj);
 					continue;
 				}
 				
-				WorldZone objzone = getZone(Util.toZoneCoords(obj.getPosition()));
-				if (zone != objzone) {
-					zone.getGameobjects().remove(obj);
-					objzone.getGameobjects().add(obj);
-				}
+				//WorldZone objzone = getZone(Util.toZoneCoords(obj.getPosition()));
+				//if (zone != objzone) {
+				//	zone.getGameobjects().remove(obj);
+				//	objzone.getGameobjects().add(obj);
+				//}
 				
 				if (!getScanners().containsKey(obj)) {
 					obj.update();
@@ -170,6 +182,10 @@ public class WorldController implements WorldProvider {
 					colliders.add( (CollisionHandler)obj);
 				}
 			}
+			
+			zone.getGameobjects().removeAll(todelete);
+			todelete.clear();
+			
 		}
 		
 		for (GameObject obj : getScanners().keySet()) {

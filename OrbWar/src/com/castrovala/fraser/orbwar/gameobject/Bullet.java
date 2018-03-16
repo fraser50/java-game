@@ -25,8 +25,8 @@ public class Bullet extends GameObject implements CollisionHandler {
 		super(pos, controller);
 		setWidth (16);
 		setHeight(16);
-		setMaxhealth(1000);
-		setHealth(1000);
+		setMaxhealth(150);
+		setHealth(150);
 		this.parent = parent;
 		
 		if (getPosition() != null) {
@@ -39,6 +39,7 @@ public class Bullet extends GameObject implements CollisionHandler {
 	@Override
 	public void onCollision(GameObject[] objects) {
 		for (GameObject obj : objects) {
+			
 			if (obj == parent || (obj instanceof ShieldDrone && parent instanceof PlayerShip)) {
 				// continue;
 			} else {
@@ -53,8 +54,6 @@ public class Bullet extends GameObject implements CollisionHandler {
 			}
 			
 		}
-		
-		
 		
 	}
 	

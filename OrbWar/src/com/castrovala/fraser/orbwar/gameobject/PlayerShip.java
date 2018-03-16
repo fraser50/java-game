@@ -15,6 +15,7 @@ import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.ControlUser;
+import com.castrovala.fraser.orbwar.util.Anchor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
@@ -27,13 +28,9 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class PlayerShip extends GameObject implements Controllable, WeaponOwner, CollisionHandler {
-	private boolean tofly = false;
-	private boolean toshoot = false;
-	private boolean toprotect = false;
-	private boolean toleft = false;
-	private boolean toright = false;
 	private static BufferedImage renderimage;
-	private Weapon primaryweapon;
+	private Weapon primaryweaponA;
+	private Weapon primaryweaponB;
 	private Weapon shield;
 	private double speed;
 	private double maxspeed = 6d; // 6d
@@ -47,13 +44,21 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		super(pos, controller);
 		setWidth(64);
 		setHeight(64);
-		primaryweapon = new BulletGun();
+		primaryweaponA = new BulletGun();
+		primaryweaponB = new BulletGun();
 		shield = new Forcefield();
 	}
 	
-	public void shoot() {
-		if (primaryweapon != null) {
-			primaryweapon.fire(this);
+	@Override
+	public void fire() {
+		if (primaryweaponA != null && primaryweaponB != null) {
+			Anchor a = new Anchor(new Position(9, 12), new Position(32, 32));
+			Anchor b = new Anchor(new Position(45, 12), new Position(32, 32));
+			
+			Position posa = a.getAnchorPosition(getRotation()).add(getPosition()).subtract(new Position(8, 8));
+			Position posb = b.getAnchorPosition(getRotation()).add(getPosition()).subtract(new Position(8, 8));
+			primaryweaponA.fire(this, posa);
+			primaryweaponB.fire(this, posb);
 		}
 		
 		/*Position bulletpos = new Position(getPosition().getX() + (getWidth() / 2), getPosition().getY() +  + (getHeight() / 2) );
@@ -81,40 +86,14 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		//fuel -= (speed / 2);
 		fuel = 100;
 		
-		if (primaryweapon != null) {
-			primaryweapon.update(this);
+		if (primaryweaponA != null) {
+			primaryweaponA.update(this);
+			primaryweaponB.update(this);
 		}
 		
 		
 		if (rotation >= 360) {
 			setRotation(0);
-		}
-		
-		if (tofly) {
-			tofly = false;
-			forward();
-		}
-		
-		if (toshoot) {
-			toshoot = false;
-			shoot();
-		}
-		
-		if (toprotect) {
-			toprotect = false;
-			if (shield != null) {
-				shield.fire(this);
-			}
-		}
-		
-		if (toleft) {
-			toleft = false;
-			setRotation(getRotation() - 5);
-		}
-		
-		if (toright) {
-			toright = false;
-			setRotation(getRotation() + 5);
 		}
 		
 		if (speed > maxspeed) {
@@ -168,38 +147,28 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 
 	@Override
 	public void left() {
-		toleft = true;
+		setRotation(getRotation() - 4.5f);
 		
 	}
 
 	@Override
 	public void right() {
-		toright = true;
+		setRotation(getRotation() + 4.5f);
 		
 	}
-
+	
 	@Override
 	public void fly() {
-		tofly = true;
-	}
-	
-	public void forward() {
 		
 		if (fuel <= 0) return;
 		
 		speed += 2; // 2
 		
 	}
-
-	@Override
-	public void fire() {
-		toshoot = true;
-		
-	}
 	
 	@Override
 	public void shield() {
-		toprotect = true;
+		//toprotect = true;
 	}
 	
 	@Override
@@ -216,6 +185,33 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		g2d.setColor(Color.RED);
 		g2d.fillRect(rel_x + green, rel_y - 10, getWidth() - green, 5);
 		rd.onRender(4);
+		
+		//Position pos = getPosition().copy();
+		//pos.add(new Position(32, 32));
+		//pos.add(Util.angleToVel(getRotation() - 90d, 28));
+		//pos.add(Util.angleToVel(getRotation(), 16));
+		//pos.setX(pos.getX() + 8);
+		//pos.setY(pos.getY() + 8);
+		
+		Anchor a = new Anchor(new Position(9, 12), new Position(32, 32));
+		Anchor b = new Anchor(new Position(45, 12), new Position(32, 32));
+		
+		Position posa = a.getAnchorPosition(getRotation()).add(getPosition());
+		Position posb = b.getAnchorPosition(getRotation()).add(getPosition());
+		
+		Position extendedposa = Util.angleToVel(getRotation(), 48).add(posa);
+		Position extendedposb = Util.angleToVel(getRotation(), 48).add(posb);
+		
+		Position scrpos1a = Util.coordToScreen(posa, rd.getRenderloc());
+		Position scrpos2a = Util.coordToScreen(extendedposa, rd.getRenderloc());
+		
+		Position scrpos1b = Util.coordToScreen(posb, rd.getRenderloc());
+		Position scrpos2b = Util.coordToScreen(extendedposb, rd.getRenderloc());
+		
+		g2d.setColor(Color.RED);
+		g2d.drawLine((int)scrpos1a.getX(), (int)scrpos1a.getY(), (int)scrpos2a.getX(), (int)scrpos2a.getY());
+		g2d.drawLine((int)scrpos1b.getX(), (int)scrpos1b.getY(), (int)scrpos2b.getX(), (int)scrpos2b.getY());
+		
 	}
 	
 	public static void loadResources() {
@@ -238,12 +234,12 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 
 	@Override
 	public Weapon getPrimaryweapon() {
-		return primaryweapon;
+		return primaryweaponA;
 	}
 
 	@Override
 	public void setPrimaryweapon(Weapon primaryweapon) {
-		this.primaryweapon = primaryweapon;
+		this.primaryweaponA = primaryweapon;
 	}
 
 	public double getSpeed() {

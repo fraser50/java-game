@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -30,6 +31,7 @@ public class WormHole extends GameObject implements CollisionHandler {
 	private WormHoleData wormData;
 	private int cooldown = 0;
 	private static BufferedImage renderimage;
+	private int animationstate = 0;
 	
 	public WormHole(Position pos, WorldProvider controller, WormHoleType wormType) {
 		super(pos, controller);
@@ -101,10 +103,35 @@ public class WormHole extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
-		AffineTransform orig = g2d.getTransform();
-		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
-		g2d.drawImage(getRenderimage(), rel_x, rel_y, getWidth(), getHeight(), null);
-		g2d.setTransform(orig);
+		if (rd.isEditor()) {
+			AffineTransform orig = g2d.getTransform();
+			g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
+			g2d.drawImage(getRenderimage(), rel_x, rel_y, getWidth(), getHeight(), null);
+			g2d.setTransform(orig);
+			return;
+		}
+		
+		int[] xpoints = new int[360];
+		int[] ypoints = new int[360];
+		
+		for (int i = 0; i < 360; i++) {
+			double sinewave = Math.sin(Math.toRadians(((animationstate * 7) + (i * 12)) / 1)) * 7;
+			// MAGNITUDE = 32
+			float magnitude = (float) (52 + sinewave);
+			Position pos = Util.coordToScreen(getPosition().copy().add(new Position(32, 32)).add(Util.angleToVel(i, magnitude)), rd.getRenderloc());
+			xpoints[i] = (int) pos.getX();
+			ypoints[i] = (int) pos.getY();
+		}
+		
+		animationstate++;
+		
+		//if (animationstate > 359) {
+		//	animationstate = 0;
+		//}
+		
+		g2d.setColor(Color.GREEN);
+		g2d.drawPolygon(xpoints, ypoints, 360);
+		
 	}
 	
 	public static void setRenderimage(BufferedImage r) {
@@ -154,7 +181,14 @@ public class WormHole extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void clientUpdate() {
-		setRotation((float)Util.fixAngle(getRotation() + 1));
+		//setRotation((float)Util.fixAngle(getRotation() + 2));
+		
+		//Position vel = Util.angleToVel(getRotation(), ((getWidth() / 2) / 64) + 1.25f);
+		//Spark s = new Spark(getPosition().copy().add(vel.copy().multiply(40)).add(new Position(getWidth() / 2, getHeight() / 2)), getController());
+		//double vm = getRotation() % 12 == 0 ? 1 : 0.25;
+		//s.setVelocity(vel.multiply(0.25));
+		//s.setVelocity(Util.angleToVel(getRotation(), 0.25f));
+		//getController().addObject(s);
 	}
 	
 	@Override

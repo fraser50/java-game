@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -14,20 +15,24 @@ import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.planet.PlanetType;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
+import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.OpenSimplexNoise;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
-public class Planet extends GameObject {
+public class Planet extends GameObject implements CollisionHandler {
 	private static Map<String, BufferedImage> planetimages = new HashMap<>();
+	private int counter = 0;
 
 	public Planet(Position pos, WorldProvider controller) {
 		super(pos, controller);
 		
 		setWidth(128);
 		setHeight(128);
+		setMaxhealth(1000);
+		setHealth(1000);
 	}
 
 	@Override
@@ -82,15 +87,24 @@ public class Planet extends GameObject {
 								g = 50 + (int)(value * 100);
 								b = 0;
 								break;
+								
 							case ALIEN:
 								r = 50 + (int)(value * 100);
 								g = 60;
 								b = 60;
 								break;
+								
 							case DESERT:
 								r = 128;
 								g = 128;
 								b = (int)(value * 100);
+								
+							case DEAD:
+								r = (int) (255 - (value * 100));
+								g = (int) (240 - (value * 100));
+								b = (int) (230 - (value * 100));
+								break;
+								
 						default:
 							break;
 						}
@@ -110,15 +124,25 @@ public class Planet extends GameObject {
 								g = 0;
 								b = (int) (100 - (value * 100) );
 								break;
+								
 							case ALIEN:
 								r = 255;
 								g = (int) (100 - (value * 100) );
 								b = 40;
 								break;
+								
 							case DESERT:
 								r = 255;
 								g = 255;
 								b = 250 - (int)(value * 100);
+								break;
+								
+							case DEAD:
+								r = 150;
+								g = 150;
+								b = (int) (170 + (value * 100));
+								break;
+								
 						default:
 							break;
 						}
@@ -142,7 +166,20 @@ public class Planet extends GameObject {
 		}
 		
 		g2d.drawImage(img, rel_x, rel_y, null);
+		
+		g2d.setColor(Color.GREEN);
+		int green = (int) (getHealth() * getWidth()) / getMaxhealth();
+		g2d.fillRect(rel_x, rel_y - 10, green, 5);
+		
+		g2d.setColor(Color.RED);
+		g2d.fillRect(rel_x + green, rel_y - 10, getWidth() - green, 5);
+		rd.onRender(4);
 		//g2d.drawOval(rel_x, rel_y, 64, 64);
+	}
+	
+	@Override
+	public void update() {
+		super.update();
 	}
 	
 	public static void registerGameObj() {
@@ -179,6 +216,12 @@ public class Planet extends GameObject {
 		};
 		
 		EditorManager.addEditor(e);
+	}
+
+	@Override
+	public void onCollision(GameObject[] objects) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

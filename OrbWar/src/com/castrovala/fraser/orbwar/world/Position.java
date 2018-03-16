@@ -65,14 +65,22 @@ public class Position {
 		return this;
 	}
 	
-	public Position multiply(Position p) {
+	public Position multiply(double mx, double my) {
 		double oldx = x;
 		double oldy = y;
 		
-		x *= p.getX();
-		y *= p.getY();
+		x *= mx;
+		y *= my;
 		edited = (long)oldx != (long) x || (long) oldy != (long) y;
 		return this;
+	}
+	
+	public Position multiply(double multiplier) {
+		return multiply(multiplier, multiplier);
+	}
+	
+	public Position multiply(Position p) {
+		return multiply(p.getX(), p.getY());
 	}
 	
 	public double distance(Position pos) {

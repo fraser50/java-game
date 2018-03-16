@@ -274,7 +274,24 @@ public class GameServer extends Thread {
 							
 							KeyPressPacket kpp = (KeyPressPacket) pa;
 							if (p.getControl() != null) {
-								GameObject ship = (GameObject) p.getControl();
+								
+								switch (kpp.getKey()) {
+								case "up":
+									p.forward = true;
+									break;
+								case "fire":
+									p.fire = true;
+									break;
+								case "left":
+									p.left = true;
+									break;
+								case "right":
+									p.right = true;
+									break;
+								default:
+									// Something went wrong
+								
+								/*GameObject ship = (GameObject) p.getControl();
 								synchronized (ship) {
 									switch (kpp.getKey()) {
 										case "up":
@@ -291,7 +308,7 @@ public class GameServer extends Thread {
 											break;
 										default:
 											// Something went wrong
-									}
+									}*/
 								}
 							}
 							gotcontrol = true;
@@ -321,16 +338,16 @@ public class GameServer extends Thread {
 								
 								for (NetworkPlayer pl : getPlayers()) {
 									
-									if (message.replace(" ", "").length() == 0) {
+									if (cep.getMessage().replace(" ", "").length() == 0) {
 										break;
 									}
 									
-									if (message.equalsIgnoreCase("/secon") && p.isAdmin()) {
+									if (cep.getMessage().equalsIgnoreCase("/secon") && p.isAdmin()) {
 										nosecurity = false;
 										break;
 									}
 									
-									if (message.equalsIgnoreCase("/secoff") && p.isAdmin()) {
+									if (cep.getMessage().equalsIgnoreCase("/secoff") && p.isAdmin()) {
 										nosecurity = true;
 										break;
 									}

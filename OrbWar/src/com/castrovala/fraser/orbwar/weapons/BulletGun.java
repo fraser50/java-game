@@ -17,13 +17,13 @@ public class BulletGun implements RechargeWeapon {
 	}
 
 	@Override
-	public void fire(GameObject user) {
+	public void fire(GameObject user, Position bulletpos) {
 		if (user instanceof Turret) {
 			//max = 5; // 100
 		}
 		
 		if (charge >= max) {
-			Position bulletpos = new Position(user.getPosition().getX() + (user.getWidth() / 2), user.getPosition().getY() +  + (user.getHeight() / 2) );
+			//Position bulletpos = new Position(user.getPosition().getX() + (user.getWidth() / 2), user.getPosition().getY() +  + (user.getHeight() / 2) );
 			//Position bulletpos = getPosition().copy();
 			float speed = 5;
 			if (user instanceof PlayerShip) {
@@ -34,10 +34,10 @@ public class BulletGun implements RechargeWeapon {
 			Position frontvelocity = Util.angleToVel(user.getRotation(), speed); //3
 			float vx = (float) frontvelocity.getX();
 			float vy = (float) frontvelocity.getY();
-			bulletpos.add(Util.angleToVel(user.getRotation(), 5));
+			//bulletpos.add(Util.angleToVel(user.getRotation(), 5));
 			
 			Bullet b = new Bullet(bulletpos, user.getController(), user);
-			b.getPosition().subtract(new Position(b.getWidth() / 2, b.getHeight() / 2));
+			//b.getPosition().subtract(new Position(b.getWidth() / 2, b.getHeight() / 2));
 			b.getVelocity().setX(vx);
 			b.getVelocity().setY(vy);
 			user.getController().addObject(b);

@@ -30,6 +30,11 @@ public class NetworkPlayer implements ControlUser {
 	private int screenWidth = 0;
 	private int screenHeight = 0;
 	
+	public boolean left;
+	public boolean right;
+	public boolean forward;
+	public boolean fire;
+	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
 		this.conn = conn;
