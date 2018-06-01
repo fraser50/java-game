@@ -69,7 +69,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	@Override
 	public void update() {
 		super.update();
-		delete();
+		//delete();
 		
 		setRotation(rotation + 0.5f);
 		if (rotation >= 360) {
@@ -162,7 +162,6 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	public static void registerGameObj() {
 		GameObjParser parser = new GameObjParser() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public JSONObject toJSON(GameObject obj) {
 				Asteroid ast = (Asteroid) obj;

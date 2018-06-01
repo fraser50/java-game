@@ -114,7 +114,7 @@ public class WorldController implements WorldProvider {
 				if (ozone != zone) {
 					todelete.add(obj);
 					ozone.getGameobjects().add(obj);
-					System.out.println("old-zone detected");
+					//System.out.println("old-zone detected");
 					continue;
 				}
 				

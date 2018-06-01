@@ -3,8 +3,6 @@ package com.castrovala.fraser.orbwar.gameobject;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -23,7 +21,7 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class Planet extends GameObject implements CollisionHandler {
-	private static Map<String, BufferedImage> planetimages = new HashMap<>();
+	private BufferedImage image;
 	private int counter = 0;
 
 	public Planet(Position pos, WorldProvider controller) {
@@ -32,7 +30,7 @@ public class Planet extends GameObject implements CollisionHandler {
 		setWidth(128);
 		setHeight(128);
 		setMaxhealth(1000);
-		setHealth(1000);
+		setHealth(1);
 	}
 
 	@Override
@@ -47,7 +45,7 @@ public class Planet extends GameObject implements CollisionHandler {
 			return;
 		}
 		
-		BufferedImage img = planetimages.get(getUuid());
+		BufferedImage img = image;
 		if (img == null) {
 			img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 			
@@ -81,7 +79,7 @@ public class Planet extends GameObject implements CollisionHandler {
 						//int g = 50 + (int)(value * 100);
 						//int b = 0;
 						
-						switch (type) {
+						switch (type) { // Land
 							case EARTH:
 								r = 0;
 								g = 50 + (int)(value * 100);
@@ -118,7 +116,7 @@ public class Planet extends GameObject implements CollisionHandler {
 						
 						b = (int) (100 - (value * 100) );
 						
-						switch (type) {
+						switch (type) { // Water
 							case EARTH:
 								r = 0;
 								g = 0;
@@ -134,7 +132,7 @@ public class Planet extends GameObject implements CollisionHandler {
 							case DESERT:
 								r = 255;
 								g = 255;
-								b = 250 - (int)(value * 100);
+								b = 100 - (int)((value * 100));
 								break;
 								
 							case DEAD:
@@ -162,7 +160,7 @@ public class Planet extends GameObject implements CollisionHandler {
 				}
 				
 			}
-			planetimages.put(getUuid(), img);
+			//image = img;
 		}
 		
 		g2d.drawImage(img, rel_x, rel_y, null);

@@ -45,8 +45,8 @@ public class Bullet extends GameObject implements CollisionHandler {
 			} else {
 				
 				if (obj instanceof WormHole) {
-					obj.setWidth(obj.getWidth() + 10);
-					obj.setHeight(obj.getHeight() + 10);
+					obj.setWidth(obj.getWidth() + 100);
+					obj.setHeight(obj.getHeight() + 100);
 				}
 				
 				obj.hurt(5); // 1

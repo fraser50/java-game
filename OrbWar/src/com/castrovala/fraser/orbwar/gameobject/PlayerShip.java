@@ -60,30 +60,11 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 			primaryweaponA.fire(this, posa);
 			primaryweaponB.fire(this, posb);
 		}
-		
-		/*Position bulletpos = new Position(getPosition().getX() + (getWidth() / 2), getPosition().getY() +  + (getHeight() / 2) );
-		//Position bulletpos = getPosition().copy();
-		Position frontvelocity = Util.angleToVel(rotation, 5); //3
-		float vx = frontvelocity.getX();
-		float vy = frontvelocity.getY();
-		bulletpos.add(Util.angleToVel(rotation, 5));
-		
-		Bullet b = new Bullet(bulletpos, getController());
-		b.getVelocity().setX(vx);
-		b.getVelocity().setY(vy);
-		getController().addObject(b);
-		*/
 	}
 	
 	@Override
 	public void update() {
-		//System.out.println("Health: " + getHealth() + "/" + getMaxhealth());
 		super.update();
-		
-		//setRotation(getRotation() + 1);
-		//forward();
-		
-		//fuel -= (speed / 2);
 		fuel = 100;
 		
 		if (primaryweaponA != null) {

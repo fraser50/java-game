@@ -1,6 +1,8 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -40,8 +42,8 @@ public class WormHole extends GameObject implements CollisionHandler {
 		
 		this.wormType = wormType;
 		
-		setWidth(64);
-		setHeight(64);
+		setWidth(128);
+		setHeight(128);
 	}
 	
 	@Override
@@ -115,10 +117,10 @@ public class WormHole extends GameObject implements CollisionHandler {
 		int[] ypoints = new int[360];
 		
 		for (int i = 0; i < 360; i++) {
-			double sinewave = Math.sin(Math.toRadians(((animationstate * 7) + (i * 12)) / 1)) * 7;
+			double sinewave = Math.sin(Math.toRadians(((animationstate * 7) + (i * 12)) / 1)) * 7; // i * 120 for a laugh (Default: i * 12)
 			// MAGNITUDE = 32
-			float magnitude = (float) (52 + sinewave);
-			Position pos = Util.coordToScreen(getPosition().copy().add(new Position(32, 32)).add(Util.angleToVel(i, magnitude)), rd.getRenderloc());
+			float magnitude = (float) ((getWidth() / 2) + sinewave); // 52 + sinewave
+			Position pos = Util.coordToScreen(getPosition().copy().add(new Position(getWidth() / 2, getHeight() / 2)).add(Util.angleToVel(i, magnitude)), rd.getRenderloc());
 			xpoints[i] = (int) pos.getX();
 			ypoints[i] = (int) pos.getY();
 		}
@@ -129,6 +131,11 @@ public class WormHole extends GameObject implements CollisionHandler {
 		//	animationstate = 0;
 		//}
 		
+		g2d.setColor(new Color(5, 35, 75));
+		Composite c = g2d.getComposite();
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.60f));
+		g2d.fillPolygon(xpoints, ypoints, 360);
+		g2d.setComposite(c);
 		g2d.setColor(Color.GREEN);
 		g2d.drawPolygon(xpoints, ypoints, 360);
 		

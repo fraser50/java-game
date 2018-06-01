@@ -861,7 +861,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		rendereditems += rd.getRendereditems();
 		g2d.drawString("Items rendered: " + String.valueOf(rendereditems), 40, 40);
 		g2d.drawString("Render time: " + String.valueOf(rendertime), 40, 60);
-		g2d.drawString("Update time: " + String.valueOf(new Random().nextInt(64) + 1), 40, 80); // updatetime
+		//g2d.drawString("Update time: " + String.valueOf(new Random().nextInt(64) + 1), 40, 80); // updatetime
 		
 		if (myship instanceof WeaponOwner) {
 			WeaponOwner owner = (WeaponOwner) myship;
