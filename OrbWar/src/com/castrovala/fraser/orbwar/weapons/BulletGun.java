@@ -25,7 +25,7 @@ public class BulletGun implements RechargeWeapon {
 		if (charge >= max) {
 			//Position bulletpos = new Position(user.getPosition().getX() + (user.getWidth() / 2), user.getPosition().getY() +  + (user.getHeight() / 2) );
 			//Position bulletpos = getPosition().copy();
-			float speed = 5;
+			float speed = 5; // 5
 			if (user instanceof PlayerShip) {
 				PlayerShip ps = (PlayerShip) user;
 				speed += ps.getSpeed();

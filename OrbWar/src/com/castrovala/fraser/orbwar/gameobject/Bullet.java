@@ -49,6 +49,10 @@ public class Bullet extends GameObject implements CollisionHandler {
 					obj.setHeight(obj.getHeight() + 100);
 				}
 				
+				if (obj instanceof BigAsteroid) {
+					continue;
+				}
+				
 				obj.hurt(5); // 1
 				delete();
 			}

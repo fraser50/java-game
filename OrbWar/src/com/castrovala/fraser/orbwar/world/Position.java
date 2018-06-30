@@ -83,6 +83,10 @@ public class Position {
 		return multiply(p.getX(), p.getY());
 	}
 	
+	public double distanceSquared(Position pos) {
+		return Util.distanceSquared(this, pos);
+	}
+	
 	public double distance(Position pos) {
 		return Util.distance(this, pos);
 	}

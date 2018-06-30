@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.swing.JFrame;
@@ -31,6 +30,7 @@ import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
+import com.castrovala.fraser.orbwar.gameobject.BigAsteroid;
 import com.castrovala.fraser.orbwar.gameobject.BombBoy;
 import com.castrovala.fraser.orbwar.gameobject.Bullet;
 import com.castrovala.fraser.orbwar.gameobject.Explosion;
@@ -61,6 +61,7 @@ import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
+import com.castrovala.fraser.orbwar.net.DestructionPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.KeyPressPacket;
@@ -152,6 +153,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		WormHole.registerEditor();
 		Star.registerEditor();
 		EnemyDrone.registerEditor();
+		BigAsteroid.registerEditor();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -444,9 +446,8 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		panel.setIgnoreRepaint(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		registerGameAssets();
-		panel.addNotify();
 		frame.setIgnoreRepaint(true);
-		
+		panel.addNotify();
 		
 		
 	}
@@ -537,7 +538,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			gameUpdate();
 			
 			
-			Position toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
+			/*Position toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
 			long screen_x = (long) toscreen.getX();
 			long screen_y = (long) toscreen.getY();
 			
@@ -561,7 +562,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
 				screen_x = (long) toscreen.getX();
 				screen_y = (long) toscreen.getY();
-			}
+			}*/
 			
 			gameRender();
 			
@@ -1271,6 +1272,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		ShieldUpdatePacket.registerPacket();
 		NameCheckPacket.registerPacket();
 		SizeUpdatePacket.registerPacket();
+		DestructionPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -1289,6 +1291,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		WarShip.registerGameObj();
 		BombBoy.registerGameObj();
 		MotherTransport.registerGameObj();
+		BigAsteroid.registerGameObj();
 	}
 
 }

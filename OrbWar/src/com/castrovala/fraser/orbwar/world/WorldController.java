@@ -98,7 +98,6 @@ public class WorldController implements WorldProvider {
 	public void updateGame() {
 		List<CollisionHandler> colliders = new ArrayList<>();
 		List<GameObject> todelete = new ArrayList<>();
-		//List<GameObject> toadd = new ArrayList<>();
 		
 		for (GameObject obj : toAdd.toArray(new GameObject[toAdd.size()])) {
 			getNewObjects().add(obj);
@@ -126,8 +125,8 @@ public class WorldController implements WorldProvider {
 						}
 						
 						float scanrange = scanners.get(obj);
-						float distance = (float) Util.distance(obj.getPosition(), detected.getPosition());
-						if (distance > scanrange) {
+						float distancesquared = (float) Util.distanceSquared(obj.getPosition(), detected.getPosition());
+						if (distancesquared > scanrange) {
 							obj.getNearby().remove(detected);
 						}
 						
@@ -138,45 +137,22 @@ public class WorldController implements WorldProvider {
 						continue;
 					}
 					
-					if (scan.distance(obj) <= getScanners().get(scan)) {
+					if (scan.distanceSquared(obj) <= getScanners().get(scan)) {
 						scan.getNearby().add(obj);
 					}
 				}
 				
 				if (obj.isDeleted()) {
 					getDeadObjects().add(obj);
-					//zone.getGameobjects().remove(obj);
 					todelete.add(obj);
 					objectuuid.remove(obj.getUuid());
 					getScanners().remove(obj);
 					continue;
 				}
 				
-				//WorldZone objzone = getZone(Util.toZoneCoords(obj.getPosition()));
-				//if (zone != objzone) {
-				//	zone.getGameobjects().remove(obj);
-				//	objzone.getGameobjects().add(obj);
-				//}
-				
 				if (!getScanners().containsKey(obj)) {
 					obj.update();
 				}
-				
-				/*if (obj.getPosition().getX() > 2048 - 70) {
-					obj.getPosition().setX(2048 - 70);
-				}
-				
-				if (obj.getPosition().getY() > 2048 - 70) {
-					obj.getPosition().setY(2048 - 70);
-				}
-				
-				if (obj.getPosition().getX() < -256) {
-					obj.getPosition().setX(-256);
-				}
-				
-				if (obj.getPosition().getY() < -256) {
-					obj.getPosition().setY(-256);
-				}*/
 				
 				if (obj instanceof CollisionHandler) {
 					colliders.add( (CollisionHandler)obj);

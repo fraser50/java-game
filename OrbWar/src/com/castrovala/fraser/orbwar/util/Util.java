@@ -58,11 +58,15 @@ public class Util {
 		return new Position(rel_x, rel_y);
 	}
 	
-	public static double distance(Position a, Position b) {
+	public static double distanceSquared(Position a, Position b) {
 		double x = b.getX() - a.getX();
 		double y = b.getY() - a.getY();
-		double hyp = Math.sqrt((x * x) + (y * y));
-		return hyp;
+		double hypsquare = Math.pow(x, 2) + Math.pow(y, 2);
+		return hypsquare;
+	}
+	
+	public static double distance(Position a, Position b) {
+		return Math.sqrt(distanceSquared(a, b));
 	}
 	
 	public static int toPercent(int amount, int max) {

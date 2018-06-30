@@ -10,12 +10,14 @@ import java.util.List;
 
 import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
+import com.castrovala.fraser.orbwar.gameobject.BigAsteroid;
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.gameobject.OliverMothership;
 import com.castrovala.fraser.orbwar.gameobject.RespawnLaser;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
+import com.castrovala.fraser.orbwar.net.DestructionPacket;
 import com.castrovala.fraser.orbwar.net.HealthUpdatePacket;
 import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
@@ -28,6 +30,7 @@ import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.net.SizeUpdatePacket;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.server.NoPacketParserException;
+import com.castrovala.fraser.orbwar.util.AstCircle;
 import com.castrovala.fraser.orbwar.util.Util;
 
 public class WorldNetController implements WorldProvider {
@@ -301,8 +304,15 @@ public class WorldNetController implements WorldProvider {
 				}
 			}
 			
-			//System.out.println("Not parsed :(");
-			//System.out.println("Serialised data: " + PacketProcessor.toJSON(pack));
+			if (pack instanceof DestructionPacket) {
+				DestructionPacket p = (DestructionPacket) pack;
+				GameObject obj = getGameObject(p.getUuid());
+				if (!(obj instanceof BigAsteroid)) continue;
+				BigAsteroid asteroid = (BigAsteroid) obj;
+				asteroid.getMissing().add(new AstCircle(p.getX(), p.getY(), p.getRadius()));
+				//asteroid.buildTexture();
+			}
+
 		}
 		
 		receiveBufferLen = ByteBuffer.allocate(4);

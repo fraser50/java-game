@@ -164,7 +164,7 @@ public abstract class GameObject {
 	}
 	
 	public GameObject[] getNearbyObjects(float radius) {
-		controller.getScanners().put(this, radius);
+		controller.getScanners().put(this, (float) Math.pow(radius, 2));
 		
 		return nearby.toArray(new GameObject[nearby.size()]);
 	}
@@ -179,6 +179,10 @@ public abstract class GameObject {
 
 	public List<GameObject> getNearby() {
 		return nearby;
+	}
+	
+	public double distanceSquared(GameObject obj) {
+		return Util.distanceSquared(getPosition(), obj.getPosition());
 	}
 	
 	public double distance(GameObject obj) {

@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 			Position posa = a.getAnchorPosition(getRotation()).add(getPosition()).subtract(new Position(8, 8));
 			Position posb = b.getAnchorPosition(getRotation()).add(getPosition()).subtract(new Position(8, 8));
 			primaryweaponA.fire(this, posa);
-			primaryweaponB.fire(this, posb);
+			//primaryweaponB.fire(this, posb);
 		}
 	}
 	
@@ -190,8 +191,10 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		Position scrpos2b = Util.coordToScreen(extendedposb, rd.getRenderloc());
 		
 		g2d.setColor(Color.RED);
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.drawLine((int)scrpos1a.getX(), (int)scrpos1a.getY(), (int)scrpos2a.getX(), (int)scrpos2a.getY());
 		g2d.drawLine((int)scrpos1b.getX(), (int)scrpos1b.getY(), (int)scrpos2b.getX(), (int)scrpos2b.getY());
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		
 	}
 	

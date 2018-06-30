@@ -69,7 +69,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	@Override
 	public void update() {
 		super.update();
-		//delete();
+		delete();
 		
 		setRotation(rotation + 0.5f);
 		if (rotation >= 360) {
@@ -102,7 +102,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	@Override
 	public void render(Graphics2D g2d, int rel_x, int rel_y, int centre_x, int centre_y, RenderDebug rd) {
 		AffineTransform orig = g2d.getTransform();
-		g2d.rotate(Math.toRadians((double) this.getRotation()), centre_x, centre_y);
+		g2d.rotate(Math.toRadians((double) getRotation()), centre_x, centre_y);
 		g2d.drawImage(getRenderimage(), rel_x, rel_y, null);
 		g2d.setTransform(orig);
 		rd.onRender();

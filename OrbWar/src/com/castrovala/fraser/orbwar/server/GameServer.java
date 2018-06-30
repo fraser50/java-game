@@ -289,26 +289,9 @@ public class GameServer extends Thread {
 									p.right = true;
 									break;
 								default:
+									break;
 									// Something went wrong
 								
-								/*GameObject ship = (GameObject) p.getControl();
-								synchronized (ship) {
-									switch (kpp.getKey()) {
-										case "up":
-											p.getControl().fly();
-											break;
-										case "fire":
-											p.getControl().fire();
-											break;
-										case "left":
-											p.getControl().left();
-											break;
-										case "right":
-											p.getControl().right();
-											break;
-										default:
-											// Something went wrong
-									}*/
 								}
 							}
 							gotcontrol = true;
@@ -344,10 +327,12 @@ public class GameServer extends Thread {
 									
 									if (cep.getMessage().equalsIgnoreCase("/secon") && p.isAdmin()) {
 										nosecurity = false;
+										p.sendPacket(new ChatEnterPacket("Server security has been turned on!"));
 										break;
 									}
 									
 									if (cep.getMessage().equalsIgnoreCase("/secoff") && p.isAdmin()) {
+										p.sendPacket(new ChatEnterPacket("Server security has been turned off!"));
 										nosecurity = true;
 										break;
 									}
