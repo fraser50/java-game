@@ -164,5 +164,9 @@ public class Util {
 	public static boolean byteToBool(byte b) {
 		return b == (byte)1 ? true : false;
 	}
+	
+	public static void fillCircle(Graphics2D g2d, int x, int y, int radius) {
+		g2d.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+	}
 
 }

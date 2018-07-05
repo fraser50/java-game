@@ -1,5 +1,7 @@
 package com.castrovala.fraser.orbwar.world;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -309,8 +311,9 @@ public class WorldNetController implements WorldProvider {
 				GameObject obj = getGameObject(p.getUuid());
 				if (!(obj instanceof BigAsteroid)) continue;
 				BigAsteroid asteroid = (BigAsteroid) obj;
-				asteroid.getMissing().add(new AstCircle(p.getX(), p.getY(), p.getRadius()));
-				//asteroid.buildTexture();
+				AstCircle hole = new AstCircle(p.getX(), p.getY(), p.getRadius());
+				asteroid.getMissing().add(hole);
+				asteroid.getMakeHoles().add(hole);
 			}
 
 		}

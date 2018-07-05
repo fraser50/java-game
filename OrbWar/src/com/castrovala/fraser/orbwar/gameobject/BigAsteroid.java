@@ -1,8 +1,9 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -28,8 +29,9 @@ import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class BigAsteroid extends GameObject implements CollisionHandler {
 	private BufferedImage texture;
-	List<AstCircle> matter = new ArrayList<>();
-	List<AstCircle> missing = new ArrayList<>();
+	private List<AstCircle> matter = new ArrayList<>();
+	private List<AstCircle> missing = new ArrayList<>();
+	private List<AstCircle> makeholes = new ArrayList<>();
 
 	public BigAsteroid(Position pos, WorldProvider controller) {
 		super(pos, controller);
@@ -88,8 +90,7 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 		Position pos1 = new Position(0, 0);
 		Position pos2 = new Position(0, 0);
 		
-		Rectangle r1 = new Rectangle(1, 1);
-		Rectangle r2 = new Rectangle(1, 1);
+		int[] texturedata = new int[texture.getWidth() * texture.getHeight()];
 		
 		for (AstCircle m : matter) {
 			double p = Math.pow(m.getRadius(), 2);
@@ -99,31 +100,36 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 					pos1.setY(y);
 					pos2.setX(m.getX());
 					pos2.setY(m.getY());
-					r1.setLocation(x, y);
+					//r1.setLocation(x, y);
 					if (Util.distanceSquared(pos1, pos2) <= p) {
-						boolean suitable = true;
-						for (AstCircle d : missing) {
-							pos2.setX(d.getX());
-							pos2.setY(d.getY());
-							r2.setLocation(d.getX() - d.getRadius(), d.getY() - d.getRadius());
-							r2.setSize(d.getRadius() * 2, d.getRadius() * 2);
-							
-							//if (!r1.intersects(r2)) continue;
-							
-							if (Util.distanceSquared(pos1, pos2) <= 625) { // Math.pow(d.getRadius(), 2)
-								suitable = false;
-								break;
-							}
-						}
-						
-						if (suitable) {
-							texture.setRGB(x, y, getColour(x, y));
-						}
+						texturedata[(y * texture.getWidth()) + (x-1)] = getColour(x, y);
 						
 					}
 				}
 			}
 		}
+		
+		for (AstCircle d : missing) {
+			double p = Math.pow(d.getRadius(), 2);
+			for (int x = d.getX() - d.getRadius(); x <= d.getX() + d.getRadius(); x++) {
+				for (int y = d.getY() - d.getRadius(); y <= d.getY() + d.getRadius(); y++) {
+					pos1.setX(x);
+					pos1.setY(y);
+					
+					pos2.setX(d.getX());
+					pos2.setY(d.getY());
+					
+					if (x < 0 || x >= texture.getWidth() || y < 0 || y >= texture.getHeight()) continue;
+					
+					if (Util.distanceSquared(pos1, pos2) <= p) {
+						texturedata[(y * texture.getWidth()) + (x-1)] = 16777216;
+					}
+				}
+			}
+		}
+		
+		texture.setRGB(0, 0, texture.getWidth(), texture.getHeight(), texturedata, 0, texture.getWidth());
+		
 	}
 	
 	@Override
@@ -139,11 +145,21 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 		}
 		
 		if (texture == null) buildTexture();
+		
+		for (AstCircle hole : makeholes) {
+			Graphics2D g = (Graphics2D) texture.getGraphics();
+			Composite c = g.getComposite();
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, 0f));
+			
+			Util.fillCircle(g, hole.getX(), hole.getY(), hole.getRadius());
+			g.setComposite(c);
+		}
+		makeholes.clear();
+		
 		AffineTransform orig = g2d.getTransform();
 		g2d.rotate(Math.toRadians((double) this.getRotation()), rel_x + 256, rel_y + 256);
 		g2d.drawImage(texture, rel_x, rel_y, texture.getWidth(), texture.getHeight(), null);
 		g2d.setTransform(orig);
-		texture = null;
 	}
 
 	@Override
@@ -251,6 +267,10 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 	
 	public List<AstCircle> getMissing() {
 		return missing;
+	}
+	
+	public List<AstCircle> getMakeHoles() {
+		return makeholes;
 	}
 	
 	public void computeRotation() {
