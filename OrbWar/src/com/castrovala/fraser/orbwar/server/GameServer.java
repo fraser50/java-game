@@ -304,9 +304,9 @@ public class GameServer extends Thread {
 							if (p.isAdmin() || nosecurity) {
 								EditorTransmitPacket etp = (EditorTransmitPacket) pa;
 								GameObject obj = GameObjectProcessor.fromJSON(etp.getObj());
-								synchronized (gamelogic.getController()) {
-									obj.setController(gamelogic.getController());
-									gamelogic.getController().addObject(obj);
+								synchronized (p.getUniverse()) {
+									obj.setController(p.getUniverse());
+									p.getUniverse().addObject(obj);
 									obj.afterBirth();
 								} 
 							}
@@ -421,6 +421,7 @@ public class GameServer extends Thread {
 	}
 	
 	private void finishLogin(NetworkPlayer p) {
+		p.setUniverseUnsafe(getGameThread().getManager().getUniverses().get(0));
 		readyplayers.add(p);
 		try {
 			p.setAdmin(p.getConn().getRemoteAddress().toString().startsWith("/127.0.0.1:"));
@@ -431,16 +432,16 @@ public class GameServer extends Thread {
 			e.printStackTrace();
 		}
 		
-		synchronized (gamelogic.getController()) {
-			PlayerShip ship = new PlayerShip(new Position(300, 300), gamelogic.getController());
+		synchronized (p.getUniverse()) {
+			PlayerShip ship = new PlayerShip(new Position(300, 300), p.getUniverse());
 			ship.setControl(p);
 			p.setControl(ship);
 			
 			
-			gamelogic.getController().addObject(ship);
+			p.getUniverse().addObject(ship);
 			System.out.println("Added Player Ship");
 			
-			for (GameObject obj : gamelogic.getController().allObjects()) {
+			for (GameObject obj : p.getUniverse().allObjects()) {
 				if (obj == ship) {
 					continue;
 				}
@@ -480,7 +481,7 @@ public class GameServer extends Thread {
 	
 	private void saveGame() {
 		if (savefile != null) {
-			WorldController c = getGameThread().getController();
+			WorldController c = getGameThread().getManager().getUniverses().get(0);
 			if (!savefile.exists()) {
 				savefile.mkdir();
 				

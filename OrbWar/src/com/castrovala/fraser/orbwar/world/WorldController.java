@@ -150,6 +150,13 @@ public class WorldController implements WorldProvider {
 					continue;
 				}
 				
+				if (obj.getController() != this) {
+					todelete.add(obj);
+					objectuuid.remove(obj.getUuid());
+					getScanners().remove(obj);
+					deadObjects.add(obj);
+				}
+				
 				if (!getScanners().containsKey(obj)) {
 					obj.update();
 				}

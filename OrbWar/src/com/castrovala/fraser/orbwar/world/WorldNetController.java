@@ -1,7 +1,5 @@
 package com.castrovala.fraser.orbwar.world;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -25,6 +23,7 @@ import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PacketProcessor;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ResetPacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
@@ -42,7 +41,7 @@ public class WorldNetController implements WorldProvider {
 	private ByteBuffer receiveBuffer;
 	private ByteBuffer receiveBufferLen;
 	private int objectcount;
-	private Position pos;
+	private final Position pos;
 	private HashMap<String, ClientPlayer> clients = new HashMap<>();
 	private List<ServerMessage> messages = new ArrayList<>();
 	public boolean readytoplay = false;
@@ -314,6 +313,14 @@ public class WorldNetController implements WorldProvider {
 				AstCircle hole = new AstCircle(p.getX(), p.getY(), p.getRadius());
 				asteroid.getMissing().add(hole);
 				asteroid.getMakeHoles().add(hole);
+			}
+			
+			if (pack instanceof ResetPacket) {
+				zones.clear();
+				objids.clear();
+				objectcount = 0;
+				pos.setX(0);
+				pos.setY(0);
 			}
 
 		}

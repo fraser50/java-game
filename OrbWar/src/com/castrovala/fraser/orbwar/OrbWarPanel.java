@@ -46,6 +46,7 @@ import com.castrovala.fraser.orbwar.gameobject.ShieldDrone;
 import com.castrovala.fraser.orbwar.gameobject.ShieldGenerator;
 import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
+import com.castrovala.fraser.orbwar.gameobject.UniverseTransporter;
 import com.castrovala.fraser.orbwar.gameobject.WormHole;
 import com.castrovala.fraser.orbwar.gameobject.npc.EnemyDrone;
 import com.castrovala.fraser.orbwar.gameobject.npc.WarShip;
@@ -60,6 +61,7 @@ import com.castrovala.fraser.orbwar.gui.GuiLabel;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
+import com.castrovala.fraser.orbwar.net.DebugInfoPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
 import com.castrovala.fraser.orbwar.net.DestructionPacket;
 import com.castrovala.fraser.orbwar.net.EditorTransmitPacket;
@@ -68,6 +70,7 @@ import com.castrovala.fraser.orbwar.net.KeyPressPacket;
 import com.castrovala.fraser.orbwar.net.NameCheckPacket;
 import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
+import com.castrovala.fraser.orbwar.net.ResetPacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
@@ -133,27 +136,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		setFocusable(true);
 		requestFocus();
 		
-		Asteroid.loadResources();
-		PlayerShip.loadResources();
-		Bullet.loadResources();
-		Star.loadResources();
-		HydrogenParticle.loadResources();
-		Turret.loadResources();
-		RespawnLaser.loadResources();
-		SmokeParticle.loadResources();
-		ShieldDrone.loadResources();
-		OliverMothership.loadResources();
-		ShieldGenerator.loadResources();
-		WormHole.loadResources();
-		
-		Asteroid.registerEditor();
-		Turret.registerEditor();
-		OliverMothership.registerEditor();
-		Planet.registerEditor();
-		WormHole.registerEditor();
-		Star.registerEditor();
-		EnemyDrone.registerEditor();
-		BigAsteroid.registerEditor();
+		OrbWarPanel.registerClientAssets();
 		
 		for (int i = 1; i<1000; i++) {
 			starpoints.add(new Position(Util.randomRange(1, PWIDTH), Util.randomRange(1, PHEIGHT)));
@@ -971,13 +954,6 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		
 		joinServer("127.0.0.1", 5555, "SP");
 		controller.readytoplay = true;
-		
-		//controller = new WorldController();
-		/*
-		Position pos = new Position(256, 256); // 256, 256
-		PlayerShip ship = new PlayerShip(pos, controller);
-		Star star = new Star(new Position(512, 512), controller);
-		*/
 	}
 
 	public GuiScreen getActivegui() {
@@ -1273,6 +1249,8 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		NameCheckPacket.registerPacket();
 		SizeUpdatePacket.registerPacket();
 		DestructionPacket.registerPacket();
+		ResetPacket.registerPacket();
+		DebugInfoPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -1292,6 +1270,32 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		BombBoy.registerGameObj();
 		MotherTransport.registerGameObj();
 		BigAsteroid.registerGameObj();
+		UniverseTransporter.registerGameObj();
+	}
+	
+	public static void registerClientAssets() {
+		Asteroid.loadResources();
+		PlayerShip.loadResources();
+		Bullet.loadResources();
+		Star.loadResources();
+		HydrogenParticle.loadResources();
+		Turret.loadResources();
+		RespawnLaser.loadResources();
+		SmokeParticle.loadResources();
+		ShieldDrone.loadResources();
+		OliverMothership.loadResources();
+		ShieldGenerator.loadResources();
+		WormHole.loadResources();
+		
+		Asteroid.registerEditor();
+		Turret.registerEditor();
+		OliverMothership.registerEditor();
+		Planet.registerEditor();
+		WormHole.registerEditor();
+		Star.registerEditor();
+		EnemyDrone.registerEditor();
+		BigAsteroid.registerEditor();
+		UniverseTransporter.registerEditor();
 	}
 
 }

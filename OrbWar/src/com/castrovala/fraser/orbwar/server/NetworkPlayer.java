@@ -9,10 +9,12 @@ import java.util.UUID;
 
 import com.castrovala.fraser.orbwar.gameobject.GameObject;
 import com.castrovala.fraser.orbwar.net.AbstractPacket;
+import com.castrovala.fraser.orbwar.net.ResetPacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.world.Position;
+import com.castrovala.fraser.orbwar.world.WorldProvider;
 import com.castrovala.fraser.orbwar.world.WorldZone;
 
 public class NetworkPlayer implements ControlUser {
@@ -34,6 +36,8 @@ public class NetworkPlayer implements ControlUser {
 	public boolean right;
 	public boolean forward;
 	public boolean fire;
+	
+	private WorldProvider universe;
 	
 	public NetworkPlayer(GameServer server, SocketChannel conn) {
 		this.server = server;
@@ -59,20 +63,9 @@ public class NetworkPlayer implements ControlUser {
 			throw new NullPointerException("Value was null");
 		}
 		
-		//System.out.println("I have been told to send: " + packet.getClass().getName());
-		
 		synchronized (packetQueue) {
-			/*if (packet instanceof HealthUpdatePacket) {
-				for (AbstractPacket p : packetQueue.toArray(new AbstractPacket[packetQueue.size()])) {
-					if (p instanceof HealthUpdatePacket) {
-						packetQueue.remove(p);
-					}
-				}
-			}*/
 			getPacketQueue().add(packet);
 		}
-		
-		//System.out.println("Contains packet: " + getPacketQueue().contains(packet));
 	}
 
 	public SocketChannel getConn() {
@@ -170,6 +163,20 @@ public class NetworkPlayer implements ControlUser {
 
 	public void setScreenHeight(int screenHeight) {
 		this.screenHeight = screenHeight;
+	}
+
+	public WorldProvider getUniverse() {
+		return universe;
+	}
+
+	public void setUniverse(WorldProvider universe) {
+		this.universe = universe;
+		getSeenZones().clear();
+		sendPacket(new ResetPacket());
+	}
+	
+	public void setUniverseUnsafe(WorldProvider universe) {
+		this.universe = universe;
 	}
 
 }
