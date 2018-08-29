@@ -236,4 +236,8 @@ public abstract class GameObject {
 		return true;
 	}
 	
+	public boolean shouldBroadcastDeath() {
+		return true;
+	}
+	
 }

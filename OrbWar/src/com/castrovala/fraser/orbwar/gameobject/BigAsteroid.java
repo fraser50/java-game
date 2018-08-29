@@ -90,7 +90,6 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 		Position pos1 = new Position(0, 0);
 		Position pos2 = new Position(0, 0);
 		
-		int[] texturedata = new int[texture.getWidth() * texture.getHeight()];
 		
 		for (AstCircle m : matter) {
 			double p = Math.pow(m.getRadius(), 2);
@@ -102,7 +101,7 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 					pos2.setY(m.getY());
 					//r1.setLocation(x, y);
 					if (Util.distanceSquared(pos1, pos2) <= p) {
-						texturedata[(y * texture.getWidth()) + (x-1)] = getColour(x, y);
+						texture.setRGB(x, y, getColour(x, y));
 						
 					}
 				}
@@ -122,13 +121,11 @@ public class BigAsteroid extends GameObject implements CollisionHandler {
 					if (x < 0 || x >= texture.getWidth() || y < 0 || y >= texture.getHeight()) continue;
 					
 					if (Util.distanceSquared(pos1, pos2) <= p) {
-						texturedata[(y * texture.getWidth()) + (x-1)] = 16777216;
+						texture.setRGB(x, y, 16777216);
 					}
 				}
 			}
 		}
-		
-		texture.setRGB(0, 0, texture.getWidth(), texture.getHeight(), texturedata, 0, texture.getWidth());
 		
 	}
 	

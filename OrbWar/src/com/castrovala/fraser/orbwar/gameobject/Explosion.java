@@ -17,8 +17,11 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
 
 public class Explosion extends GameObject {
-	public Explosion(Position pos, WorldProvider controller) {
+	private float size = 0;
+	
+	public Explosion(Position pos, WorldProvider controller, float size) {
 		super(pos, controller, 20);
+		this.size = size;
 	}
 
 	@Override
@@ -32,8 +35,10 @@ public class Explosion extends GameObject {
 		List<Position> points = new ArrayList<>();
 		for (int i = 0;i<360;i+=2) {
 			if (rand.nextBoolean() != rand.nextBoolean()) {
-				float far = (rand.nextInt(100)) + 0.5f;
-				Position pos = Util.angleToVel(i, far - ( (getMaxhealth() - getHealth()) * 2) );
+				float expansion = rand.nextInt(40);
+				float far = expansion + (size + 18.5f);
+				float healthratio = (float) ((float)getHealth()/(float)getMaxhealth());
+				Position pos = Util.angleToVel(i, healthratio * far);
 				points.add(pos);
 			}
 		}
@@ -63,12 +68,13 @@ public class Explosion extends GameObject {
 				jobj.put("x", ex.getPosition().getX());
 				
 				jobj.put("y", ex.getPosition().getY());
+				jobj.put("size", ex.getSize());
 				return jobj;
 			}
 			
 			@Override
 			public GameObject fromJSON(JSONObject obj) {
-				Explosion ex = new Explosion(null, null);
+				Explosion ex = new Explosion(null, null, ((Number)obj.get("size")).floatValue());
 				return ex;
 			}
 		};
@@ -80,6 +86,29 @@ public class Explosion extends GameObject {
 	public void update() {
 		super.update();
 		hurt();
+		setChanged(false);
+	}
+	
+	@Override
+	public void clientUpdate() {
+		hurt();
+		
+		if (getHealth() <= 0) {
+			delete();
+		}
+	}
+	
+	@Override
+	public boolean shouldBroadcastDeath() {
+		return false;
+	}
+
+	public float getSize() {
+		return size;
+	}
+
+	public void setSize(float size) {
+		this.size = size;
 	}
 
 }

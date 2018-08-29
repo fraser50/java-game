@@ -180,6 +180,12 @@ public class Planet extends GameObject implements CollisionHandler {
 		super.update();
 	}
 	
+	@Override
+	public void death() {
+		Explosion ex = new Explosion(getPosition().copy().add(new Position(64, 64)), getController(), 64);
+		getController().addObject(ex);
+	}
+	
 	public static void registerGameObj() {
 		GameObjParser parser = new GameObjParser() {
 			

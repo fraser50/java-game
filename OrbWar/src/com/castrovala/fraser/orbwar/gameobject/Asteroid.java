@@ -69,7 +69,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	@Override
 	public void update() {
 		super.update();
-		delete();
+		//delete();
 		
 		setRotation(rotation + 0.5f);
 		if (rotation >= 360) {
@@ -79,7 +79,6 @@ public class Asteroid extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void clientUpdate() {
-		// TODO Auto-generated method stub
 		super.clientUpdate();
 		
 		setRotation(rotation + 0.5f);
@@ -93,6 +92,7 @@ public class Asteroid extends GameObject implements CollisionHandler {
 		for (GameObject obj : objects) {
 			if (obj instanceof Bullet) {
 				delete();
+				getController().addObject(new Explosion(getPosition().copy().add(new Position(32, 32)), getController(), 32));
 				return;
 			}
 		}

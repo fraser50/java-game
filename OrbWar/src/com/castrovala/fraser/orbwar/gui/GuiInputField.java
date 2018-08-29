@@ -72,7 +72,7 @@ public class GuiInputField extends GuiElement implements GuiFocusable {
 		g.setColor(Color.BLACK);
 		String newtext = text;
 		
-		if (counter >= 10 && focused) {
+		if (counter >= 15 && focused) {
 			newtext = newtext.concat("|");
 		}
 		
@@ -104,7 +104,7 @@ public class GuiInputField extends GuiElement implements GuiFocusable {
 	@Override
 	public void update(int mousex, int mousey) {
 		counter++;
-		if (counter == 20) {
+		if (counter == 40) {
 			counter = 0;
 		}
 	}

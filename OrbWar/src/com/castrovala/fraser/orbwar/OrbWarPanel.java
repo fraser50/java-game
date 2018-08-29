@@ -3,8 +3,10 @@ package com.castrovala.fraser.orbwar;
 import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
@@ -16,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import com.castrovala.fraser.orbwar.client.ClientPlayer;
 import com.castrovala.fraser.orbwar.client.ServerMessage;
 import com.castrovala.fraser.orbwar.editor.Editor;
 import com.castrovala.fraser.orbwar.editor.EditorManager;
+import com.castrovala.fraser.orbwar.editor.Resizable;
 import com.castrovala.fraser.orbwar.gameobject.Asteroid;
 import com.castrovala.fraser.orbwar.gameobject.BigAsteroid;
 import com.castrovala.fraser.orbwar.gameobject.BombBoy;
@@ -48,6 +52,7 @@ import com.castrovala.fraser.orbwar.gameobject.Star;
 import com.castrovala.fraser.orbwar.gameobject.Turret;
 import com.castrovala.fraser.orbwar.gameobject.UniverseTransporter;
 import com.castrovala.fraser.orbwar.gameobject.WormHole;
+import com.castrovala.fraser.orbwar.gameobject.interior.StationFloor;
 import com.castrovala.fraser.orbwar.gameobject.npc.EnemyDrone;
 import com.castrovala.fraser.orbwar.gameobject.npc.WarShip;
 import com.castrovala.fraser.orbwar.gameobject.particle.HydrogenParticle;
@@ -72,6 +77,7 @@ import com.castrovala.fraser.orbwar.net.ObjectTransmitPacket;
 import com.castrovala.fraser.orbwar.net.PositionUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ResetPacket;
 import com.castrovala.fraser.orbwar.net.ScreenUpdatePacket;
+import com.castrovala.fraser.orbwar.net.SetLightingPacket;
 import com.castrovala.fraser.orbwar.net.ShieldUpdatePacket;
 import com.castrovala.fraser.orbwar.net.ShipDataPacket;
 import com.castrovala.fraser.orbwar.net.ShipRemovePacket;
@@ -83,6 +89,7 @@ import com.castrovala.fraser.orbwar.server.ServerState;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
 import com.castrovala.fraser.orbwar.util.Controllable;
 import com.castrovala.fraser.orbwar.util.GameState;
+import com.castrovala.fraser.orbwar.util.LightCircle;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.util.Util;
 import com.castrovala.fraser.orbwar.weapons.RechargeWeapon;
@@ -113,6 +120,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	private String activecontrol = null;
 	private List<MPGameInfo> activeGames = new ArrayList<>();
 	private GameObject editorObj;
+	private boolean lockEditor = false;
 	private volatile Position mousePos = new Position(0, 0);
 	private volatile boolean clicked = false;
 	private GuiFocusable focused;
@@ -123,6 +131,10 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	private Graphics2D g2d;
 	//private long timesticked = 2;
 	private BufferStrategy strategy;
+	private int lightcounter = 0;
+	
+	private BufferedImage lightmap;
+	private List<LightCircle> lightsources = new ArrayList<>();
 	
 	public OrbWarPanel() {
 		
@@ -272,6 +284,10 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				if (keyCode == KeyEvent.VK_M) {
 					editorObj = null;
 					activecontrol = "menu";
+				}
+				
+				if (keyCode == KeyEvent.VK_X && editorObj != null) {
+					activecontrol = "lock";
 				}
 				
 				if (keyCode == KeyEvent.VK_NUMPAD4 && editorObj != null) {
@@ -472,7 +488,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					}
 					long end = System.currentTimeMillis();
 					long timetaken = end - start;
-					System.out.println("prepareGame() took " + timetaken + " ms");
+					System.out.println("prepareGame() took " + timetaken + " ms (legacy code)");
 					init_game = false;
 					state = GameState.PLAYING;
 					activegui = null;
@@ -497,13 +513,16 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				continue;
 			}
 			
-			GameObject obj = (GameObject) myship;
+			//GameObject obj = (GameObject) myship;
 			if (myship == null) {
 				updateMouse();
 				gameUpdate();
 				gameRender();
+				
 				try {
-					Thread.sleep(updatespeed);
+					long sleeptime = updatespeed - updatetime - rendertime;
+					sleeptime = sleeptime >= 0 ? sleeptime : 0;
+					Thread.sleep(sleeptime);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -511,7 +530,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				continue;
 			}
 			
-			if (mylocation.getX() - obj.getPosition().getX() >= 1000000 || mylocation.getY() - obj.getPosition().getY() >= 1000000 ||
+			/*if (mylocation.getX() - obj.getPosition().getX() >= 1000000 || mylocation.getY() - obj.getPosition().getY() >= 1000000 ||
 				mylocation.getX() - obj.getPosition().getX() <= -1000000 || mylocation.getY() - obj.getPosition().getY() <= -1000000	) {
 				mylocation.setX(obj.getPosition().getX() - (PWIDTH / 2) );
 				mylocation.setY(obj.getPosition().getY() - (PHEIGHT / 2) );
@@ -520,39 +539,14 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			updateMouse();
 			gameUpdate();
 			
-			
-			/*Position toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
-			long screen_x = (long) toscreen.getX();
-			long screen_y = (long) toscreen.getY();
-			
-			while (screen_x >= PWIDTH - 50 || screen_x <= 50 || screen_y >= PHEIGHT - 50 || screen_y <= 50) {
-				if (screen_x >= PWIDTH - 50) {
-					mylocation.setX(mylocation.getX() + 1);
-				}
-				
-				if (screen_x <= 50) {
-					mylocation.setX(mylocation.getX() - 1);
-				}
-				
-				if (screen_y >= PHEIGHT - 50) {
-					mylocation.setY(mylocation.getY() + 1);
-				}
-				
-				if (screen_y <= 50) {
-					mylocation.setY(mylocation.getY() - 1);
-				}
-				
-				toscreen = Util.coordToScreen(obj.getPosition(), mylocation);
-				screen_x = (long) toscreen.getX();
-				screen_y = (long) toscreen.getY();
-			}*/
-			
 			gameRender();
+			
+			
 			
 			try {
 				//Thread.sleep(20);
-				Thread.sleep(updatespeed);
-			} catch (InterruptedException ex){}
+				Thread.sleep(updatespeed - updatetime - rendertime);
+			} catch (InterruptedException ex){}*/
 			
 		}
 		System.exit(0);
@@ -598,8 +592,19 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				editorObj.setUuid(UUID.randomUUID().toString());
 			}
 			
-			if (editorObj != null) {
+			if (editorObj != null && (!lockEditor)) {
 				editorObj.setPosition(mousePos.copy().subtract(new Position(editorObj.getWidth() / 2, editorObj.getHeight() / 2)).add(mylocation));
+			}
+			
+			if (lockEditor && editorObj instanceof Resizable) {
+				int width = (int) ((mousePos.getX() + mylocation.getX()) - editorObj.getPosition().getX());
+				//width = width >= 0 ? width : -width;
+				
+				int height = (int) ((mousePos.getY() + mylocation.getY()) - editorObj.getPosition().getY());
+				//height = height >= 0 ? height : -height;
+				
+				editorObj.setWidth(width);
+				editorObj.setHeight(height);
 			}
 			
 		}
@@ -626,6 +631,9 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			if (activecontrol.equals("menu")) {
 				activegui = getEditorScreen();
 				activecontrol = null;
+			} else if (activecontrol.equals("lock")) {
+				lockEditor = !lockEditor;
+				activecontrol = null;
 			} else {
 				KeyPressPacket p = new KeyPressPacket(activecontrol);
 				activecontrol = null;
@@ -635,10 +643,12 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		}
 		
 		controller.updateGame();
+		controller.lighting = false;
 	}
 	
 	public void gameRender() {
-		RenderDebug rd = new RenderDebug(mylocation);
+		
+		RenderDebug rd = new RenderDebug(mylocation, lightsources);
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(0, 0, PWIDTH, PHEIGHT);
 			
@@ -779,35 +789,6 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					ClientPlayer p = controller.getClients().get(obj.getUuid());
 					g2d.setColor(Color.WHITE);
 					
-					/*BufferedImage img = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
-					Graphics2D g2di = (Graphics2D) img.getGraphics();
-					g2di.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-					int[] xp = new int[360 / 60];
-					int[] yp = new int[360 / 60];
-					
-					int in = 0;
-					for (int i = 0; i < 360; i+=60) {
-						
-						Position pos = Util.angleToVel(i, 8);
-						
-						xp[in] = (int) (pos.getX()) + (img.getWidth() / 2);
-						yp[in] = (int) (pos.getY()) + (img.getHeight() / 2);
-						
-						in++;
-						
-					}
-					
-					if (p.isAdmin()) {
-						g2di.setColor(Color.CYAN);
-					} else {
-						g2di.setColor(Color.LIGHT_GRAY);
-					}
-					
-					g2di.fillPolygon(xp, yp, xp.length);
-					g2di.dispose();
-					
-					g2d.drawImage(img, rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ) - 30, rel_y - 32, null);*/
-					
 					if (p.isAdmin()) {
 						g2d.setColor(Color.CYAN);
 					} else {
@@ -818,7 +799,6 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					
 					g2d.setColor(Color.WHITE);
 					g2d.drawString(p.getName(), rel_x + ( (obj.getWidth() / 2) - (p.getName().length() * 3) ), rel_y - 20);
-					//int crash = 0/0;
 				}
 				
 				long objrenderend = System.currentTimeMillis();
@@ -840,11 +820,19 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			}
 		}
 		
+		// LIGHTING
+		
+		if (controller.lighting) {
+			renderLighting();
+		}
+		
 		g2d.setColor(Color.CYAN);
 		rendereditems += 3;
 		rendereditems += rd.getRendereditems();
 		g2d.drawString("Items rendered: " + String.valueOf(rendereditems), 40, 40);
 		g2d.drawString("Render time: " + String.valueOf(rendertime), 40, 60);
+		g2d.drawString("Locked: " + lockEditor, 40, 80);
+		g2d.drawString("Lighting: " + controller.lighting, 40, 100);
 		//g2d.drawString("Update time: " + String.valueOf(new Random().nextInt(64) + 1), 40, 80); // updatetime
 		
 		if (myship instanceof WeaponOwner) {
@@ -856,7 +844,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			}
 		}
 		
-		if (myship instanceof GameObject) {
+		if (myship instanceof GameObject) { // Doesn't work since multiplayer was added, might fix in the future
 			GameObject s = (GameObject) myship;
 			g2d.drawString("Health: " + Util.toPercent(s.getHealth(), s.getMaxhealth()) + "%", 40, 120);
 			g2d.drawString("X: " + s.getPosition().getX(), 40, 140);
@@ -934,8 +922,40 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		//end
 		rd.setEnd(System.currentTimeMillis());
 		rendertime = (int) rd.getTime();
+		//System.out.println(rendertime);
 		
 	
+	}
+	
+	public void renderLighting() {
+		if (controller.lighting) {
+			if (lightmap == null) {
+				lightmap = new BufferedImage(PWIDTH, PHEIGHT, BufferedImage.TYPE_INT_ARGB);
+			}
+			
+			lightcounter++;
+			if (lightcounter >= 0) {
+				lightcounter = 0;
+				Graphics2D lg2d = (Graphics2D) lightmap.getGraphics();
+				lg2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
+				lg2d.setColor(new Color(0, 0, 0, 255)); // Alpha: 127
+				lg2d.fillRect(0, 0, PWIDTH, PHEIGHT);
+				lg2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN));
+				for (LightCircle c : lightsources) {
+					lg2d.setColor(c.getColour());
+					Util.fillCircle(lg2d, c.getX(), c.getY(), c.getRadius());
+				}
+				lg2d.dispose();
+			}
+			//Composite c = g2d.getComposite();
+			//g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER));
+			g2d.drawImage(lightmap, 0, 0, PWIDTH, PHEIGHT, null);
+			//g2d.setComposite(c);
+		} else {
+			lightmap = null;
+		}
+		
+		lightsources.clear();
 	}
 	
 	public void prepareGame(String world) throws IOException {
@@ -1034,6 +1054,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					editorObj = e.spawn(controller);
 					activegui = null;
 					clicked = false;
+					lockEditor = false;
 					
 				}
 			}, Color.LIGHT_GRAY).setText(Color.BLACK));
@@ -1251,6 +1272,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		DestructionPacket.registerPacket();
 		ResetPacket.registerPacket();
 		DebugInfoPacket.registerPacket();
+		SetLightingPacket.registerPacket();
 		
 		PlayerShip.registerGameObj();
 		Asteroid.registerGameObj();
@@ -1271,6 +1293,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		MotherTransport.registerGameObj();
 		BigAsteroid.registerGameObj();
 		UniverseTransporter.registerGameObj();
+		StationFloor.registerGameObj();
 	}
 	
 	public static void registerClientAssets() {
@@ -1296,6 +1319,17 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		EnemyDrone.registerEditor();
 		BigAsteroid.registerEditor();
 		UniverseTransporter.registerEditor();
+		StationFloor.registerEditor();
+	}
+	
+	// Used to prevent game from crashing while it is loading if you click
+	@Override
+	public Point getLocationOnScreen() {
+		try {
+			return super.getLocationOnScreen();
+		} catch (IllegalComponentStateException e) {
+			return new Point(0, 0);
+		}
 	}
 
 }

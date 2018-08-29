@@ -243,10 +243,16 @@ public class GameServer extends Thread {
 								}
 							}
 							
+							if (ncp.getName() == null || ncp.getName().equals("")) {
+								response.setLogin(false);
+								response.setName("Don't leave your name blank!");
+							}
+							
 							if (p.getScreenWidth() > 1024 || p.getScreenHeight() > 1024) {
 								response.setLogin(false);
 								response.setName("Invalid game size! (Don't try to cheat! :O )");
 							}
+							
 							
 							if (!response.isLogin()) {
 								System.out.println("Refusing player with reason '" + response.getName() + "'");

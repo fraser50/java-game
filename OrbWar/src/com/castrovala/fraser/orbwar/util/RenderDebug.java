@@ -1,5 +1,7 @@
 package com.castrovala.fraser.orbwar.util;
 
+import java.util.List;
+
 import com.castrovala.fraser.orbwar.world.Position;
 
 public class RenderDebug {
@@ -10,16 +12,19 @@ public class RenderDebug {
 	private boolean editor;
 	private boolean isTouching;
 	private Position mousepos;
+	private List<LightCircle> lightsources;
 	
-	public RenderDebug(int rendereditems, long start, long end, Position renderloc) {
+	public RenderDebug(int rendereditems, long start, long end, Position renderloc, List<LightCircle> lightsources) {
 		this.rendereditems = rendereditems;
 		this.start = start;
 		this.end = end;
 		this.setRenderloc(renderloc);
+		this.lightsources = lightsources;
+		
 	}
 	
-	public RenderDebug(Position renderloc) {
-		this(0, System.currentTimeMillis(), 0l, renderloc);
+	public RenderDebug(Position renderloc, List<LightCircle> lightsources) {
+		this(0, System.currentTimeMillis(), 0l, renderloc, lightsources);
 	}
 	
 	public void onRender(int amount) {
@@ -88,6 +93,10 @@ public class RenderDebug {
 
 	public void setMousepos(Position mousepos) {
 		this.mousepos = mousepos;
+	}
+	
+	public void addLight(LightCircle c) {
+		lightsources.add(c);
 	}
 
 }

@@ -272,7 +272,7 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 	
 	@Override
 	public void death() {
-		Explosion boom = new Explosion(getPosition().copy().add(new Position(128, 128)), getController());
+		Explosion boom = new Explosion(getPosition().copy().add(new Position(128, 128)), getController(), 128);
 		getController().addObject(boom);
 	}
 	

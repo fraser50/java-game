@@ -21,6 +21,8 @@ public class GameThread extends Thread {
 		if (server.getSavefile() == null) {
 			mainworld = new WorldController(server);
 			this.setName("Game Thread");
+			manager = new UniverseManager(getServer());
+			manager.addUniverse(mainworld);
 			return;
 		}
 		

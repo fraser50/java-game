@@ -1,5 +1,6 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import org.json.simple.JSONObject;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
+import com.castrovala.fraser.orbwar.util.LightCircle;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;

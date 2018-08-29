@@ -208,7 +208,7 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 	
 	@Override
 	public void death() {;
-		Explosion ex = new Explosion(getPosition().copy(), getController());
+		Explosion ex = new Explosion(getPosition().copy().add(new Position(32, 32)), getController(), 32);
 		getController().addObject(ex);
 	}
 

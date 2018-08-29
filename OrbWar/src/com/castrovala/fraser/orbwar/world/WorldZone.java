@@ -48,6 +48,8 @@ public class WorldZone {
 		Position endpos = getEndPoint();
 		List<Rectangle> prevAst = new ArrayList<>();
 		
+		if (1==1) return;
+		
 		for (int i = 1; i <= 5;i++) {
 			Random rand = ThreadLocalRandom.current();
 			int r1 = rand.nextInt(10);

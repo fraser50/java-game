@@ -154,6 +154,7 @@ public class UniverseManager {
 		for (GameObject obj : controller.getDeadObjects()) {
 			for (NetworkPlayer player : getServer().getPlayers()) {
 				if (player.getUniverse() != controller) continue;
+				if (!obj.shouldBroadcastDeath()) continue;
 				DeleteObjectPacket dop = new DeleteObjectPacket(obj.getUuid());
 				player.sendPacket(dop);
 			}

@@ -48,6 +48,7 @@ public class WorldNetController implements WorldProvider {
 	public boolean namegood = false;
 	public String namereason = "";
 	public boolean didgetncp = false;
+	public boolean lighting = true;
 	
 	public String host;
 	public int port;
