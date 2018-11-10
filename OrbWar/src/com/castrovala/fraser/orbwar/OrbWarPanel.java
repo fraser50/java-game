@@ -3,7 +3,6 @@ package com.castrovala.fraser.orbwar;
 import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
@@ -65,6 +64,9 @@ import com.castrovala.fraser.orbwar.gui.GuiInputField;
 import com.castrovala.fraser.orbwar.gui.GuiLabel;
 import com.castrovala.fraser.orbwar.gui.GuiScreen;
 import com.castrovala.fraser.orbwar.gui.RenderStage;
+import com.castrovala.fraser.orbwar.item.Inventory;
+import com.castrovala.fraser.orbwar.item.InventoryType;
+import com.castrovala.fraser.orbwar.item.ItemBattery;
 import com.castrovala.fraser.orbwar.net.ChatEnterPacket;
 import com.castrovala.fraser.orbwar.net.DebugInfoPacket;
 import com.castrovala.fraser.orbwar.net.DeleteObjectPacket;
@@ -135,6 +137,8 @@ public class OrbWarPanel extends Canvas implements Runnable {
 	
 	private BufferedImage lightmap;
 	private List<LightCircle> lightsources = new ArrayList<>();
+	
+	private Inventory inv;
 	
 	public OrbWarPanel() {
 		
@@ -290,6 +294,10 @@ public class OrbWarPanel extends Canvas implements Runnable {
 					activecontrol = "lock";
 				}
 				
+				if (keyCode == KeyEvent.VK_U) {
+					activecontrol = "inv";
+				}
+				
 				if (keyCode == KeyEvent.VK_NUMPAD4 && editorObj != null) {
 					editorObj.setRotation(editorObj.getRotation() - 10);
 					if (editorObj.getRotation() < 0) {
@@ -331,7 +339,7 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				in = true;
-				if (state == GameState.PLAYING && editorObj != null) {
+				if (state == GameState.PLAYING) {
 					clicked = true;
 				}
 				
@@ -607,6 +615,14 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				editorObj.setHeight(height);
 			}
 			
+			if (inv != null && clicked) {
+				inv.onClick(mousePos);
+				clicked = false;
+			}
+			
+			clicked = false;
+			
+			
 		}
 		
 		try {
@@ -634,6 +650,12 @@ public class OrbWarPanel extends Canvas implements Runnable {
 			} else if (activecontrol.equals("lock")) {
 				lockEditor = !lockEditor;
 				activecontrol = null;
+				
+			} else if (activecontrol.equals("inv")) {
+				inv = new Inventory(InventoryType.SHIP, 25);
+				inv.getSlots().get(7).setItem(new ItemBattery(1));
+				activecontrol = null;
+				
 			} else {
 				KeyPressPacket p = new KeyPressPacket(activecontrol);
 				activecontrol = null;
@@ -824,6 +846,10 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		
 		if (controller.lighting) {
 			renderLighting();
+		}
+		
+		if (inv != null) {
+			inv.render(g2d);
 		}
 		
 		g2d.setColor(Color.CYAN);
@@ -1320,6 +1346,9 @@ public class OrbWarPanel extends Canvas implements Runnable {
 		BigAsteroid.registerEditor();
 		UniverseTransporter.registerEditor();
 		StationFloor.registerEditor();
+		
+		// Item texture registration
+		ItemBattery.loadResources();
 	}
 	
 	// Used to prevent game from crashing while it is loading if you click

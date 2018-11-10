@@ -1,6 +1,5 @@
 package com.castrovala.fraser.orbwar.gameobject;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import org.json.simple.JSONObject;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.CollisionHandler;
-import com.castrovala.fraser.orbwar.util.LightCircle;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
 import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldProvider;
@@ -63,10 +61,7 @@ public class Bullet extends GameObject implements CollisionHandler {
 		
 	}
 	
-	@Override
-	public void update() {
-		super.update();
-		
+	public void commonUpdate() {
 		long timepassed = System.currentTimeMillis() - timeborn;
 		int loopsince = (int) (timepassed / (1000 / 60)); // 1000 / 60
 		
@@ -87,24 +82,15 @@ public class Bullet extends GameObject implements CollisionHandler {
 	}
 	
 	@Override
+	public void update() {
+		super.update();
+		commonUpdate();
+	}
+	
+	@Override
 	public void clientUpdate() {
 		super.update();
-		
-		long timepassed = System.currentTimeMillis() - timeborn;
-		int loopsince = (int) (timepassed / (1000 / 60));
-		
-		double dx = loopsince * getVelocity().getX();
-		double dy = loopsince * getVelocity().getY();
-		
-		getPosition().setX(getInitialpos().getX() + dx);
-		getPosition().setY(getInitialpos().getY() + dy);
-		
-		if (getHealth() <= 0) {
-			delete();
-		} else {
-			hurt();
-			setChanged(false);
-		}
+		commonUpdate();
 	}
 	
 	@Override

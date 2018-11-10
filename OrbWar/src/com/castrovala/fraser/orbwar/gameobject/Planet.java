@@ -2,6 +2,7 @@ package com.castrovala.fraser.orbwar.gameobject;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.UUID;
@@ -109,6 +110,7 @@ public class Planet extends GameObject implements CollisionHandler {
 						
 						int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
 						img.setRGB(x - 1, y - 1, rgb);
+						
 					} else { //int b = (int) (80 + Math.sqrt((value * 100) * (value * 100) ) );
 						//System.out.println("Water");
 						r = 0;
@@ -160,11 +162,10 @@ public class Planet extends GameObject implements CollisionHandler {
 				}
 				
 			}
-			//image = img;
+			image = img;
 		}
 		
 		g2d.drawImage(img, rel_x, rel_y, null);
-		
 		g2d.setColor(Color.GREEN);
 		int green = (int) (getHealth() * getWidth()) / getMaxhealth();
 		g2d.fillRect(rel_x, rel_y - 10, green, 5);

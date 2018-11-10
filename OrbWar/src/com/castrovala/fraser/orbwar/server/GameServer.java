@@ -24,6 +24,7 @@ import com.castrovala.fraser.orbwar.world.Position;
 import com.castrovala.fraser.orbwar.world.WorldController;
 
 public class GameServer extends Thread {
+	public static int MAX_PACKET_SIZE = 10240; // Packet limit of 10 KiB
 	private boolean localserver;
 	private boolean isTicking = true;
 	private GameThread gamelogic;
@@ -171,21 +172,28 @@ public class GameServer extends Thread {
 					
 					List<AbstractPacket> packets = new ArrayList<>();
 					
-					if (p.getRecievedLen() == null) {
-						p.setRecievedLen(ByteBuffer.allocate(4));
+					if (p.getReceivedLen() == null) {
+						p.setReceivedLen(ByteBuffer.allocate(4));
 					}
 					
-					if (p.getRecievedLen().hasRemaining()) {
-						channel.read(p.getRecievedLen());
-						if (p.getRecievedLen().hasRemaining()) {
+					if (p.getReceivedLen().hasRemaining()) {
+						channel.read(p.getReceivedLen());
+						if (p.getReceivedLen().hasRemaining()) {
 							continue;
 						}
-						p.getRecievedLen().position(0);
+						p.getReceivedLen().position(0);
+					}
+					
+					int length = p.getReceivedLen().getInt();
+					p.getReceivedLen().position(0);
+					if (length >= GameServer.MAX_PACKET_SIZE || length < 1) {
+						p.setReceivedLen(null);
+						continue;
 					}
 					
 					ByteBuffer buff = p.getReceived();
 					if (buff == null) {
-						buff = ByteBuffer.allocate(p.getRecievedLen().getInt());
+						buff = ByteBuffer.allocate(p.getReceivedLen().getInt());
 						p.setReceived(buff);
 					}
 					
@@ -352,7 +360,7 @@ public class GameServer extends Thread {
 					}
 					
 					buff = null;
-					p.setRecievedLen(null);
+					p.setReceivedLen(null);
 					p.setReceived(buff);
 					
 				} catch (Exception e) {

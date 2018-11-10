@@ -27,7 +27,7 @@ public class NetworkPlayer implements ControlUser {
 	private List<WorldZone> seenZones = new ArrayList<>();
 	private Position currentpos = new Position(0, 0);
 	private volatile ByteBuffer received;
-	private volatile ByteBuffer recievedLen;
+	private volatile ByteBuffer receivedLen;
 	private boolean admin;
 	private int screenWidth = 0;
 	private int screenHeight = 0;
@@ -133,12 +133,12 @@ public class NetworkPlayer implements ControlUser {
 		this.id = id;
 	}
 
-	public ByteBuffer getRecievedLen() {
-		return recievedLen;
+	public ByteBuffer getReceivedLen() {
+		return receivedLen;
 	}
 
-	public void setRecievedLen(ByteBuffer recievedLen) {
-		this.recievedLen = recievedLen;
+	public void setReceivedLen(ByteBuffer receivedLen) {
+		this.receivedLen = receivedLen;
 	}
 
 	public boolean isAdmin() {

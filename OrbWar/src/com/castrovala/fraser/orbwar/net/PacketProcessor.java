@@ -15,7 +15,7 @@ public class PacketProcessor {
 		//parsers.add(parser);
 		parserids.put(parser.getID(), parser);
 		parserclasses.put(c, parser);
-		System.out.println("Added " + parser.getID() + " for " + c.getSimpleName());
+		System.out.println("[Packet] Added " + parser.getID() + " for " + c.getSimpleName());
 	}
 	
 	public static byte[] toBytes(AbstractPacket p) throws NoPacketParserException {
