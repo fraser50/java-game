@@ -27,7 +27,7 @@ public class PacketProcessor {
 		
 		
 		if (parser == null) {
-			System.out.println("No parser for " + p.getClass().getSimpleName());
+			System.out.println("[Packet] No parser for " + p.getClass().getSimpleName());
 			throw new NoPacketParserException();
 			//throw new NullPointerException("Problems");
 		}

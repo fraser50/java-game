@@ -1,6 +1,6 @@
 package com.castrovala.fraser.orbwar.server;
 
-public class NoPacketParserException extends Exception {
+public class NoItemParserException extends Exception {
 
 	/**
 	 * 

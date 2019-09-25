@@ -3,6 +3,7 @@ package com.castrovala.fraser.orbwar.item;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
@@ -39,6 +40,25 @@ public class ItemBattery extends Item {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void registerItem() {
+		ItemParser parser = new ItemParser() {
+			
+			@Override
+			public byte[] toBytes(Item item) {
+				ByteBuffer buf = ByteBuffer.allocate(4);
+				buf.putInt(item.getAmount());
+				return buf.array();
+			}
+			
+			@Override
+			public Item fromBytes(ByteBuffer buf) {
+				return new ItemBattery(buf.getInt());
+			}
+		};
+		
+		ItemProcessor.addParser(parser, ItemBattery.class);
 	}
 
 }

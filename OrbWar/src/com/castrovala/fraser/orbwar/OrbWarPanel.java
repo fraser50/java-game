@@ -651,9 +651,9 @@ public class OrbWarPanel extends Canvas implements Runnable {
 				lockEditor = !lockEditor;
 				activecontrol = null;
 				
-			} else if (activecontrol.equals("inv")) {
+			} else if (activecontrol.equals("inv") && 0==1) {
 				inv = new Inventory(InventoryType.SHIP, 25);
-				inv.getSlots().get(7).setItem(new ItemBattery(1));
+				//inv.getSlots().get(7).setItem(new ItemBattery(1));
 				activecontrol = null;
 				
 			} else {
