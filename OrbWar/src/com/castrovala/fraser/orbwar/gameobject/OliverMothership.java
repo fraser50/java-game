@@ -111,10 +111,21 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			deathtimer++;
 			
 			if (deathtimer < 500) {
+				
+				if (deathtimer % 10 == 0) {
+					double randx = Util.randomRange(0, getWidth());
+					double randy = Util.randomRange(0, getHeight());
+					
+					getController().addObject(new Explosion(getPosition().copy().add(new Position(randx, randy)), getController(), 16));
+				}
+				
 				return;
+			} else {
+				getController().addObject(new Explosion(getPosition().copy().add(new Position(getWidth() / 2, getHeight() / 2)), getController(), getWidth() + 8));
+				delete();
 			}
 			
-			if (transport.size() == 0) {
+			/*if (transport.size() == 0) {
 				for (int i = 90; i<361; i+=90) {
 					OrbitControl c = new OrbitControl(this, 0, 0.5f);
 					c.setRotation(i);
@@ -135,7 +146,7 @@ public class OliverMothership extends GameObject implements CollisionHandler {
 			if (getWidth() >= 512) {
 				delete();
 			}
-			return;
+			return;*/
 		}
 		
 		timer++;

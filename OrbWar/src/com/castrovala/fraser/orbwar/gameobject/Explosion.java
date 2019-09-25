@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+import com.castrovala.fraser.orbwar.gui.RenderStage;
 import com.castrovala.fraser.orbwar.save.GameObjParser;
 import com.castrovala.fraser.orbwar.save.GameObjectProcessor;
 import com.castrovala.fraser.orbwar.util.RenderDebug;
@@ -109,6 +110,11 @@ public class Explosion extends GameObject {
 
 	public void setSize(float size) {
 		this.size = size;
+	}
+	
+	@Override
+	public RenderStage getRenderStage() {
+		return RenderStage.CONTROL;
 	}
 
 }
