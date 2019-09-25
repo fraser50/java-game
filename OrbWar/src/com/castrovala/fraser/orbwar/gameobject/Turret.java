@@ -121,7 +121,7 @@ public class Turret extends GameObject implements WeaponOwner, CollisionHandler 
 		
 		setRotation(requiredrota);
 		if (primary != null) {
-			primary.fire(this, getPosition());
+			primary.fire(this, getPosition().copy().add(new Position(getWidth() / 2, getHeight() / 2)));
 		}
 	}
 	
