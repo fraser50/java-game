@@ -83,7 +83,19 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		}
 		
 		Position vel = Util.angleToVel(getRotation(), (float)speed);
-		getPosition().add(vel);
+		//getPosition().add(vel);
+		
+		float magnitude = (float) Math.sqrt(Math.pow(getVelocity().getX(), 2) + Math.pow(getVelocity().getY(), 2));
+		
+		if (magnitude > maxspeed) {
+			getVelocity().divide(new Position(magnitude, magnitude)).multiply(maxspeed);
+		} else if (magnitude > 0) {
+			float newmag = magnitude - 0.01f >= 0f ? magnitude - 0.01f : 0f;
+			getVelocity().divide(new Position(magnitude, magnitude)).multiply(newmag);
+		}
+		
+		getPosition().add(getVelocity());
+		
 		if (handbrake) {
 			speed -= 0.1d; // 0.1
 			double behind = Util.fixAngle(getRotation() + 360);
@@ -145,6 +157,8 @@ public class PlayerShip extends GameObject implements Controllable, WeaponOwner,
 		if (fuel <= 0) return;
 		
 		speed += 2; // 2
+		
+		getVelocity().add(Util.angleToVel(getRotation(), 4f));
 		
 	}
 	

@@ -117,7 +117,7 @@ public class WormHole extends GameObject implements CollisionHandler {
 		int[] ypoints = new int[360];
 		
 		for (int i = 0; i < 360; i++) {
-			double sinewave = Math.sin(Math.toRadians(((animationstate * 7) + (i * 12)) / 1)) * 7; // i * 120 for a laugh (Default: i * 12)
+			double sinewave = (Math.sin(Math.toRadians(((animationstate * 7) + (i * (getWidth()/128f) * 7f)) / 1))) * 7; // i * 120 for a laugh (Default: i * 12)
 			// MAGNITUDE = 32
 			float magnitude = (float) ((getWidth() / 2) + sinewave); // 52 + sinewave
 			Position pos = Util.coordToScreen(getPosition().copy().add(new Position(getWidth() / 2, getHeight() / 2)).add(Util.angleToVel(i, magnitude)), rd.getRenderloc());
@@ -131,7 +131,7 @@ public class WormHole extends GameObject implements CollisionHandler {
 		//	animationstate = 0;
 		//}
 		
-		g2d.setColor(new Color(5, 35, 75));
+		g2d.setColor(new Color(5, 105, 25));
 		Composite c = g2d.getComposite();
 		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.60f));
 		g2d.fillPolygon(xpoints, ypoints, 360);
